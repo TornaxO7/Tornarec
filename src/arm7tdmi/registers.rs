@@ -1,11 +1,49 @@
 //! Some helper structs to represent the registers like for the different modes.
 
+use std::fmt;
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+#[repr(usize)]
+pub enum Register {
+    R0, R1, R2, R3, R4, R5, R6, R7,
+    R8, R9, R10, R11, R12,
+    SP, LR,
+    PC,
+    CPSR,
+    SPSR,
+}
+
+impl fmt::Display for Register {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match &self {
+            Self::R0 => write!(formatter, "r0"),
+            Self::R1 => write!(formatter, "r1"),
+            Self::R2 => write!(formatter, "r2"),
+            Self::R3 => write!(formatter, "r3"),
+            Self::R4 => write!(formatter, "r4"),
+            Self::R5 => write!(formatter, "r5"),
+            Self::R6 => write!(formatter, "r6"),
+            Self::R7 => write!(formatter, "r7"),
+            Self::R8 => write!(formatter, "r8"),
+            Self::R9 => write!(formatter, "r9"),
+            Self::R10 => write!(formatter, "r10"),
+            Self::R11 => write!(formatter, "r11"),
+            Self::R12 => write!(formatter, "r12"),
+            Self::SP => write!(formatter, "sp"),
+            Self::LR => write!(formatter, "lr"),
+            Self::PC => write!(formatter, "pc"),
+            Self::CPSR => write!(formatter, "cpsr"),
+            Self::SPSR => write!(formatter, "spsr"),
+        }
+    }
+}
+
 // == General r8 - r12 ==
 /// Represents one register from r8 to r12, since the FIQ mode has its own registers in this range.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct GeneralR8R12 {
-    norm: u32,
-    fiq:  u32,
+    pub norm: u32,
+    pub fiq:  u32,
 }
 
 // -- Traits --
@@ -23,25 +61,25 @@ impl Default for GeneralR8R12 {
 /// LR register for each mode.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Distincts {
-    /// User mode
-    user: u32,
+    /// User and System mode
+    pub usr_sys: u32,
     /// FIQ mode
-    fiq: u32,
+    pub fiq: u32,
     /// Supervisor mode
-    svc: u32,
+    pub svc: u32,
     /// Abort mode
-    abt: u32,
+    pub abt: u32,
     /// IRQ mode
-    irq: u32,
+    pub irq: u32,
     /// Undefined mode
-    und: u32,
+    pub und: u32,
 }
 
 // -- Traits --
 impl Default for Distincts {
     fn default() -> Self {
         Self {
-            user: 0,
+            usr_sys: 0,
             fiq:  0,
             svc:  0,
             abt:  0,
@@ -56,15 +94,15 @@ impl Default for Distincts {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SPSR {
     /// FIQ mode
-    fiq: u32,
+    pub fiq: u32,
     /// Supervisor mode
-    svc: u32,
+    pub svc: u32,
     /// Abort mode
-    abt: u32,
+    pub abt: u32,
     /// IRQ mode
-    irq: u32,
+    pub irq: u32,
     /// Undefined mode
-    und: u32,
+    pub und: u32,
 }
 
 impl Default for SPSR {
