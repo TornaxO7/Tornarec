@@ -5,6 +5,10 @@ use nds::parser::NDSParser;
 
 use core::convert::TryFrom;
 
+use crate::ram::address::Address;
+use crate::ram::data::Data;
+use crate::ram::main::Ram;
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RomReader {
     rom_content: Vec<u8>,
@@ -44,5 +48,16 @@ impl RomReader {
             rom_content,
             parser,
         }
+    }
+
+    pub fn load_arm7_tdmi(&self, ram: &mut Ram) {
+        let arm7tdmi_rom_data: &[u8] = &self.rom_content[
+            self.parser.arm7.rom_offset as usize..self.parser.arm7.size as usize
+        ];
+
+        let arm7tdmi_data = Data::from(arm7tdmi_rom_data);
+        let starting_address = Address::from(self.parser.arm7.load_address);
+
+        ram.load_data(arm7tdmi_data, starting_address);
     }
 }

@@ -21,6 +21,12 @@ impl From<usize> for Address {
     }
 }
 
+impl From<u32> for Address {
+    fn from(num: u32) -> Self {
+        Self(num as usize)
+    }
+}
+
 impl fmt::Display for Address {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(formatter, "{}", self.0)

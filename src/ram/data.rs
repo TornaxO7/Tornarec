@@ -3,6 +3,12 @@ use core::ops::{Deref, DerefMut};
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Data(Vec<u8>);
 
+impl From<&[u8]> for Data {
+    fn from(data: &[u8]) -> Self {
+        Self(data.to_vec())
+    }
+}
+
 impl From<Vec<u8>> for Data {
     fn from(data: Vec<u8>) -> Self {
         Self(data)
