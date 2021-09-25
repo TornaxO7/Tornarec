@@ -1,6 +1,5 @@
+use crate::cpus::endianess::Endianess;
 use crate::ram::Ram;
-
-use crate::ram::memory_size::{Halfword, Word};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum OperatingState {
@@ -22,5 +21,9 @@ impl Arm7TDMI {
     }
 
     pub fn execute(&self) {
+    }
+
+    pub fn get_endianess(&self) -> Endianess {
+        Endianess::Big
     }
 }
