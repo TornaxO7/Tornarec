@@ -1,12 +1,14 @@
 pub mod ram;
 pub mod rom_reader;
+pub mod cpus;
 
-use crate::ram::main::Ram;
+use crate::ram::Ram;
 use crate::rom_reader::RomReader;
+use crate::cpus::Arm7TDMI;
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct NintendoDS {
-    arm7tdmi: u32,
+    arm7tdmi: Arm7TDMI,
     ram: Ram,
 }
 
@@ -15,7 +17,8 @@ impl NintendoDS {
         Self::default()
     }
 
-    pub fn load_file<S: AsRef<str>>(&mut self, path: S) {
+    pub fn load_file_to_ram<S: AsRef<str>>(&mut self, path: S) {
         let rom_reader = RomReader::new(path);
+        rom_reader.load_arm7_tdmi(&mut self.ram);
     }
 }

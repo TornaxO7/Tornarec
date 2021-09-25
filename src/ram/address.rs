@@ -1,5 +1,5 @@
 use core::fmt;
-use core::fmt::UpperHex;
+use core::fmt::{UpperHex, LowerHex};
 use core::ops::Add;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -36,6 +36,12 @@ impl fmt::Display for Address {
 impl UpperHex for Address {
     fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(formatter, "{:X}", self.0)
+    }
+}
+
+impl LowerHex for Address {
+    fn fmt(&self, formatter: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(formatter, "{:x}", self.0)
     }
 }
 
