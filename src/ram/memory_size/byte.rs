@@ -34,7 +34,14 @@ mod tests {
     use core::convert::TryFrom;
 
     #[test]
-    fn test_try_from_slice() {
+    fn get() {
+        let number = 10;
+        let byte = Byte(number);
+        assert_eq!(byte.get(), number);
+    }
+
+    #[test]
+    fn try_from_slice() {
         let input: Vec<u8> = vec![0x4];
         let byte = Byte::try_from(&input[..]).unwrap();
 
@@ -42,7 +49,7 @@ mod tests {
     }
 
     #[test]
-    fn test_fail_try_from_slice() {
+    fn fail_try_from_slice() {
         let input: Vec<u8> = vec![0x4, 0x3, 0x2, 0x1];
         let byte = Byte::try_from(&input[..]);
 

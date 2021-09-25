@@ -33,14 +33,14 @@ mod tests {
     use core::convert::TryFrom;
 
     #[test]
-    fn test_get() {
+    fn get() {
         let number = 42;
         let halfword = Halfword(number);
         assert_eq!(halfword.get(), number);
     }
 
     #[test]
-    fn test_try_from_slice() {
+    fn try_from_slice() {
         let input: Vec<u8> = vec![0x4, 0x3];
         let halfword = Halfword::try_from(&input[..]).unwrap();
 
@@ -48,7 +48,7 @@ mod tests {
     }
 
     #[test]
-    fn test_fail_try_from_slice() {
+    fn fail_try_from_slice() {
         let input: Vec<u8> = vec![0x1];
         let halfword = Halfword::try_from(&input[..]);
 

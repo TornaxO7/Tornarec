@@ -68,3 +68,17 @@ impl RomReader {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+
+    mod new {
+        use crate::rom_reader::RomReader;
+
+        #[test]
+        #[should_panic]
+        fn fail_open_file() {
+            RomReader::new("invalid_path");
+        }
+    }
+}
