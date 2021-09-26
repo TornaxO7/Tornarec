@@ -17,6 +17,12 @@ impl NintendoDS {
         Self::default()
     }
 
+    pub fn run(&mut self) {
+        loop {
+            self.arm7tdmi.step();
+        }
+    }
+
     pub fn load_file_to_ram<S: AsRef<str>>(&mut self, path: S) {
         let rom_reader = RomReader::new(path);
         rom_reader.load_arm7_tdmi(&mut self.ram);
