@@ -2,7 +2,7 @@ use core::fmt;
 use core::fmt::{UpperHex, LowerHex};
 use core::ops::Add;
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct Address(usize);
 
 impl Address {
