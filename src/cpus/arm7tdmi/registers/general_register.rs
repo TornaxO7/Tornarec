@@ -1,6 +1,6 @@
-use core::convert::TryFrom;
 use core::ops::Add;
 use std::fmt::Display;
+use core::convert::{From, TryFrom};
 
 #[derive(thiserror::Error, Clone, Debug, PartialEq, Eq)]
 pub enum GeneralRegisterError<T: Display> {
@@ -20,6 +20,12 @@ impl GeneralRegister {
     }
 }
 
+impl From<u32> for GeneralRegister {
+    fn from(num: u32) -> Self {
+        Self(num)
+    }
+}
+
 impl Add<u32> for GeneralRegister {
     type Output = Self;
 
@@ -33,5 +39,24 @@ impl Add<Self> for GeneralRegister {
 
     fn add(self, register: GeneralRegister) -> Self {
         Self(self.0 + register.0)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+
+    use super::GeneralRegister;
+
+    #[test]
+    fn add_u32() {
+        let reg = GeneralRegister::from(10);
+        assert_eq!(reg + 10, GeneralRegister(20));
+    }
+    
+    #[test]
+    fn add_self() {
+        let reg1 = GeneralRegister::from(10);
+        let reg2 = GeneralRegister::from(10);
+        assert_eq!(reg1 + reg2, GeneralRegister(20));
     }
 }

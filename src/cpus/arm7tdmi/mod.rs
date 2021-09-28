@@ -14,7 +14,6 @@ pub use exception::Exception;
 
 use crate::cpus::state::State;
 use crate::ram::Ram;
-use crate::ram::data_types::{DataTypeSize, DataType};
 use crate::cpus::pipeline::Pipeline;
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
@@ -43,8 +42,8 @@ impl Arm7TDMI {
         todo!();
     }
 
-    pub fn fetch(&mut self, ram: &Ram) {
-        let start = self.pc.get_as_usize();
+    pub fn fetch(&mut self, _ram: &Ram) {
+        // let start = self.pc.get_as_usize();
 
         // TODO: 2.8.6
         // match self.cpsr.get_operating_state() {

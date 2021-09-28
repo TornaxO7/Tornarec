@@ -8,4 +8,3 @@ pub struct Spsr {
     pub irq: Cpsr,
     pub und: Cpsr,
 }
-
