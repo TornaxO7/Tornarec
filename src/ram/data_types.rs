@@ -1,4 +1,5 @@
 use core::convert::TryInto;
+use core::ops::Add;
 
 #[derive(thiserror::Error, Debug, Clone, PartialEq, Eq)]
 pub enum DataTypeError {
@@ -13,12 +14,34 @@ pub enum DataTypeError {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct DataTypeSize;
+pub enum DataTypeSize {
+    Byte = 8,
+    Halfword = 16,
+    Word = 32,
+}
 
-impl DataTypeSize {
-    pub const BYTE: u32     = 8;
-    pub const HALFWORD: u32 = 16;
-    pub const WORD: u32     = 32;
+impl Add<DataTypeSize> for usize {
+    type Output = usize;
+
+    fn add(self, data_type_size: DataTypeSize) -> usize {
+        match data_type_size {
+            DataTypeSize::Byte     => self + DataTypeSize::Byte as usize,
+            DataTypeSize::Halfword => self + DataTypeSize::Halfword as usize,
+            DataTypeSize::Word     => self + DataTypeSize::Word as usize,
+        }
+    }
+}
+
+impl Add<DataTypeSize> for u32 {
+    type Output = u32;
+
+    fn add(self, data_type_size: DataTypeSize) -> u32 {
+        match data_type_size {
+            DataTypeSize::Byte => self + DataTypeSize::Byte as u32,
+            DataTypeSize::Halfword => self + DataTypeSize::Halfword as u32,
+            DataTypeSize::Word => self + DataTypeSize::Word as u32,
+        }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]

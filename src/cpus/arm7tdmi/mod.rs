@@ -13,7 +13,11 @@ pub use condition_flag::ConditionFlag;
 pub use exception::Exception;
 
 use crate::cpus::state::State;
-use crate::ram::Ram;
+use crate::ram::{
+    Ram,
+    Address,
+    data_types::DataTypeSize
+};
 use crate::cpus::pipeline::Pipeline;
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
@@ -42,20 +46,13 @@ impl Arm7TDMI {
         todo!();
     }
 
-    pub fn fetch(&mut self, _ram: &Ram) {
-        // let start = self.pc.get_as_usize();
+    pub fn fetch(&mut self, ram: &Ram) {
+        let start = Address::from(self.pc.clone());
 
-        // TODO: 2.8.6
-        // match self.cpsr.get_operating_state() {
-        //     OperatingState::Arm => match DataType::get_word(&ram[start..start + DataTypeSize::WORD as usize]) {
-        //         Ok(word) => self.pipeline.set_raw_instruction(word),
-        //         Err(err) => panic!("{}", err),
-        //     },
-        //     OperatingState::Thumb => match DataType::get_halfword(&ram[start..start + DataTypeSize::HALFWORD as usize]) {
-        //         Ok(halfword) => self.pipeline.set_raw_instruction(halfword),
-        //         Err(err) => panic!("{}", err),
-        //     },
-        // };
+        match self.cpsr.get_operating_state() {
+            OperatingState::Arm => self.pipeline.fetch(ram, start, DataTypeSize::Word),
+            OperatingState::Thumb => self.pipeline.fetch(ram, start, DataTypeSize::Halfword),
+        };
     }
 
     pub fn decode(&self) {

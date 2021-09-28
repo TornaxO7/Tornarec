@@ -12,6 +12,10 @@ pub enum GeneralRegisterError<T: Display> {
 pub struct GeneralRegister(u32);
 
 impl GeneralRegister {
+    pub fn get_val(&self) -> u32 {
+        self.0
+    }
+
     pub fn get_as_usize(&self) -> usize {
         match usize::try_from(self.0) {
             Ok(num) => num,

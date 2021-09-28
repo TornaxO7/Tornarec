@@ -3,6 +3,8 @@ use core::fmt::{UpperHex, LowerHex};
 use core::ops::Add;
 use core::convert::TryFrom;
 
+use crate::cpus::arm7tdmi::registers::GeneralRegister;
+
 #[derive(thiserror::Error, Clone, Debug, PartialEq, Eq)]
 pub enum AddressError<T: fmt::Display> {
     #[error("[ADDRESS ERROR]: Couldn't convert value '{0}' to a u32.")]
@@ -16,11 +18,11 @@ pub enum AddressError<T: fmt::Display> {
 pub struct Address(u32);
 
 impl Address {
-    pub fn get_ref(&self) -> &u32 {
+    pub fn get_ref_as_u32(&self) -> &u32 {
         &self.0
     }
 
-    pub fn get(&self) -> u32 {
+    pub fn get_as_u32(&self) -> u32 {
         self.0
     }
 
@@ -35,6 +37,12 @@ impl Address {
 impl From<u32> for Address {
     fn from(num: u32) -> Self {
         Self(num)
+    }
+}
+
+impl From<GeneralRegister> for Address {
+    fn from(general_register: GeneralRegister) -> Self {
+        Self(general_register.get_val())
     }
 }
 
@@ -81,14 +89,14 @@ mod tests {
     fn get_ref() {
         let input = 42;
         let address = Address(input);
-        assert_eq!(address.get_ref(), &input);
+        assert_eq!(address.get_ref_as_u32(), &input);
     }
     
     #[test]
     fn get() {
         let input = 42;
         let address = Address(input);
-        assert_eq!(address.get(), input);
+        assert_eq!(address.get_as_u32(), input);
     }
 
     #[test]

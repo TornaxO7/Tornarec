@@ -29,7 +29,7 @@ impl Ram {
     }
 
     pub fn load_data(&mut self, data: DataBlock, starting_address: Address) -> Result<(), RamError>{
-        let last_address = starting_address.get() + data.size();
+        let last_address = starting_address.get_as_u32() + data.size();
 
         if self.size() < last_address {
             self.ram.resize(usize::try_from(last_address).unwrap(), 0);
@@ -41,12 +41,12 @@ impl Ram {
             }
         }
 
-        self.ram[usize::try_from(starting_address.get()).unwrap()..].copy_from_slice(data.get_ref());
+        self.ram[usize::try_from(starting_address.get_as_u32()).unwrap()..].copy_from_slice(data.get_ref());
         Ok(())
     }
 
     pub fn set_max_address(&mut self, new_max_size: Address) {
-        self.max_address = Some(new_max_size.get());
+        self.max_address = Some(new_max_size.get_as_u32());
     }
 
     pub fn size(&self) -> u32 {
