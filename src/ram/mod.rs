@@ -30,13 +30,13 @@ impl Ram {
 
     pub fn load_data(&mut self, data: DataBlock, starting_address: Address) -> Result<(), RamError>{
         let last_address = starting_address.get() + data.size();
-        let ram_size = self.size();
-        if ram_size < last_address {
+
+        if self.size() < last_address {
             self.ram.resize(usize::try_from(last_address).unwrap(), 0);
         }
 
         if let Some(max_size) = self.max_address {
-            if ram_size > max_size {
+            if self.size() > max_size {
                 return Err(RamError::RamIndexOverflow(Address::from(last_address), Address::from(max_size)));
             }
         }
@@ -52,10 +52,7 @@ impl Ram {
     pub fn size(&self) -> u32 {
         match u32::try_from(self.ram.len()) {
             Ok(size) => size,
-            Err(_) => {
-                println!("{}", RamError::RamTooBig(self.ram.len()));
-                panic!();
-            },
+            Err(_) => panic!("{}", RamError::RamTooBig(self.ram.len())),
         }
     }
 }
@@ -109,16 +106,13 @@ mod tests {
     fn fail_load_data_due_to_max_size() {
         let mut ram = Ram::new();
         ram.set_max_address(Address::from(5));
-        let result = ram.load_data(
-            DataBlock::from(vec![1]),
-            Address::from(6)
-        );
 
-        assert_eq!(result, Err(RamError::RamIndexOverflow(
-                Address::from(7),
-                Address::from(5),
-            )
-        ));
+        let result = ram.load_data(DataBlock::from(vec![1]), Address::from(6));
+
+        assert_eq!(
+            result,
+            Err(RamError::RamIndexOverflow(Address::from(7), Address::from(5)))
+        );
     }
 
     #[test]

@@ -46,7 +46,7 @@ mod tests {
     fn get() {
         let data_block = DataBlock(vec![1]);
         
-        assert_eq!(data_block.get(), &vec![1]);
+        assert_eq!(data_block.get_ref(), &vec![1]);
     }
 
     #[test]

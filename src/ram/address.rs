@@ -92,13 +92,6 @@ mod tests {
     }
 
     #[test]
-    fn from_usize() {
-        let input: usize = 42;
-        let address = Address::from(input);
-        assert_eq!(address, Address(input));
-    }
-
-    #[test]
     fn display() {
         let address = Address(42);
         assert_eq!(format!("{}", address), "42".to_string());
@@ -114,14 +107,6 @@ mod tests {
     fn lower_hex() {
         let address = Address(42);
         assert_eq!(format!("{:x}", address), "2a");
-    }
-
-    #[test]
-    fn add_with_usize() {
-        let address = Address(22);
-        let number: usize = 20;
-
-        assert_eq!(address + number, Address(42));
     }
 
     #[test]
