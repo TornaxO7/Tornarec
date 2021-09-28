@@ -6,17 +6,21 @@ pub use address::Address;
 pub use data_block::DataBlock;
 
 use core::ops::{Index, Range};
+use core::convert::TryFrom;
 
 #[derive(thiserror::Error, Debug, Clone, PartialEq, Eq)]
 pub enum RamError {
-    #[error("[ROM ERROR]: Address `{0:X}` can't be accessed, because it's beyond the max size: {1:X}")]
-    RamOverflow(Address, Address),
+    #[error("[RAM ERROR]: Address `{0:X}` can't be accessed, because it's beyond the max size: {1:X}")]
+    RamIndexOverflow(Address, Address),
+
+    #[error("[RAM ERROR]: Ram is too large: '{0}' bits long.")]
+    RamTooBig(usize),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, PartialOrd, Default)]
 pub struct Ram {
     ram: Vec<u8>,
-    max_address: Option<usize>,
+    max_address: Option<u32>,
 }
 
 impl Ram {
@@ -25,23 +29,34 @@ impl Ram {
     }
 
     pub fn load_data(&mut self, data: DataBlock, starting_address: Address) -> Result<(), RamError>{
-        let last_address = starting_address.get_ref() + data.len();
-        if self.ram.len() < last_address {
-            self.ram.resize(last_address, 0);
+        let last_address = starting_address.get() + data.size();
+        let ram_size = self.size();
+        if ram_size < last_address {
+            self.ram.resize(usize::try_from(last_address).unwrap(), 0);
         }
 
         if let Some(max_size) = self.max_address {
-            if self.ram.len() > max_size {
-                return Err(RamError::RamOverflow(Address::from(last_address), Address::from(max_size)));
+            if ram_size > max_size {
+                return Err(RamError::RamIndexOverflow(Address::from(last_address), Address::from(max_size)));
             }
         }
 
-        self.ram[starting_address.get()..].copy_from_slice(&data);
+        self.ram[usize::try_from(starting_address.get()).unwrap()..].copy_from_slice(data.get_ref());
         Ok(())
     }
 
     pub fn set_max_address(&mut self, new_max_size: Address) {
         self.max_address = Some(new_max_size.get());
+    }
+
+    pub fn size(&self) -> u32 {
+        match u32::try_from(self.ram.len()) {
+            Ok(size) => size,
+            Err(_) => {
+                println!("{}", RamError::RamTooBig(self.ram.len()));
+                panic!();
+            },
+        }
     }
 }
 
@@ -83,7 +98,7 @@ mod tests {
         };
         
         let data = DataBlock::from(vec![0x1, 0x2, 0x3, 0x4]);
-        let start = Address::from(10 as usize);
+        let start = Address::from(10);
 
         ram.load_data(data, start).unwrap();
 
@@ -93,15 +108,15 @@ mod tests {
     #[test]
     fn fail_load_data_due_to_max_size() {
         let mut ram = Ram::new();
-        ram.set_max_address(Address::from(5 as usize));
+        ram.set_max_address(Address::from(5));
         let result = ram.load_data(
             DataBlock::from(vec![1]),
-            Address::from(6 as usize)
+            Address::from(6)
         );
 
-        assert_eq!(result, Err(RamError::RamOverflow(
-                Address::from(7 as usize),
-                Address::from(5 as usize),
+        assert_eq!(result, Err(RamError::RamIndexOverflow(
+                Address::from(7),
+                Address::from(5),
             )
         ));
     }

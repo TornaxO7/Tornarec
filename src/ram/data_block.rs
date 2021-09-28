@@ -1,11 +1,27 @@
-use core::ops::{Deref, DerefMut};
+use core::convert::TryFrom;
+
+#[derive(thiserror::Error, Debug, Clone, PartialEq, Eq)]
+pub enum DataBlockError {
+    #[error("[DATABLOCK ERROR]: The datablock is too big: {0}")]
+    OverflowBlock(usize),
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DataBlock(Vec<u8>);
 
 impl DataBlock {
-    pub fn get(&self) -> &Vec<u8> {
+    pub fn get_ref(&self) -> &Vec<u8> {
         &self.0
+    }
+
+    pub fn size(&self) -> u32 {
+        match u32::try_from(self.0.len()) {
+            Ok(num) => num,
+            Err(_)  => {
+                println!("{}", DataBlockError::OverflowBlock(self.0.len()));
+                panic!();
+            },
+        }
     }
 }
 
@@ -18,20 +34,6 @@ impl From<&[u8]> for DataBlock {
 impl From<Vec<u8>> for DataBlock {
     fn from(data: Vec<u8>) -> Self {
         Self(data)
-    }
-}
-
-impl Deref for DataBlock {
-    type Target = Vec<u8>;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
-    }
-}
-
-impl DerefMut for DataBlock {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        &mut self.0
     }
 }
 

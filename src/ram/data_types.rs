@@ -13,11 +13,12 @@ pub enum DataTypeError {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-#[repr(usize)]
-pub enum DataTypeSize {
-    Byte = 8,
-    Halfword = 16,
-    Word = 32,
+pub struct DataTypeSize;
+
+impl DataTypeSize {
+    pub const BYTE: u32     = 8;
+    pub const HALFWORD: u32 = 16;
+    pub const WORD: u32     = 32;
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]

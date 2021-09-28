@@ -1,29 +1,40 @@
 use core::fmt;
 use core::fmt::{UpperHex, LowerHex};
 use core::ops::Add;
+use core::convert::TryFrom;
+
+#[derive(thiserror::Error, Clone, Debug, PartialEq, Eq)]
+pub enum AddressError<T: fmt::Display> {
+    #[error("[ADDRESS ERROR]: Couldn't convert value '{0}' to a u32.")]
+    ConvertToU32(T),
+
+    #[error("[ADDRESS ERROR]: Couldn't convert the address '{0:X}' to type usize.")]
+    ConvertToUsize(T),
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
-pub struct Address(usize);
+pub struct Address(u32);
 
 impl Address {
-    pub fn get_ref(&self) -> &usize {
+    pub fn get_ref(&self) -> &u32 {
         &self.0
     }
 
-    pub fn get(&self) -> usize {
+    pub fn get(&self) -> u32 {
         self.0
     }
-}
 
-impl From<usize> for Address {
-    fn from(num: usize) -> Self {
-        Self(num)
+    pub fn get_as_usize(&self) -> usize {
+        match usize::try_from(self.0) {
+            Ok(num) => num,
+            Err(_)  => panic!("{}", AddressError::ConvertToUsize(self.0)),
+        }
     }
 }
 
 impl From<u32> for Address {
     fn from(num: u32) -> Self {
-        Self(num as usize)
+        Self(num)
     }
 }
 
@@ -45,10 +56,10 @@ impl LowerHex for Address {
     }
 }
 
-impl Add<usize> for Address {
+impl Add<u32> for Address {
     type Output = Self;
 
-    fn add(self, number: usize) -> Self {
+    fn add(self, number: u32) -> Self {
         Self(self.0 + number)
     }
 }

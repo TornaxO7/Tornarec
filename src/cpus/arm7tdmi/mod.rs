@@ -1,36 +1,36 @@
-pub mod registers;
 pub mod condition_flag;
 pub mod operating_mode;
 pub mod operating_state;
 pub mod interruption;
+pub mod exception;
+pub mod registers;
 
-pub use registers::{FiqReg, Spsr};
+pub use registers::{FiqReg, Spsr, Cpsr, GeneralRegister};
 pub use interruption::Interruption;
 pub use operating_mode::OperatingMode;
 pub use operating_state::OperatingState;
 pub use condition_flag::ConditionFlag;
+pub use exception::Exception;
 
-use crate::ram::{Ram, Address};
-use crate::ram::data_types::{DataTypeSize, DataType};
 use crate::cpus::state::State;
-
-#[derive(thiserror::Error, Debug, Clone, PartialEq, Eq)]
-pub enum Arm7TDMIError {
-    #[error("The following operating mode is unknown: {0:b}")]
-    UnknownOperatingMode(u32),
-}
+use crate::ram::Ram;
+use crate::ram::data_types::{DataTypeSize, DataType};
+use crate::cpus::pipeline::Pipeline;
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct Arm7TDMI {
-    r0_7:   [u32; 8],
+    r0_7:   [GeneralRegister; 8],
     r8_r12: [FiqReg; 4],
-    sp:     [Address; OperatingMode::AmountModes as usize],
-    lr:     [Address; OperatingMode::AmountModes as usize],
-    pc:     Address,
-    cpsr:   u32,
+    // r13
+    sp:     [GeneralRegister; OperatingMode::AMOUNT_MODES],
+    // r14
+    lr:     [GeneralRegister; OperatingMode::AMOUNT_MODES],
+    // r15
+    pc:     GeneralRegister,
+    cpsr:   Cpsr,
     spsr:   Spsr,
 
-    instruction: DataType,
+    pipeline: Pipeline,
 }
 
 impl Arm7TDMI {
@@ -44,73 +44,103 @@ impl Arm7TDMI {
     }
 
     pub fn fetch(&mut self, ram: &Ram) {
-        // Assume OperatingState::Arm first
-        let start = self.pc.get();
+        let start = self.pc.get_as_usize();
 
-        match self.get_operating_state() {
-            OperatingState::Arm => match DataType::get_word(&ram[start..start + DataTypeSize::Word as usize]) {
-                Ok(word) => self.instruction = word,
-                Err(err) => panic!("{}", err),
-            },
-            OperatingState::Thumb => match DataType::get_halfword(&ram[start..start + DataTypeSize::Halfword as usize]) {
-                Ok(halfword) => self.instruction = halfword,
-                Err(err) => panic!("{}", err),
-            },
-        };
+        // TODO: 2.8.6
+        // match self.cpsr.get_operating_state() {
+        //     OperatingState::Arm => match DataType::get_word(&ram[start..start + DataTypeSize::WORD as usize]) {
+        //         Ok(word) => self.pipeline.set_raw_instruction(word),
+        //         Err(err) => panic!("{}", err),
+        //     },
+        //     OperatingState::Thumb => match DataType::get_halfword(&ram[start..start + DataTypeSize::HALFWORD as usize]) {
+        //         Ok(halfword) => self.pipeline.set_raw_instruction(halfword),
+        //         Err(err) => panic!("{}", err),
+        //     },
+        // };
     }
 
     pub fn decode(&self) {
+        todo!();
     }
 
-    pub fn execute(&self) {
-    }
+    pub fn execute(&mut self) {
 
-    pub fn exception(&mut self) {
-    }
-
-    pub fn get_condition_state(&self, flag: ConditionFlag) -> State {
-        match flag {
-            ConditionFlag::N => State::from(self.cpsr >> 31),
-            ConditionFlag::Z => State::from((self.cpsr >> 30) & 1),
-            ConditionFlag::C => State::from((self.cpsr >> 29) & 1),
-            ConditionFlag::V => State::from((self.cpsr >> 28) & 1),
-        }
-    }
-
-    pub fn set_interrupt_bit(&mut self, interrupt: Interruption, state: State) {
-        match interrupt {
-            Interruption::Irq => match state {
-                State::Unset => self.cpsr &= !(1 << 7),
-                State::Set   => self.cpsr |= 1 << 7,
+        // Look if an FIQ or IRQ interrupt has been set, during execution
+        match self.cpsr.get_operating_mode() {
+            Ok(mode) => {
+                if (mode == OperatingMode::Fiq)
+                    && (self.cpsr.get_interrrupt_bit_state(Interruption::Fiq) != State::Unset) 
+                {
+                        self.exception(Exception::Fiq);
+                }
+                else if (mode == OperatingMode::Irq)
+                    && (self.cpsr.get_interrrupt_bit_state(Interruption::Irq) != State::Unset)
+                {
+                    self.exception(Exception::Irq);
+                }
             },
-            Interruption::Fiq => match state {
-                State::Unset => self.cpsr &= !(1 << 6),
-                State::Set   => self.cpsr |= 1 << 6,
-            }
+            Err(err) => panic!("{}", err),
         }
     }
 
-    pub fn get_operating_state(&self) -> OperatingState {
-        if (self.cpsr >> 5) & 1 == 0 {
-            OperatingState::Arm
-        } else {
-            OperatingState::Thumb
-        }
-    }
+    pub fn exception(&mut self, exception: Exception) {
+        let in_arm_state = self.cpsr.get_operating_state() == OperatingState::Arm;
 
-    pub fn get_mode(&self) -> Result<OperatingMode, Self> {
-        match self.cpsr & 0b11111 {
-            0b10000 => Ok(OperatingMode::Usr),
-            0b10001 => Ok(OperatingMode::Fiq),
-            0b10010 => Ok(OperatingMode::Irq),
-            0b10011 => Ok(OperatingMode::Svc),
-            0b10111 => Ok(OperatingMode::Abt),
-            0b11011 => Ok(OperatingMode::Und),
-            0b11111 => Ok(OperatingMode::Sys),
-            _other => {
-                println!("{}", Arm7TDMIError::UnknownOperatingMode(_other));
-                return Err(self.reset());
+        match exception {
+            Exception::Bl => {
+                if in_arm_state {
+                    self.lr[OperatingMode::as_usize(OperatingMode::Sys)] = self.pc.clone() + 2;
+                } else {
+                    self.lr[OperatingMode::as_usize(OperatingMode::Sys)] = self.pc.clone() + 4;
+                }
+                self.cpsr.set_operating_mode(OperatingMode::Sys);
+                
             },
-        }
+            Exception::Swi => {
+                if in_arm_state {
+                    self.lr[OperatingMode::as_usize(OperatingMode::Svc)] = self.pc.clone() + 2;
+                } else {
+                    self.lr[OperatingMode::as_usize(OperatingMode::Svc)] = self.pc.clone() + 4;
+                }
+
+                self.spsr.svc = self.cpsr.clone();
+                self.cpsr.set_operating_mode(OperatingMode::Svc);
+                
+            },
+            Exception::Udef => {
+                if in_arm_state {
+                    self.lr[OperatingMode::as_usize(OperatingMode::Und)] = self.pc.clone() + 2;
+                } else {
+                    self.lr[OperatingMode::as_usize(OperatingMode::Und)] = self.pc.clone() + 4;
+                }
+
+                self.spsr.und = self.cpsr.clone();
+                self.cpsr.set_operating_mode(OperatingMode::Und);
+            },
+            Exception::Pabt => {
+                self.lr[OperatingMode::as_usize(OperatingMode::Abt)] = self.pc.clone() + 4;
+                self.spsr.abt = self.cpsr.clone();
+                self.cpsr.set_operating_mode(OperatingMode::Abt);
+            },
+            Exception::Fiq  => {
+                self.lr[OperatingMode::as_usize(OperatingMode::Fiq)] = self.pc.clone() + 4;
+                self.spsr.fiq = self.cpsr.clone();
+                self.cpsr.set_operating_mode(OperatingMode::Fiq);
+                self.cpsr.set_interrupt_bit(Interruption::Irq, State::Set)
+            },
+            Exception::Irq  => {
+                self.lr[OperatingMode::as_usize(OperatingMode::Irq)] = self.pc.clone() + 4;
+                self.spsr.irq = self.cpsr.clone();
+                self.cpsr.set_operating_mode(OperatingMode::Irq);
+            },
+            Exception::Dabt => {
+                self.lr[OperatingMode::as_usize(OperatingMode::Abt)] = self.pc.clone() + 8;
+                self.spsr.abt = self.cpsr.clone();
+                self.cpsr.set_operating_mode(OperatingMode::Abt);
+            },
+            Exception::Reset => (),
+        };
+
+        self.cpsr.set_operating_state(OperatingState::Arm);
     }
 }
