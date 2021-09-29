@@ -3,7 +3,7 @@ use core::fmt::{UpperHex, LowerHex};
 use core::ops::Add;
 use core::convert::TryFrom;
 
-use crate::cpus::arm7tdmi::registers::GeneralRegister;
+use crate::cpus::general::register::GeneralRegister;
 
 #[derive(thiserror::Error, Clone, Debug, PartialEq, Eq)]
 pub enum AddressError<T: fmt::Display> {
@@ -42,7 +42,7 @@ impl From<u32> for Address {
 
 impl From<GeneralRegister> for Address {
     fn from(general_register: GeneralRegister) -> Self {
-        Self(general_register.get_val())
+        Self(general_register.get_as_u32())
     }
 }
 
@@ -86,14 +86,14 @@ mod tests {
     use super::Address;
 
     #[test]
-    fn get_ref() {
+    fn get_ref_as_u32() {
         let input = 42;
         let address = Address(input);
         assert_eq!(address.get_ref_as_u32(), &input);
     }
     
     #[test]
-    fn get() {
+    fn get_as_u32() {
         let input = 42;
         let address = Address(input);
         assert_eq!(address.get_as_u32(), input);
