@@ -8,6 +8,7 @@ pub mod register;
 pub mod pipeline;
 pub mod instruction_map;
 pub mod instruction;
+pub mod condition_code_flag;
 
 pub use bit_state::BitState;
 pub use condition_flag::ConditionFlag;

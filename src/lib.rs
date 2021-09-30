@@ -19,7 +19,7 @@ impl NintendoDS {
 
     pub fn run(&mut self) {
         loop {
-            self.arm7tdmi.step();
+            self.arm7tdmi.step(&self.ram);
         }
     }
 

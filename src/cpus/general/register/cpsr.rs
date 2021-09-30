@@ -3,12 +3,11 @@ use crate::cpus::general:: {
     operating_mode::OperatingMode,
     operating_state::OperatingState,
     interruption::Interruption,
+    condition_code_flag::ConditionCodeFlag,
+    register::types::condition_bits::ConditionBits,
 };
 
 use core::convert::From;
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub enum ConditionCodeFlag {EQ, NE, CS, CC, MI, PL, VS, VC, HI, LS, GE, LT, GT, LE, AL}
 
 #[derive(thiserror::Error, Debug, Clone, PartialEq, Eq)]
 pub enum CpsrError {
@@ -23,28 +22,29 @@ impl Cpsr {
 
     pub fn is_condition_set(&self, condition: ConditionCodeFlag) -> bool {
 
-        let n = BitState::from(self.0 >> 31);
-        let z = BitState::from((self.0 >> 30) & 1);
-        let c = BitState::from((self.0 >> 29) & 1);
-        let v = BitState::from((self.0 >> 28) & 1);
+        let cb = self.get_condition_bits();
 
         match condition {
-            ConditionCodeFlag::EQ => z.is_set(),
-            ConditionCodeFlag::NE => z.is_unset(),
-            ConditionCodeFlag::CS => c.is_set(),
-            ConditionCodeFlag::CC => c.is_unset(),
-            ConditionCodeFlag::MI => n.is_set(),
-            ConditionCodeFlag::PL => n.is_unset(),
-            ConditionCodeFlag::VS => v.is_set(),
-            ConditionCodeFlag::VC => v.is_unset(),
-            ConditionCodeFlag::HI => c.is_set() && z.is_unset(),
-            ConditionCodeFlag::LS => c.is_unset() && z.is_set(),
-            ConditionCodeFlag::GE => n == v,
-            ConditionCodeFlag::LT => n != v,
-            ConditionCodeFlag::GT => z.is_unset() && n == v,
-            ConditionCodeFlag::LE => z.is_set() || n != v,
+            ConditionCodeFlag::EQ => cb.z.is_set(),
+            ConditionCodeFlag::NE => cb.z.is_unset(),
+            ConditionCodeFlag::CS => cb.c.is_set(),
+            ConditionCodeFlag::CC => cb.c.is_unset(),
+            ConditionCodeFlag::MI => cb.n.is_set(),
+            ConditionCodeFlag::PL => cb.n.is_unset(),
+            ConditionCodeFlag::VS => cb.v.is_set(),
+            ConditionCodeFlag::VC => cb.v.is_unset(),
+            ConditionCodeFlag::HI => cb.c.is_set() && cb.z.is_unset(),
+            ConditionCodeFlag::LS => cb.c.is_unset() && cb.z.is_set(),
+            ConditionCodeFlag::GE => cb.n == cb.v,
+            ConditionCodeFlag::LT => cb.n != cb.v,
+            ConditionCodeFlag::GT => cb.z.is_unset() && cb.n == cb.v,
+            ConditionCodeFlag::LE => cb.z.is_set() || cb.n != cb.v,
             ConditionCodeFlag::AL => true,
         }
+    }
+
+    pub fn get_condition_bits(&self) -> ConditionBits {
+        ConditionBits::from(self.0)
     }
 
     pub fn set_interrupt_bit(&mut self, interrupt: Interruption, state: BitState) {

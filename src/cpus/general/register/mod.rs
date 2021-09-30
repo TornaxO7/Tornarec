@@ -2,6 +2,7 @@ pub mod spsr;
 pub mod fiq_req;
 pub mod cpsr;
 pub mod general_register;
+pub mod types;
 
 pub use spsr::Spsr;
 pub use fiq_req::FiqReg;

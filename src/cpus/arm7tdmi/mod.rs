@@ -37,8 +37,10 @@ impl Arm7TDMI {
         Self::default()
     }
 
-    pub fn step(&mut self) {
-        todo!();
+    pub fn step(&mut self, ram: &Ram) {
+        self.fetch(ram);
+        self.decode();
+        self.execute();
     }
 
     pub fn fetch(&mut self, ram: &Ram) {

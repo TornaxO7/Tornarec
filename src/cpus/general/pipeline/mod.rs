@@ -15,6 +15,7 @@ use crate::{
     },
 };
 
+use core::convert::From;
 
 #[derive(thiserror::Error, Debug, Clone, PartialEq, Eq)]
 pub enum PipelineError {
@@ -56,12 +57,17 @@ impl Pipeline {
             Prefetch::Success(instruction) => {
                 // get the condition
                 if cpsr.is_condition_set(instruction.get_condition_code_flag()) {
+                    self.decoded_instruction = InstructionMap::from(instruction);
                 } else {
                     self.decoded_instruction = InstructionMap::Noop;
                 }
             },
             Prefetch::Invalid => panic!("Housto, we've a little problem..."),
         }
+    }
+
+    pub fn get_decoded_instruction(&self) -> InstructionMap {
+        self.decoded_instruction.clone()
     }
 }
 
