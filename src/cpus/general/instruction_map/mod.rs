@@ -31,9 +31,9 @@ impl Default for InstructionMap {
 impl From<&Instruction> for InstructionMap {
     fn from(instruction: &Instruction) -> Self {
         if Branch::is_matching(instruction)  {
-            Self::Branch(Branch::match_instruction(instruction))
+            Self::Branch(Branch::from(instruction))
         } else if DataProcessing::is_matching(instruction) {
-            Self::DataProcessing(DataProcessing::match_instruction(instruction))
+            Self::DataProcessing(DataProcessing::from(instruction))
         } else {
             Self::Noop
         }
