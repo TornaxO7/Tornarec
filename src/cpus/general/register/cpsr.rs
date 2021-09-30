@@ -21,7 +21,7 @@ pub struct Cpsr(u32);
 
 impl Cpsr {
 
-    pub fn get_condition(&self, condition: ConditionCodeFlag) -> bool {
+    pub fn is_condition_set(&self, condition: ConditionCodeFlag) -> bool {
 
         let n = BitState::from(self.0 >> 31);
         let z = BitState::from((self.0 >> 30) & 1);
@@ -140,21 +140,21 @@ mod tests {
     fn get_condition() {
         let cpsr = Cpsr::from(0b1011_0000_0000_0000_0000_0000_0000_0000);
 
-        assert!(!cpsr.get_condition(ConditionCodeFlag::EQ));
-        assert!(cpsr.get_condition(ConditionCodeFlag::NE));
-        assert!(cpsr.get_condition(ConditionCodeFlag::CS));
-        assert!(!cpsr.get_condition(ConditionCodeFlag::CC));
-        assert!(cpsr.get_condition(ConditionCodeFlag::MI));
-        assert!(!cpsr.get_condition(ConditionCodeFlag::PL));
-        assert!(cpsr.get_condition(ConditionCodeFlag::VS));
-        assert!(!cpsr.get_condition(ConditionCodeFlag::VC));
-        assert!(cpsr.get_condition(ConditionCodeFlag::HI));
-        assert!(!cpsr.get_condition(ConditionCodeFlag::LS));
-        assert!(cpsr.get_condition(ConditionCodeFlag::GE));
-        assert!(!cpsr.get_condition(ConditionCodeFlag::LT));
-        assert!(cpsr.get_condition(ConditionCodeFlag::GT));
-        assert!(!cpsr.get_condition(ConditionCodeFlag::LE));
-        assert!(cpsr.get_condition(ConditionCodeFlag::AL));
+        assert!(!cpsr.is_condition_set(ConditionCodeFlag::EQ));
+        assert!(cpsr.is_condition_set(ConditionCodeFlag::NE));
+        assert!(cpsr.is_condition_set(ConditionCodeFlag::CS));
+        assert!(!cpsr.is_condition_set(ConditionCodeFlag::CC));
+        assert!(cpsr.is_condition_set(ConditionCodeFlag::MI));
+        assert!(!cpsr.is_condition_set(ConditionCodeFlag::PL));
+        assert!(cpsr.is_condition_set(ConditionCodeFlag::VS));
+        assert!(!cpsr.is_condition_set(ConditionCodeFlag::VC));
+        assert!(cpsr.is_condition_set(ConditionCodeFlag::HI));
+        assert!(!cpsr.is_condition_set(ConditionCodeFlag::LS));
+        assert!(cpsr.is_condition_set(ConditionCodeFlag::GE));
+        assert!(!cpsr.is_condition_set(ConditionCodeFlag::LT));
+        assert!(cpsr.is_condition_set(ConditionCodeFlag::GT));
+        assert!(!cpsr.is_condition_set(ConditionCodeFlag::LE));
+        assert!(cpsr.is_condition_set(ConditionCodeFlag::AL));
     }
 
     #[test]

@@ -7,6 +7,7 @@ pub mod exception;
 pub mod register;
 pub mod pipeline;
 pub mod instruction_map;
+pub mod instruction;
 
 pub use bit_state::BitState;
 pub use condition_flag::ConditionFlag;

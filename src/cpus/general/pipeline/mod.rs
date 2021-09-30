@@ -2,9 +2,19 @@ pub mod prefetch;
 
 pub use prefetch::Prefetch;
 
-use crate::ram::data_types::{DataType, DataTypeSize};
-use crate::ram::{Ram, Address};
-use crate::cpus::general::instruction_map::InstructionMap;
+use crate::{
+    ram::{
+        data_types::{DataType, DataTypeSize},
+        Ram,
+        Address,
+    },
+    cpus::general::{
+        instruction::Instruction,
+        register::Cpsr,
+        instruction_map::InstructionMap,
+    },
+};
+
 
 #[derive(thiserror::Error, Debug, Clone, PartialEq, Eq)]
 pub enum PipelineError {
@@ -29,11 +39,11 @@ impl Pipeline {
         } else {
             match instruction_size {
                 DataTypeSize::Word => match DataType::get_word(&ram[start_usize..end.get_as_usize()]) {
-                    Ok(word) => self.prefetch = Prefetch::Success(word),
+                    Ok(word) => self.prefetch = Prefetch::Success(Instruction::from(word)),
                     Err(err) => panic!("{}", err),
                 },
                 DataTypeSize::Halfword => match DataType::get_halfword(&ram[start_usize..end.get_as_usize()]) {
-                    Ok(halfword) => self.prefetch = Prefetch::Success(halfword),
+                    Ok(halfword) => self.prefetch = Prefetch::Success(Instruction::from(halfword)),
                     Err(err) => panic!("{}", err),
                 },
                 _ => unreachable!("{}", PipelineError::InvalidInstructionSize(instruction_size)),
@@ -41,16 +51,25 @@ impl Pipeline {
         }
     }
 
-    pub fn decode(&mut self) {
-        
+    pub fn decode(&mut self, cpsr: &Cpsr) {
+        match &self.prefetch {
+            Prefetch::Success(instruction) => {
+                // get the condition
+                if cpsr.is_condition_set(instruction.get_condition_code_flag()) {
+                } else {
+                    self.decoded_instruction = InstructionMap::Noop;
+                }
+            },
+            Prefetch::Invalid => panic!("Housto, we've a little problem..."),
+        }
     }
 }
 
 impl Default for Pipeline {
     fn default() -> Self {
         Self {
-            prefetch: Prefetch::from(DataType::default()),
-            decoded_instruction: InstructionMap::Noop,
+            prefetch: Prefetch::default(),
+            decoded_instruction: InstructionMap::default(),
         }
     }
 }

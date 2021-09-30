@@ -51,7 +51,7 @@ impl Arm7TDMI {
     }
 
     pub fn decode(&mut self) {
-        self.pipeline.decode();
+        self.pipeline.decode(&self.cpsr);
     }
 
     pub fn execute(&mut self) {
