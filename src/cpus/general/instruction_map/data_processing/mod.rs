@@ -59,7 +59,13 @@ impl From<&Instruction> for DataProcessing {
         let s_flag = BitState::from((instruction_val >> 20) & 0b1);
         let rn = RegisterIndex::from((instruction_val >> 16) & 0b1111);
         let rd = RegisterIndex::from((instruction_val >> 12) & 0b1111);
-        let shifter_operand = ShifterOperand::from(instruction_val);
+
+        let shifter_operand: ShifterOperand;
+        if i_flag.is_set() {
+            shifter_operand = ShifterOperand::from_immediate(instruction);
+        } else {
+            shifter_operand = ShifterOperand::from_shifts(instruction);
+        }
 
         Self {
             i_flag,

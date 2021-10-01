@@ -17,8 +17,8 @@ impl Branch {
     pub fn get_operand(&self) -> BranchOperand {
         let instruction_val = self.0.get_value_as_u32();
 
-        if ((instruction_val >> 20) & 0b111_1111 == 0b00010010)
-            && ((instruction_val >> 4) & 0b1111 == 0b1111) 
+        if ((instruction_val >> 20) & 0b1111_1111 == 0b0001_0010)
+            && ((instruction_val >> 4) & 0b1111 == 0b0001) 
         {
             if (instruction_val >> 8) & 0b1111_1111_1111 != 0b1111_1111_1111 {
                 panic!("[BRANCH ERROR]: Bit[8:19] should be ones! Instruction value: {:b}", instruction_val);
@@ -50,13 +50,49 @@ impl From<&Instruction> for Branch {
 }
 
 impl InstructionMapTrait for Branch {
+    // TODO: Add the BX instruction! Currently only checking for th BL instruction
     fn is_matching(instruction: &Instruction) -> bool {
         let instruction_val = instruction.get_value_as_u32();
 
-        if (instruction_val >> 25) & 0b111 == 0b101 {
+        if ((instruction_val >> 25) & 0b111 == 0b101) ||
+            ((instruction_val >> 20) & 0b1111_1111 == 0b0001_0010 
+             && (instruction_val >> 4) & 0b1111 == 0b0001) 
+        {
             true
         } else {
             false
         }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    
+    use super::{Branch, BranchOperand};
+    use crate::cpus::general::{
+        instruction::Instruction,
+        instruction_map::InstructionMapTrait,
+        bit_state::BitState,
+    };
+
+    #[test]
+    fn is_matching() {
+        let valid_instruction = Instruction::from(0b0000_1010_0000_0000_0000_0000_0000_0000);
+        let invalid_instruction = Instruction::from(0b0000_0100_0000_0000_0000_0000_0000_0000);
+
+        assert!(Branch::is_matching(&valid_instruction));
+        assert!(!Branch::is_matching(&invalid_instruction));
+    }
+
+    #[test]
+    fn get_operand() {
+        let bx_instruction = Instruction::from(0b0000_00010010_1111_1111_1111_0001_0000);
+        let bx_branch = Branch::from(&bx_instruction);
+        let bx_operand = bx_branch.get_operand();
+
+        assert_eq!(bx_operand, BranchOperand::Bx {
+            rm: 0b0000,
+            switch_to_thumb: BitState::Unset,
+        });
     }
 }
