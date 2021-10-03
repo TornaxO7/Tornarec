@@ -15,6 +15,8 @@ use crate::cpus::general::{
     register::types::RegisterIndex,
 };
 
+use core::convert::From;
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CpsrAccess(Instruction);
 
@@ -50,5 +52,11 @@ impl InstructionMapTrait for CpsrAccess {
         } else {
             unreachable!("{}", CpsrAccessError::UnknownOperand(instruction_val));
         }
+    }
+}
+
+impl From<&Instruction> for CpsrAccess {
+    fn from(instruction: &Instruction) -> Self {
+        Self(instruction.clone())
     }
 }

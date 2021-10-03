@@ -16,7 +16,17 @@ impl BitState {
 
 impl From<u32> for BitState {
     fn from(num: u32) -> Self {
-        if num > 0 {
+        if num & 0b1 == 0b1 {
+            Self::Set
+        } else {
+            Self::Unset
+        }
+    }
+}
+
+impl From<i32> for BitState {
+    fn from(num: i32) -> Self {
+        if num & 0b1 == 0b1 {
             Self::Set
         } else {
             Self::Unset
@@ -26,7 +36,7 @@ impl From<u32> for BitState {
 
 impl From<u8> for BitState {
     fn from(num: u8) -> Self {
-        if num > 0 {
+        if num & 0b1 == 0b1 {
             Self::Set
         } else {
             Self::Unset
@@ -46,22 +56,22 @@ mod tests {
     use super::BitState;
 
     #[test]
-    fn from_u32() {
+    fn from_num() {
         let unset_val = 0;
         let val1 = 1;
         let val2 = 10;
-        let val3 = 100;
+        let val3: u32 = 100;
 
         assert_eq!(BitState::from(unset_val), BitState::Unset);
         assert_eq!(BitState::from(val1), BitState::Set);
-        assert_eq!(BitState::from(val2), BitState::Set);
-        assert_eq!(BitState::from(val3), BitState::Set);
+        assert_eq!(BitState::from(val2), BitState::Unset);
+        assert_eq!(BitState::from(val3), BitState::Unset);
     }
 
     #[test]
     fn get_state() {
         let unset_val = 0;
-        let val1 = 10;
+        let val1 = 1;
         let val2 = 100;
 
         let unset_state = BitState::from(unset_val);
@@ -70,7 +80,7 @@ mod tests {
 
         assert!(unset_state.is_unset());
         assert!(state1.is_set());
-        assert!(state2.is_set());
+        assert!(state2.is_unset());
     }
 
     #[test]
