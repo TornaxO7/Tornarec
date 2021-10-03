@@ -1,6 +1,8 @@
 pub mod operand;
+pub mod error;
 
 pub use operand::BranchOperand;
+pub use error::BranchError;
 
 use crate::cpus::general::{
     bit_state::BitState,
@@ -39,7 +41,7 @@ impl InstructionMapTrait for Branch {
 
         if BranchOperand::is_bx_instruction(&self.0) {
             if (instruction_val >> 8) & 0b1111_1111_1111 != 0b1111_1111_1111 {
-                panic!("[BRANCH ERROR]: Bit[8:19] should be ones! Instruction value: {:b}", instruction_val);
+                panic!("{}", BranchError::SBOConflict(instruction_val));
             }
 
             let rm = u8::try_from(instruction_val & 0b1111).unwrap();

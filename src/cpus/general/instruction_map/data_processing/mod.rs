@@ -1,6 +1,8 @@
 pub mod operand;
+pub mod error;
 
 pub use operand::DataProcessingOperand;
+pub use error::DataProcessingError;
 
 use crate::cpus::general::{
     instruction::Instruction,
@@ -86,7 +88,7 @@ impl InstructionMapTrait for DataProcessing {
             0b1101 => DataProcessingOperand::ORR,
             0b1110 => DataProcessingOperand::MOV,
             0b1111 => DataProcessingOperand::BIC,
-            _other => unreachable!("[DATA PROCESSING]: Reached unknown opcode: {:b}", _other),
+            _other => unreachable!("{}", DataProcessingError::UnknownOpcode(u32::from(_other))),
         }
     }
 }

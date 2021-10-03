@@ -1,4 +1,7 @@
 pub mod operand;
+pub mod error;
+
+pub use error::MultiplyError;
 
 use crate::cpus::general::{
     instruction::Instruction,
@@ -52,79 +55,31 @@ impl InstructionMapTrait for Multiply {
                 let rd = RegisterIndex::from((instruction_val >> 16) & 0b1111);
                 let rn = RegisterIndex::from((instruction_val >> 12) & 0b1111);
 
-                MultiplyOperand::MLA {
-                    s_flag,
-                    rd,
-                    rn,
-                    rs,
-                    rm,
-                }
+                MultiplyOperand::MLA {s_flag, rd, rn, rs, rm}
             },
             MultiplyOperand::MUL_CODE => {
                 if ((instruction_val >> 12) & 0b1111) != 0b0000 {
-                    panic!("[MULTIPLY ERROR]: MUL-Instruction doesn't have zero bits from 12:15: {:b}!", instruction_val);
+                    panic!("{}", MultiplyError::SBZConflict(instruction_val));
                 }
 
                 let rd = RegisterIndex::from((instruction_val >> 16) & 0b1111);
 
-                MultiplyOperand::MUL {
-                    s_flag,
-                    rd,
-                    rs,
-                    rm,
-                }
+                MultiplyOperand::MUL {s_flag, rd, rs, rm}
             },
-            MultiplyOperand::SMLAL_CODE => {
+            MultiplyOperand::SMLAL_CODE | MultiplyOperand::SMULL_CODE | MultiplyOperand::UMLAL_CODE | MultiplyOperand::UMULL_CODE => {
                 let rdhi = Immed8::from((instruction_val >> 16) & 0b1111);
                 let rdlo = Immed8::from((instruction_val >> 12) & 0b1111);
-
-                MultiplyOperand::SMLAL {
-                    s_flag,
-                    rdhi,
-                    rdlo,
-                    rs,
-                    rm,
-                }
-            },
-            MultiplyOperand::SMULL_CODE => {
-                let rdhi = Immed8::from((instruction_val >> 16) & 0b1111);
-                let rdlo = Immed8::from((instruction_val >> 12) & 0b1111);
-
-                MultiplyOperand::SMULL {
-                    s_flag,
-                    rdhi,
-                    rdlo,
-                    rs,
-                    rm,
+                
+                match operand_code {
+                    MultiplyOperand::SMLAL_CODE => MultiplyOperand::SMLAL{s_flag, rdhi, rdlo, rs, rm},
+                    MultiplyOperand::SMULL_CODE => MultiplyOperand::SMULL{s_flag, rdhi, rdlo, rs, rm},
+                    MultiplyOperand::UMLAL_CODE => MultiplyOperand::UMLAL{s_flag, rdhi, rdlo, rs, rm},
+                    MultiplyOperand::UMULL_CODE => MultiplyOperand::UMULL{s_flag, rdhi, rdlo, rs, rm},
+                    _other => unreachable!(),
                 }
 
             },
-            MultiplyOperand::UMLAL_CODE => {
-                let rdhi = Immed8::from((instruction_val >> 16) & 0b1111);
-                let rdlo = Immed8::from((instruction_val >> 12) & 0b1111);
-
-                MultiplyOperand::UMLAL {
-                    s_flag,
-                    rdhi,
-                    rdlo,
-                    rs,
-                    rm,
-                }
-            },
-            MultiplyOperand::UMULL_CODE => {
-                let rdhi = Immed8::from((instruction_val >> 16) & 0b1111);
-                let rdlo = Immed8::from((instruction_val >> 12) & 0b1111);
-
-                MultiplyOperand::UMULL {
-                    s_flag,
-                    rdhi,
-                    rdlo,
-                    rs,
-                    rm,
-                }
-            },
-
-            _other => unreachable!("[MULTIPLY ERROR]: Unknown multiply operand: {:b}.", _other),
+            _other => unreachable!("{}", MultiplyError::UnknownOperand(_other)),
         }
     }
 }
