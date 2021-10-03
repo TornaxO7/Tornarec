@@ -83,7 +83,7 @@ mod test {
     }
 
     #[test]
-    fn get_operand() {
+    fn get_bx_operand() {
         let bx_instruction = Instruction::from(0b0000_00010010_1111_1111_1111_0001_0000);
         let bx_branch = Branch::from(&bx_instruction);
         let bx_operand = bx_branch.get_operand();
@@ -92,5 +92,39 @@ mod test {
             rm: 0b0000,
             switch_to_thumb: BitState::Unset,
         });
+    }
+
+    #[test]
+    #[should_panic]
+    fn get_invalid_bx_operand() {
+        let invalid_bx_instruction = Instruction::from(0b0000_00010010_0000_0000_0000_0001_0000);
+        let invalid_bx_branch = Branch::from(&invalid_bx_instruction);
+
+        invalid_bx_branch.get_operand();
+    }
+
+    #[test]
+    fn get_b_or_bl_operand() {
+        let b_instruction = Instruction::from(0b0000_1010_0000_0000_0000_0000_0000_0000);
+        let bl_instruction = Instruction::from(0b0000_1011_0000_0000_0000_0000_0000_0001);
+
+        let b_branch = Branch::from(&b_instruction);
+        let bl_branch = Branch::from(&bl_instruction);
+
+        let b_operand = b_branch.get_operand();
+        let bl_operand = bl_branch.get_operand();
+
+        let expected_b_operand = BranchOperand::BOrBL {
+            l: BitState::Unset,
+            signed_immed_24: 0,
+        };
+
+        let expected_bl_operand = BranchOperand::BOrBL {
+            l: BitState::Set,
+            signed_immed_24: 1,
+        };
+
+        assert_eq!(b_operand, expected_b_operand);
+        assert_eq!(bl_operand, expected_bl_operand);
     }
 }
