@@ -3,6 +3,7 @@ pub mod data_processing;
 pub mod instruction_map_trait;
 pub mod encoding_types;
 pub mod multiply;
+pub mod cpsr_access;
 
 pub use data_processing::DataProcessing;
 pub use branch::Branch;

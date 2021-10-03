@@ -15,8 +15,18 @@ impl BitState {
 }
 
 impl From<u32> for BitState {
-    fn from(bit: u32) -> Self {
-        if bit > 0 {
+    fn from(num: u32) -> Self {
+        if num > 0 {
+            Self::Set
+        } else {
+            Self::Unset
+        }
+    }
+}
+
+impl From<u8> for BitState {
+    fn from(num: u8) -> Self {
+        if num > 0 {
             Self::Set
         } else {
             Self::Unset
