@@ -27,29 +27,6 @@ pub struct DataProcessing {
     pub shifter_operand: ShifterOperand,
 }
 
-impl DataProcessing {
-    pub fn get_operand(&self) -> DataProcessingOperand {
-        match self.opcode.get_value_as_u8() {
-            0b0001 => DataProcessingOperand::AND,
-            0b0010 => DataProcessingOperand::EOR,
-            0b0011 => DataProcessingOperand::SUB,
-            0b0100 => DataProcessingOperand::RSB,
-            0b0101 => DataProcessingOperand::ADD,
-            0b0110 => DataProcessingOperand::ADC,
-            0b0111 => DataProcessingOperand::SBC,
-            0b1000 => DataProcessingOperand::RSC,
-            0b1001 => DataProcessingOperand::TST,
-            0b1010 => DataProcessingOperand::TEQ,
-            0b1011 => DataProcessingOperand::CMP,
-            0b1100 => DataProcessingOperand::CMN,
-            0b1101 => DataProcessingOperand::ORR,
-            0b1110 => DataProcessingOperand::MOV,
-            0b1111 => DataProcessingOperand::BIC,
-            _other => unreachable!("[DATA PROCESSING]: Reached unknown opcode: {:b}", _other),
-        }
-    }
-}
-
 impl From<&Instruction> for DataProcessing {
     fn from(instruction: &Instruction) -> Self {
         let instruction_val = instruction.get_value_as_u32();
@@ -79,6 +56,9 @@ impl From<&Instruction> for DataProcessing {
 }
 
 impl InstructionMapTrait for DataProcessing {
+
+    type Operand = DataProcessingOperand;
+
     fn is_matching(instruction: &Instruction) -> bool {
         let instruction_val = instruction.get_value_as_u32();
 
@@ -86,6 +66,27 @@ impl InstructionMapTrait for DataProcessing {
             true
         } else {
             false
+        }
+    }
+
+    fn get_operand(&self) -> Self::Operand {
+        match self.opcode.get_value_as_u8() {
+            0b0001 => DataProcessingOperand::AND,
+            0b0010 => DataProcessingOperand::EOR,
+            0b0011 => DataProcessingOperand::SUB,
+            0b0100 => DataProcessingOperand::RSB,
+            0b0101 => DataProcessingOperand::ADD,
+            0b0110 => DataProcessingOperand::ADC,
+            0b0111 => DataProcessingOperand::SBC,
+            0b1000 => DataProcessingOperand::RSC,
+            0b1001 => DataProcessingOperand::TST,
+            0b1010 => DataProcessingOperand::TEQ,
+            0b1011 => DataProcessingOperand::CMP,
+            0b1100 => DataProcessingOperand::CMN,
+            0b1101 => DataProcessingOperand::ORR,
+            0b1110 => DataProcessingOperand::MOV,
+            0b1111 => DataProcessingOperand::BIC,
+            _other => unreachable!("[DATA PROCESSING]: Reached unknown opcode: {:b}", _other),
         }
     }
 }

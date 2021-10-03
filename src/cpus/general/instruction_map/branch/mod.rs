@@ -13,13 +13,31 @@ use core::convert::{From, TryFrom};
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Branch(Instruction);
 
-impl Branch {
-    pub fn get_operand(&self) -> BranchOperand {
+impl From<&Instruction> for Branch {
+    fn from(instruction: &Instruction) -> Self {
+        Self(instruction.clone())
+    }
+}
+
+impl InstructionMapTrait for Branch {
+
+    type Operand = BranchOperand;
+
+    fn is_matching(instruction: &Instruction) -> bool {
+
+        if (BranchOperand::is_b_or_bl_instruction(instruction)) ||
+            (BranchOperand::is_bx_instruction(instruction))
+        {
+            true
+        } else {
+            false
+        }
+    }
+
+    fn get_operand(&self) -> Self::Operand {
         let instruction_val = self.0.get_value_as_u32();
 
-        if ((instruction_val >> 20) & 0b1111_1111 == 0b0001_0010)
-            && ((instruction_val >> 4) & 0b1111 == 0b0001) 
-        {
+        if BranchOperand::is_bx_instruction(&self.0) {
             if (instruction_val >> 8) & 0b1111_1111_1111 != 0b1111_1111_1111 {
                 panic!("[BRANCH ERROR]: Bit[8:19] should be ones! Instruction value: {:b}", instruction_val);
             }
@@ -39,28 +57,6 @@ impl Branch {
                 l,
                 signed_immed_24,
             }
-        }
-    }
-}
-
-impl From<&Instruction> for Branch {
-    fn from(instruction: &Instruction) -> Self {
-        Self(instruction.clone())
-    }
-}
-
-impl InstructionMapTrait for Branch {
-    // TODO: Add the BX instruction! Currently only checking for th BL instruction
-    fn is_matching(instruction: &Instruction) -> bool {
-        let instruction_val = instruction.get_value_as_u32();
-
-        if ((instruction_val >> 25) & 0b111 == 0b101) ||
-            ((instruction_val >> 20) & 0b1111_1111 == 0b0001_0010 
-             && (instruction_val >> 4) & 0b1111 == 0b0001) 
-        {
-            true
-        } else {
-            false
         }
     }
 }
