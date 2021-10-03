@@ -24,6 +24,12 @@ impl From<u32> for BitState {
     }
 }
 
+impl Default for BitState {
+    fn default() -> Self {
+        BitState::Set
+    }
+}
+
 #[cfg(test)]
 mod tests {
 

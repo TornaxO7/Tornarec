@@ -68,3 +68,12 @@ impl ShifterOperand {
         }
     }
 }
+
+impl Default for ShifterOperand {
+    fn default() -> Self {
+        Self::Immediate {
+            rotate_imm: RotateImm::from(0),
+            immed_8: Immed8::from(0),
+        }
+    }
+}

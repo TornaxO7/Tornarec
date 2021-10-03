@@ -1,6 +1,6 @@
 use core::convert::{From, TryFrom};
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct RegisterIndex(u8);
 
 impl RegisterIndex {
