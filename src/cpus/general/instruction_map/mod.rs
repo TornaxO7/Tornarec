@@ -4,6 +4,8 @@ pub mod instruction_map_trait;
 pub mod encoding_types;
 pub mod multiply;
 pub mod cpsr_access;
+pub mod load_and_store;
+pub mod load_and_store_multiple;
 
 pub use data_processing::DataProcessing;
 pub use branch::Branch;

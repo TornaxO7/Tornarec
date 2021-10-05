@@ -11,6 +11,6 @@ impl RegisterIndex {
 
 impl From<u32> for RegisterIndex {
     fn from(num: u32) -> Self {
-        Self(u8::try_from(num & 0b1111_1111).unwrap())
+        Self(u8::try_from(num & 0b1111).unwrap())
     }
 }

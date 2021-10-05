@@ -32,8 +32,9 @@ impl InstructionMapTrait for CpsrAccess {
     fn get_operand(&self) -> Self::Operand {
         let instruction_val = self.0.get_value_as_u32();
 
+        // TODO: Here
         if CpsrAccessOperand::is_msr(&self.0) {
-            let r_flag = BitState::from((instruction_val >> 22) & 0b1);
+            let r_flag = BitState::from(instruction_val >> 22);
             let rd = RegisterIndex::from((instruction_val >> 12) & 0b1111);
 
             if (instruction_val >> 16) & 0b1111 != 0b1111 {
