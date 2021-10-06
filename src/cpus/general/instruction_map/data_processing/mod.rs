@@ -63,7 +63,6 @@ mod tests {
         instruction::Instruction,
         bit_state::BitState,
         instruction_map::encoding_types:: ShifterOperand,
-        register::types::RegisterIndex,
     };
     use core::convert::From;
 
@@ -76,24 +75,15 @@ mod tests {
             DataProcessingData {
                 i_flag: BitState::Set,
                 s_flag: BitState::Set,
-                rn: RegisterIndex::from(0b1111),
-                rd: RegisterIndex::from(0b0101),
+                rn: 0b1111,
+                rd: 0b0101,
                 shifter_operand: ShifterOperand::Immediate {
-                    rotate_imm: RotateImm::from(0),
-                    immed_8: Immed8::from(0b1111_1111),
+                    rotate_imm: 0,
+                    immed_8: 0b1111_1111,
                 },
             }
         );
 
         assert_eq!(data_processing, expected_data_processing);
-    }
-
-    #[test]
-    fn is_matching() {
-        let instruction = Instruction::from(0b1111_0011_1111_1111_1111_1111_1111_1111);
-        let invalid_instruction = Instruction::from(0b1111_1111_1111_1111_1111_1111_1111_1111);
-
-        assert!(DataProcessing::is_matching(&instruction));
-        assert!(!DataProcessing::is_matching(&invalid_instruction));
     }
 }
