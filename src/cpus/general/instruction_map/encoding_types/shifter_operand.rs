@@ -56,3 +56,45 @@ impl From<&Instruction> for ShifterOperand {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+
+    use super::ShifterOperand;
+    use crate::cpus::general::instruction::Instruction;
+
+    #[test]
+    fn get_immediate() {
+        let instruction = Instruction::from(0b0000_001_0000_0_0000_0000_1000_10000000);
+        let expected_shifter_operand = ShifterOperand::Immediate {
+            rotate_imm: 0b1000,
+            immed_8: 0b1000_0000,
+        };
+
+        assert_eq!(ShifterOperand::from(&instruction), expected_shifter_operand);
+    }
+
+    #[test]
+    fn get_immediate_shift() {
+        let instruction = Instruction::from(0b0000_000_0000_0_0000_0000_1010_10_0_1010);
+        let expected_shifter_operand = ShifterOperand::ImmediateShift {
+            shift_imm: 0b1010,
+            shift: 0b10,
+            rm: 0b1010,
+        };
+
+        assert_eq!(ShifterOperand::from(&instruction), expected_shifter_operand);
+    }
+
+    #[test]
+    fn get_register_shift() {
+        let instruction = Instruction::from(0b0000_000_0000_0_0000_0000_1010_0_10_1_1010);
+        let expected_shifter_operand = ShifterOperand::RegisterShift {
+            rs: 0b1010,
+            shift: 0b10,
+            rm: 0b1010,
+        };
+
+        assert_eq!(ShifterOperand::from(&instruction), expected_shifter_operand);
+    }
+}
