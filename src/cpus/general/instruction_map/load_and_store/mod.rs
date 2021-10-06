@@ -5,10 +5,7 @@ pub use operand::LoadAndStoreOperand;
 
 use crate::cpus::general::{
     instruction::Instruction,
-    instruction_map::{
-        encoding_types::AddressingMode,
-        InstructionMapTrait,
-    },
+    instruction_map::encoding_types::AddressingMode,
     bit_state::BitState,
     register::types::RegisterIndex,
 };
