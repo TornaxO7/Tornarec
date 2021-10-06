@@ -59,7 +59,7 @@ mod tests {
     use crate::cpus::general::{
         instruction::Instruction,
         bit_state::BitState,
-        instruction_map::encoding_types:: ShifterOperand,
+        instruction_map::encoding_types::addressing_modes::AddressingMode1,
     };
     use core::convert::From;
 

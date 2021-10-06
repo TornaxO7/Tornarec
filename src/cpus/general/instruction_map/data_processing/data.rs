@@ -1,7 +1,7 @@
 use crate::cpus::general::{
     bit_state::BitState,
-    instruction_map::encoding_types::ShifterOperand,
     instruction::Instruction,
+    instruction_map::encoding_types::ShifterOperand,
 };
 
 use core::convert::From;
@@ -23,13 +23,7 @@ impl From<&Instruction> for DataProcessingData {
         let s_flag = BitState::from((instruction_val >> 20) & 0b1);
         let rn = (instruction_val >> 16) & 0b1111;
         let rd = (instruction_val >> 12) & 0b1111;
-
-        let shifter_operand: ShifterOperand;
-        if i_flag.is_set() {
-            shifter_operand = ShifterOperand::from_immediate(instruction);
-        } else {
-            shifter_operand = ShifterOperand::from_shifts(instruction);
-        }
+        let shifter_operand = ShifterOperand::from(instruction);
 
         Self {
             i_flag,

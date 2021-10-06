@@ -1,5 +1,6 @@
 pub mod operand;
 pub mod error;
+pub mod data;
 
 pub use operand::LoadAndStoreOperand;
 
