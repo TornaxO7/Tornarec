@@ -69,20 +69,21 @@ mod tests {
 
     #[test]
     fn test_from() {
-        let instruction = Instruction::from(0b0000_00_1_1010_1_1111_0101_0000_1111_1111);
+        let instruction = Instruction::from(0b0000_00_1_0101_1_1111_0101_0000_1111_1111);
         let data_processing = DataProcessing::from(&instruction);
 
-        let expected_data_processing = DataProcessing {
-            i_flag: BitState::Set,
-            opcode: Opcode::from(0b1010 as u32),
-            s_flag: BitState::Set,
-            rn: RegisterIndex::from(0b1111),
-            rd: RegisterIndex::from(0b0101),
-            shifter_operand: ShifterOperand::Immediate {
-                rotate_imm: RotateImm::from(0),
-                immed_8: Immed8::from(0b1111_1111),
-            },
-        };
+        let expected_data_processing = DataProcessing::ADC(
+            DataProcessingData {
+                i_flag: BitState::Set,
+                s_flag: BitState::Set,
+                rn: RegisterIndex::from(0b1111),
+                rd: RegisterIndex::from(0b0101),
+                shifter_operand: ShifterOperand::Immediate {
+                    rotate_imm: RotateImm::from(0),
+                    immed_8: Immed8::from(0b1111_1111),
+                },
+            }
+        );
 
         assert_eq!(data_processing, expected_data_processing);
     }
