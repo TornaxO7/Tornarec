@@ -20,7 +20,7 @@ use crate::cpus::general::{
 use core::convert::From;
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
-pub struct DataProcessing {
+pub enum DataProcessing {
     pub i_flag: BitState,
     pub opcode: Opcode,
     pub s_flag: BitState,
