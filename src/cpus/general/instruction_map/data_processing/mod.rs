@@ -1,7 +1,4 @@
-pub mod error;
 pub mod data;
-
-pub use error::DataProcessingError;
 pub use data::DataProcessingData;
 
 use crate::cpus::general::instruction::Instruction;
