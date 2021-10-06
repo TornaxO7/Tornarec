@@ -1,4 +1,3 @@
-pub mod operand;
 pub mod error;
 
 pub use error::MultiplyError;

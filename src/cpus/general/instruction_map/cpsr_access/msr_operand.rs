@@ -2,13 +2,8 @@ use crate::cpus::general::{
     BitState,
     instruction_map::{
         cpsr_access::CpsrAccessError,
-        encoding_types::field::{
-            Immed8,
-            RotateImm,
-            FieldMask,
-        },
+        encoding_types::field::FieldMask,
     },
-    register::types::RegisterIndex,
     instruction::Instruction,
 };
 
@@ -19,13 +14,13 @@ pub enum MsrOperand {
     Immediate {
         r_flag: BitState,
         field_mask: FieldMask,
-        rotate_imm: RotateImm,
-        immed8: Immed8,
+        rotate_imm: u8,
+        immed8: u8,
     },
     Register {
         r_flag: BitState,
         field_mask: FieldMask,
-        rm: RegisterIndex,
+        rm: u8,
     }
 }
 
@@ -43,8 +38,8 @@ impl From<&Instruction> for MsrOperand {
         let field_mask = FieldMask::from((instruction_val >> 16) & 0b1111);
 
         if MsrOperand::is_immediate_operand(instruction) {
-            let rotate_imm = RotateImm::from((instruction_val >> 8) & 0b1111);
-            let immed8 = Immed8::from(instruction_val & 0b1111_1111);
+            let rotate_imm = (instruction_val >> 8) & 0b1111;
+            let immed8 = instruction_val & 0b1111_1111;
 
             if (instruction_val >> 12) & 0b1111 != 0b1111 {
                 panic!("{}", CpsrAccessError::SBOConflict(16, 19, instruction_val));
@@ -58,7 +53,7 @@ impl From<&Instruction> for MsrOperand {
             }
 
         } else {
-            let rm = RegisterIndex::from(instruction_val & 0b1111);
+            let rm = instruction_val & 0b1111;
 
             if (instruction_val >> 12) & 0b1111 != 0b1111 {
                 panic!("{}", CpsrAccessError::SBOConflict(16, 19, instruction_val));

@@ -1,16 +1,11 @@
 pub mod error;
-pub mod operand;
 pub mod msr_operand;
 
 pub use error::CpsrAccessError;
-pub use operand::CpsrAccessOperand;
+pub use msr_operand::MsrOperand;
 
 use crate::cpus::general::{
     bit_state::BitState,
-    instruction_map::{
-        InstructionMapTrait,
-        cpsr_access::msr_operand::MsrOperand,
-    },
     instruction::Instruction,
     register::types::RegisterIndex,
 };
@@ -18,22 +13,35 @@ use crate::cpus::general::{
 use core::convert::From;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct CpsrAccess(Instruction);
+pub enum CpsrAccess {
+    MRS {
+        r_flag: BitState,
+        rd: u8,
+    },
+    MSR(MsrOperand),
+}
 
+impl CpsrAccess {
+    pub fn is_msr(instruction: &Instruction) -> bool {
+        let instruction_val = instruction.get_value_as_u32();
 
-impl InstructionMapTrait for CpsrAccess {
-    type Operand = CpsrAccessOperand;
-
-    fn is_matching(instruction: &Instruction) -> bool {
-        CpsrAccessOperand::is_msr(instruction)
-            || CpsrAccessOperand::is_mrs(instruction)
+        (instruction_val >> 23) & 0b11111 == 0b00110
+            && (instruction_val >> 20) & 0b11 == 0b10
     }
 
-    fn get_operand(&self) -> Self::Operand {
-        let instruction_val = self.0.get_value_as_u32();
+    pub fn is_mrs(instruction: &Instruction) -> bool {
+        let instruction_val = instruction.get_value_as_u32();
+        
+        (instruction_val >> 23) & 0b11111 == 0b00010
+            && (instruction_val >> 20) & 0b11 == 0b00
+    }
+}
 
-        // TODO: Here
-        if CpsrAccessOperand::is_msr(&self.0) {
+impl From<&Instruction> for CpsrAccess {
+    fn from(instruction: &Instruction) -> Self {
+        let instruction_val = instruction.get_value_as_u32();
+
+        if Self::is_msr(instruction) {
             let r_flag = BitState::from(instruction_val >> 22);
             let rd = RegisterIndex::from((instruction_val >> 12) & 0b1111);
 
@@ -44,20 +52,14 @@ impl InstructionMapTrait for CpsrAccess {
                 panic!("{}", CpsrAccessError::SBZConflict(0, 11, instruction_val));
             }
 
-            CpsrAccessOperand::MRS {
+            Self::MRS {
                 r_flag,
                 rd,
             }
-        } else if CpsrAccessOperand::is_mrs(&self.0) {
-            CpsrAccessOperand::MSR(MsrOperand::from(&self.0))
+        } else if Self::is_mrs(instruction) {
+            Self::MSR(MsrOperand::from(instruction))
         } else {
             unreachable!("{}", CpsrAccessError::UnknownOperand(instruction_val));
         }
-    }
-}
-
-impl From<&Instruction> for CpsrAccess {
-    fn from(instruction: &Instruction) -> Self {
-        Self(instruction.clone())
     }
 }
