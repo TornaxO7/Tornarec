@@ -4,6 +4,7 @@ pub mod data_processing_register_shift;
 pub mod miscellaneous2;
 pub mod multiplies;
 pub mod extra_load_stores;
+pub mod data_processing_immediate;
 
 use std::convert::From;
 
