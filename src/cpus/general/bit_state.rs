@@ -57,8 +57,8 @@ impl Deref for BitState {
 
     fn deref(&self) -> &Self::Target {
         match self {
-            BitState::Set => 1,
-            BitState::Unset => 0,
+            BitState::Set => &1,
+            BitState::Unset => &0,
         }
     }
 }

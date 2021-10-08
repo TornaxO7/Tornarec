@@ -31,3 +31,8 @@ impl From<&Instruction> for DataProcessingImmediateShift {
         Self{opcode, s_flag, rn, rd, shift_amount, shift, rm}
     }
 }
+
+#[cfg(test)]
+mod tests {
+    
+}
