@@ -1,7 +1,5 @@
-pub mod data;
 pub mod operand;
 
-pub use data::DataProcessingData;
 pub use operand::DataProcessingOperand;
 
 use crate::cpus::general::{
