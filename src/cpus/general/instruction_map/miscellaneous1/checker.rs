@@ -34,3 +34,32 @@ impl From<&Instruction> for Checker {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::{Checker, Instruction};
+
+    #[test]
+    fn test_from_line1() {
+        let instruction = Instruction::from(0b0000_00010_00_0_0000_0000_0000_000_0_0000);
+        assert_eq!(Checker::from(&instruction), Checker::Line1);
+    }
+
+    #[test]
+    fn test_from_line2() {
+        let instruction = Instruction::from(0b0000_00010_00_0_0000_0000_0000_0_11_1_0000);
+        assert_eq!(Checker::from(&instruction), Checker::Line2);
+    }
+
+    #[test]
+    fn test_from_line3() {
+        let instruction = Instruction::from(0b0000_00110_0_10_0000_0000_1111_1111_0000);
+        assert_eq!(Checker::from(&instruction), Checker::Line3);
+    }
+
+    #[test]
+    fn test_from_unknown() {
+        let instruction = Instruction::from(0b101010101010101010101010101010);
+        assert_eq!(Checker::from(&instruction), Checker::Unknown);
+    }
+}
