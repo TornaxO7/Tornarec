@@ -1,3 +1,5 @@
+use std::ops::Deref;
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum BitState {Set, Unset}
 
@@ -47,6 +49,17 @@ impl From<u8> for BitState {
 impl Default for BitState {
     fn default() -> Self {
         BitState::Set
+    }
+}
+
+impl Deref for BitState {
+    type Target = u8;
+
+    fn deref(&self) -> &Self::Target {
+        match self {
+            BitState::Set => 1,
+            BitState::Unset => 0,
+        }
     }
 }
 

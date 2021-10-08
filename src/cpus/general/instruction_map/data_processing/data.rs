@@ -25,12 +25,6 @@ impl From<&Instruction> for DataProcessingData {
         let rd = (instruction_val >> 12) & 0b1111;
         let shifter_operand = ShifterOperand::from(instruction);
 
-        Self {
-            i_flag,
-            s_flag,
-            rn,
-            rd,
-            shifter_operand,
-        }
+        Self{i_flag, s_flag, rn, rd, shifter_operand}
     }
 }
