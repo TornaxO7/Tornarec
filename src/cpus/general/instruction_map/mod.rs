@@ -6,6 +6,7 @@ pub mod multiplies;
 pub mod extra_load_stores;
 pub mod data_processing_immediate;
 pub mod move_immediate_to_status_register;
+pub mod load_and_store_immediate_offset;
 
 use std::convert::From;
 
