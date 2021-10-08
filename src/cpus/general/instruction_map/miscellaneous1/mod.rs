@@ -50,3 +50,69 @@ impl From<&Instruction> for Miscellaneous1 {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::{
+        Miscellaneous1,
+        Instruction,
+        BitState,
+    };
+
+    #[test]
+    fn from_line1() {
+        let instruction = Instruction::from(0b0000_00010_11_0_1010_0101_1001_000_0_0110);
+        let value = Miscellaneous1::from(&instruction);
+
+        let expected_value = Miscellaneous1::Line1 {
+            op1: 0b11,
+            rn: 0b1010,
+            rd: 0b0101,
+            rs: 0b1001,
+            op2: 0b000,
+            rm: 0b0110,
+        };
+
+        assert_eq!(value, expected_value, "{:#?}, {:#?}", &value, &expected_value);
+    }
+
+    #[test]
+    fn test_line2() {
+        let instruction = Instruction::from(0b0000_00010_11_0_1010_0101_1001_0_11_1_1111);
+        let value = Miscellaneous1::from(&instruction);
+
+        let expected_value = Miscellaneous1::Line2 {
+            op1: 0b11,
+            rn: 0b1010,
+            rd: 0b0101,
+            rs: 0b1001,
+            op2: 0b11,
+            rm: 0b1111,
+        };
+
+        assert_eq!(value, expected_value, "{:#?}, {:#?}", &value, &expected_value);
+    }
+
+    #[test]
+    fn test_line3() {
+        let instruction = Instruction::from(0b0000_00110_1_10_1010_0101_1111_11110000);
+        let value = Miscellaneous1::from(&instruction);
+        
+        let expected_value = Miscellaneous1::Line3 {
+            r_flag: BitState::Set,
+            rn: 0b1010,
+            rd: 0b0101,
+            rotate_imm: 0b1111,
+            immed_8: 0b1111_0000,
+        };
+
+        assert_eq!(value, expected_value, "{:#?}, {:#?}", &value, &expected_value);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_unknown_instruction() {
+        let instruction = Instruction::from(0b0000_11010_0101010010_10101010);
+        Miscellaneous1::from(&instruction);
+    }
+}
