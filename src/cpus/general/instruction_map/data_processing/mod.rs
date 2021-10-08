@@ -1,54 +1,60 @@
 pub mod data;
-pub use data::DataProcessingData;
+pub mod operand;
 
-use crate::cpus::general::instruction::Instruction;
+pub use data::DataProcessingData;
+pub use operand::DataProcessingOperand;
+
+use crate::cpus::general::{
+    instruction::Instruction,
+    bit_state::BitState,
+    instruction_map::encoding_types::ShifterOperand,
+};
 
 use core::convert::From;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub enum DataProcessing {
-    AND(DataProcessingData),
-    EOR(DataProcessingData),
-    SUB(DataProcessingData),
-    RSB(DataProcessingData),
-    ADD(DataProcessingData),
-    ADC(DataProcessingData),
-    SBC(DataProcessingData),
-    RSC(DataProcessingData),
-    TST(DataProcessingData),
-    TEQ(DataProcessingData),
-    CMP(DataProcessingData),
-    CMN(DataProcessingData),
-    ORR(DataProcessingData),
-    MOV(DataProcessingData),
-    BIC(DataProcessingData),
-    MVN(DataProcessingData),
+pub struct DataProcessing {
+    operand: DataProcessingOperand,
+
+    i_flag: BitState,
+    s_flag: BitState,
+    rn: u8,
+    rd: u8,
+    shifter_operand: ShifterOperand,
 }
 
 impl From<&Instruction> for DataProcessing {
     fn from(instruction: &Instruction) -> Self {
         let instruction_val = instruction.get_value_as_u32();
-        let opcode = (instruction_val >> 21) & 0b1111;
-        let data = DataProcessingData::from(instruction);
 
-        match opcode {
-            0b0000 => Self::ADD(data),
-            0b0001 => Self::EOR(data),
-            0b0010 => Self::SUB(data),
-            0b0011 => Self::RSB(data),
-            0b0100 => Self::ADD(data),
-            0b0101 => Self::ADC(data),
-            0b0110 => Self::SBC(data),
-            0b0111 => Self::RSC(data),
-            0b1000 => Self::TST(data),
-            0b1001 => Self::TEQ(data),
-            0b1010 => Self::CMP(data),
-            0b1011 => Self::CMN(data),
-            0b1100 => Self::ORR(data),
-            0b1101 => Self::MOV(data),
-            0b1110 => Self::BIC(data),
-            0b1111 => Self::MVN(data),
-        }
+        let i_flag = BitState::from((instruction_val >> 25) & 0b1);
+        let s_flag = BitState::from((instruction_val >> 20) & 0b1);
+        let rn = (instruction_val >> 16) & 0b1111;
+        let rd = (instruction_val >> 12) & 0b1111;
+        let shifter_operand = ShifterOperand::from(instruction);
+        let opcode = (instruction_val >> 21) & 0b1111;
+
+        let operand = match opcode {
+            0b0000 => Self::ADD,
+            0b0001 => Self::EOR,
+            0b0010 => Self::SUB,
+            0b0011 => Self::RSB,
+            0b0100 => Self::ADD,
+            0b0101 => Self::ADC,
+            0b0110 => Self::SBC,
+            0b0111 => Self::RSC,
+            0b1000 => Self::TST,
+            0b1001 => Self::TEQ,
+            0b1010 => Self::CMP,
+            0b1011 => Self::CMN,
+            0b1100 => Self::ORR,
+            0b1101 => Self::MOV,
+            0b1110 => Self::BIC,
+            0b1111 => Self::MVN,
+        };
+
+        Self {operand, i_flag, s_flag, rn, rd, shifter_operand}
+
     }
 }
 
@@ -59,7 +65,6 @@ mod tests {
     use crate::cpus::general::{
         instruction::Instruction,
         bit_state::BitState,
-        instruction_map::encoding_types::addressing_modes::AddressingMode1,
     };
     use core::convert::From;
 
