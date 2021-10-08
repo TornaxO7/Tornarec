@@ -5,6 +5,7 @@ pub mod miscellaneous2;
 pub mod multiplies;
 pub mod extra_load_stores;
 pub mod data_processing_immediate;
+pub mod move_immediate_to_status_register;
 
 use std::convert::From;
 
