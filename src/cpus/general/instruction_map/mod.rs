@@ -3,6 +3,7 @@ pub mod miscellaneous1;
 pub mod data_processing_register_shift;
 pub mod miscellaneous2;
 pub mod multiplies;
+pub mod extra_load_stores;
 
 use std::convert::From;
 
