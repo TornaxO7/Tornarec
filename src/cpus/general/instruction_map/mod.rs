@@ -8,6 +8,7 @@ pub mod data_processing_immediate;
 pub mod move_immediate_to_status_register;
 pub mod load_and_store_immediate_offset;
 pub mod load_and_store_register_offset;
+pub mod load_and_store_multiple;
 
 use std::convert::From;
 
