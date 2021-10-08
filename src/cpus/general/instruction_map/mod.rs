@@ -1,4 +1,5 @@
 pub mod data_processing_immediate_shift;
+pub mod data_processing_register_shift;
 pub mod miscellaneous1;
 
 use std::convert::From;
