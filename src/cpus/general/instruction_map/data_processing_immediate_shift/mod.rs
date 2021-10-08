@@ -34,5 +34,27 @@ impl From<&Instruction> for DataProcessingImmediateShift {
 
 #[cfg(test)]
 mod tests {
-    
+    use super::{
+        DataProcessingImmediateShift,
+        BitState,
+        Instruction,
+    };
+
+    #[test]
+    fn test_from() {
+        let instruction = Instruction::from(0b0000_000_1010_1_1010_0101_11100_10_0_1001);
+        let value = DataProcessingImmediateShift::from(&instruction);
+
+        let expected_output = DataProcessingImmediateShift {
+            opcode: 0b1010,
+            s_flag: BitState::Set,
+            rn: 0b1010,
+            rd: 0b0101,
+            shift_amount: 0b11100,
+            shift: 0b10,
+            rm: 0b1001,
+        };
+
+        assert_eq!(value, expected_output);
+    }
 }
