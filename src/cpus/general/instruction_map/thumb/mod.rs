@@ -12,5 +12,6 @@ pub mod load_store_halfword_immediate_offset;
 pub mod load_store_to_from_stack;
 pub mod add_to_sp_or_pc;
 pub mod load_store_multiple;
+pub mod conditional_branch;
 
 // MISSING: Miscellaneous
