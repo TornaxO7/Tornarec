@@ -6,3 +6,4 @@ pub mod data_processing_register;
 pub mod special_data_processing;
 pub mod branch_exchange_instruction_set;
 pub mod load_from_literal_pool;
+pub mod load_store_register_offset;
