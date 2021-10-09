@@ -7,3 +7,4 @@ pub mod special_data_processing;
 pub mod branch_exchange_instruction_set;
 pub mod load_from_literal_pool;
 pub mod load_store_register_offset;
+pub mod load_store_word_byte_immediate_offset;
