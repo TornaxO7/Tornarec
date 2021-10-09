@@ -14,5 +14,6 @@ pub mod add_to_sp_or_pc;
 pub mod load_store_multiple;
 pub mod conditional_branch;
 pub mod software_interrupt;
+pub mod unconditional_branch;
 
 // MISSING: Miscellaneous
