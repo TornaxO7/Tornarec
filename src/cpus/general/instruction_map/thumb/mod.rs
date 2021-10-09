@@ -11,6 +11,7 @@ pub mod load_store_word_byte_immediate_offset;
 pub mod load_store_halfword_immediate_offset;
 pub mod load_store_to_from_stack;
 pub mod add_to_sp_or_pc;
+pub mod miscellaneous;
 pub mod load_store_multiple;
 pub mod conditional_branch;
 pub mod software_interrupt;
@@ -18,5 +19,3 @@ pub mod unconditional_branch;
 pub mod blx_suffix;
 pub mod bl_blx_prefix;
 pub mod bl_suffix;
-
-// MISSING: Miscellaneous
