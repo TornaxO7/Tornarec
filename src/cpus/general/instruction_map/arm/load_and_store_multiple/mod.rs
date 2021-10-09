@@ -1,10 +1,7 @@
-pub mod register_list;
-
-use register_list::RegisterList;
-
 use crate::cpus::general::{
     BitState,
     instruction::Instruction,
+    instruction_map::encoding_fields::RegisterList,
 };
 
 use std::convert::{From, TryFrom};
