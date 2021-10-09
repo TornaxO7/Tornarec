@@ -10,6 +10,7 @@ pub mod load_and_store_immediate_offset;
 pub mod load_and_store_register_offset;
 pub mod load_and_store_multiple;
 pub mod branch_and_branch_with_link;
+pub mod coprocessor_load_and_store_and_double_register_transfer;
 
 use std::convert::From;
 
