@@ -15,5 +15,7 @@ pub mod load_store_multiple;
 pub mod conditional_branch;
 pub mod software_interrupt;
 pub mod unconditional_branch;
+pub mod blx_suffix;
+pub mod bl_blx_prefix;
 
 // MISSING: Miscellaneous
