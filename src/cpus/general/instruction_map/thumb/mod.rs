@@ -17,5 +17,6 @@ pub mod software_interrupt;
 pub mod unconditional_branch;
 pub mod blx_suffix;
 pub mod bl_blx_prefix;
+pub mod bl_suffix;
 
 // MISSING: Miscellaneous
