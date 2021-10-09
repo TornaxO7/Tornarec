@@ -13,24 +13,3 @@ pub mod branch_and_branch_with_link;
 pub mod coprocessor_load_and_store_and_double_register_transfers;
 pub mod coprocessor_data_processing;
 pub mod coprocessor_register_transfers;
-
-use std::convert::From;
-
-use crate::cpus::general::instruction::Instruction;
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub enum InstructionMap {
-    Noop
-}
-
-impl From<&Instruction> for InstructionMap {
-    fn from(_instruction: &Instruction) -> Self {
-        Self::Noop
-    }
-}
-
-impl Default for InstructionMap {
-    fn default() -> Self {
-        Self::Noop
-    }
-}
