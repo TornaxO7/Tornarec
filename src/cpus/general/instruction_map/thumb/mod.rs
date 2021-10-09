@@ -10,3 +10,4 @@ pub mod load_store_register_offset;
 pub mod load_store_word_byte_immediate_offset;
 pub mod load_store_halfword_immediate_offset;
 pub mod load_store_to_from_stack;
+pub mod add_to_sp_or_pc;
