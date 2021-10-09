@@ -5,3 +5,4 @@ pub mod add_subtract_compare_move_immediate;
 pub mod data_processing_register;
 pub mod special_data_processing;
 pub mod branch_exchange_instruction_set;
+pub mod load_from_literal_pool;
