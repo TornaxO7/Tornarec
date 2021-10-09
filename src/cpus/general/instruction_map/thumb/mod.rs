@@ -13,5 +13,6 @@ pub mod load_store_to_from_stack;
 pub mod add_to_sp_or_pc;
 pub mod load_store_multiple;
 pub mod conditional_branch;
+pub mod software_interrupt;
 
 // MISSING: Miscellaneous
