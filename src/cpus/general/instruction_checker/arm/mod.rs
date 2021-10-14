@@ -127,3 +127,14 @@ impl From<&Instruction> for ArmInstructionChecker {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::{ArmInstructionChecker, Instruction};
+
+    #[test]
+    fn data_processing_immediate_shift() {
+        let instruction = Instruction::from(0b1111_000_1010_0_0000_0000_10101_11_0_1111);
+        assert_eq!(ArmInstructionChecker::from(&instruction), ArmInstructionChecker::DataProcessingImmediateShift);
+    }
+}

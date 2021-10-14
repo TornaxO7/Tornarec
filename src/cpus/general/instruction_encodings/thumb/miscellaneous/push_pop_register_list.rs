@@ -1,7 +1,7 @@
 use crate::cpus::general::{
     instruction::Instruction,
     BitState,
-    instruction_map::encoding_fields::RegisterList,
+    instruction_encodings::encoding_fields::RegisterList,
 };
 
 use std::convert::From;
