@@ -11,7 +11,6 @@ use crate::{
     cpus::general::{
         instruction::Instruction,
         register::Cpsr,
-        instruction_map::InstructionMap,
     },
 };
 
@@ -57,9 +56,9 @@ impl Pipeline {
             Prefetch::Success(instruction) => {
                 // get the condition
                 if cpsr.is_condition_set(instruction.get_condition_code_flag()) {
-                    self.decoded_instruction = InstructionMap::from(instruction);
+                    // self.decoded_instruction = InstructionMap::from(instruction);
                 } else {
-                    self.decoded_instruction = InstructionMap::Noop;
+                    // self.decoded_instruction = InstructionMap::Noop;
                 }
             },
             Prefetch::Invalid => panic!("Housto, we've a little problem..."),

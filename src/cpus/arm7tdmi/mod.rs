@@ -1,3 +1,7 @@
+pub mod error;
+
+use error::Arm7TDMIError;
+
 use crate::cpus::general::{
     bit_state::BitState,
     pipeline::Pipeline,
@@ -60,19 +64,12 @@ impl Arm7TDMI {
 
         // Look if an FIQ or IRQ interrupt has been set, during execution
         match self.cpsr.get_operating_mode() {
-            Ok(mode) => {
-                if (mode == OperatingMode::Fiq)
-                    && (self.cpsr.get_interrrupt_bit_state(Interruption::Fiq) != BitState::Unset) 
-                {
-                        self.enter_exception(Exception::Fiq);
-                }
-                else if (mode == OperatingMode::Irq)
-                    && (self.cpsr.get_interrrupt_bit_state(Interruption::Irq) != BitState::Unset)
-                {
-                    self.enter_exception(Exception::Irq);
-                }
-            },
+            Ok(OperatingMode::Fiq) if self.cpsr.get_interrrupt_bit_state(Interruption::Fiq) != BitState::Unset
+                => self.enter_exception(Exception::Fiq),
+            Ok(OperatingMode::Irq) if self.cpsr.get_interrrupt_bit_state(Interruption::Irq) != BitState::Unset
+                => self.enter_exception(Exception::Irq),
             Err(err) => panic!("{}", err),
+            _other => unreachable!("{}", Arm7TDMIError::UnreachableOperatingMode),
         }
     }
 
