@@ -1,6 +1,3 @@
-pub mod error;
-
-use error::ArmCheckerError;
 use crate::cpus::general::{Instruction, BitState};
 
 use std::convert::{From, TryFrom};
@@ -12,26 +9,30 @@ pub enum ArmInstructionChecker {
     DataProcessingRegisterShift,
     Miscellaneous2,
     Multiplies,
-    ExtraLoadStores,
+    ExtraLoadAndStores,
     DataProcessingImmediate,
     UndefinedInstruction,
-    MoveImmediateToCpsr,
-    LoadStoreImmediateOffset,
-    LoadStoreRegisterOffset,
+    MoveImmediateToStatusRegister,
+    LoadAndStoreImmediateOffset,
+    LoadAndStoreRegisterOffset,
     MediaInstructions,
     ArchitecturallyUndefined,
-    LoadStoreMultiple,
+    LoadAndStoreMultiple,
     BranchAndBranchWithLink,
-    CoprocessorLoadStoreAndDoubleRegisterTransfers,
+    CoprocessorLoadAndStoreAndDoubleRegisterTransfers,
     CoprocessorDataProcessing,
     CoprocessorRegisterTransfers,
     SoftwareInterrupt,
-    UnconditionalInstruction,
+    UnconditionalInstructions,
 }
 
 impl From<&Instruction> for ArmInstructionChecker {
     fn from(instruction: &Instruction) -> Self {
         let instruction_val = instruction.get_value_as_u32();
+
+        if (instruction_val >> 28) & 0b1111 == 0b1111 {
+            return Self::UnconditionalInstructions;
+        }
 
         let opcode = u8::try_from((instruction_val >> 25) & 0b111).unwrap();
         match opcode {
@@ -60,7 +61,7 @@ impl From<&Instruction> for ArmInstructionChecker {
                         if (instruction_val >> 4) & 0b1111 == 0b1001 {
                             Self::Multiplies
                         } else {
-                            Self::ExtraLoadStores
+                            Self::ExtraLoadAndStores
                         }
                     } else {
                         Self::DataProcessingRegisterShift
@@ -79,14 +80,13 @@ impl From<&Instruction> for ArmInstructionChecker {
                 if bit24_23 == 0b10 && bit20.is_unset() {
                     match bit21 {
                         BitState::Unset => Self::UndefinedInstruction,
-                        BitState::Set => Self::MoveImmediateToCpsr,
-                        _other => unreachable!("{}", ArmCheckerError::UnknownInstruction(instruction_val)),
+                        BitState::Set => Self::MoveImmediateToStatusRegister,
                     }
                 } else {
                     Self::DataProcessingImmediate
                 }
             },
-            0b010 => Self::LoadStoreImmediateOffset,
+            0b010 => Self::LoadAndStoreImmediateOffset,
             0b011 => {
                 // the relevant bits which are needed to differ the instructions are:
                 // - Bit[4]
@@ -97,7 +97,7 @@ impl From<&Instruction> for ArmInstructionChecker {
                 let bit20_24 = (instruction_val >> 20) & 0b1_1111;
 
                 if bit4.is_unset() {
-                    Self::LoadStoreRegisterOffset
+                    Self::LoadAndStoreRegisterOffset
                 } else if bit4_7 == 0b1111 && bit20_24 == 0b1_1111 {
                     Self::ArchitecturallyUndefined
                 } else {
@@ -105,9 +105,9 @@ impl From<&Instruction> for ArmInstructionChecker {
                 }
 
             },
-            0b100 => Self::LoadStoreMultiple,
+            0b100 => Self::LoadAndStoreMultiple,
             0b101 => Self::BranchAndBranchWithLink,
-            0b110 => Self::CoprocessorLoadStoreAndDoubleRegisterTransfers,
+            0b110 => Self::CoprocessorLoadAndStoreAndDoubleRegisterTransfers,
             0b111 => {
                 // the relevant bits which are needed to differ the instructions are:
                 // - Bit[24]

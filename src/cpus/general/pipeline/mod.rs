@@ -11,6 +11,8 @@ use crate::{
     cpus::general::{
         instruction::Instruction,
         register::Cpsr,
+        OperatingState,
+        InstructionMap,
     },
 };
 
@@ -25,6 +27,7 @@ pub enum PipelineError {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Pipeline {
     prefetch: Prefetch,
+    // TODO: HERE
     decoded_instruction: InstructionMap,
 }
 
@@ -54,14 +57,18 @@ impl Pipeline {
     pub fn decode(&mut self, cpsr: &Cpsr) {
         match &self.prefetch {
             Prefetch::Success(instruction) => {
-                // get the condition
-                if cpsr.is_condition_set(instruction.get_condition_code_flag()) {
-                    // self.decoded_instruction = InstructionMap::from(instruction);
+                if cpsr.get_operating_state() == OperatingState::Arm {
+                    // get the condition
+                    if cpsr.is_condition_set(instruction.get_condition_code_flag()) {
+                        self.decoded_instruction = InstructionMap::get_arm_instruction(instruction);
+                    } else {
+                        self.decoded_instruction = InstructionMap::Noop;
+                    }
                 } else {
-                    // self.decoded_instruction = InstructionMap::Noop;
+                    self.decoded_instruction = InstructionMap::get_thumb_instruction(instruction);
                 }
             },
-            Prefetch::Invalid => panic!("Housto, we've a little problem..."),
+            Prefetch::Invalid => panic!("Houston, we've a little problem..."),
         }
     }
 

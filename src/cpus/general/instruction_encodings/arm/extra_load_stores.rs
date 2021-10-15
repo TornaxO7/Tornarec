@@ -6,7 +6,7 @@ use crate::cpus::general::{
 use std::convert::{From, TryFrom};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct ExtraLoadStores {
+pub struct ExtraLoadAndStores {
     p_flag: BitState,
     u_flag: BitState,
     b_flag: BitState,
@@ -19,7 +19,7 @@ pub struct ExtraLoadStores {
     rm: u8,
 }
 
-impl From<&Instruction> for ExtraLoadStores {
+impl From<&Instruction> for ExtraLoadAndStores {
     fn from(instruction: &Instruction) -> Self {
         let instruction_val = instruction.get_value_as_u32();
 
@@ -39,14 +39,14 @@ impl From<&Instruction> for ExtraLoadStores {
 
 #[cfg(test)]
 mod tests {
-    use super::{ExtraLoadStores, Instruction, BitState};
+    use super::{ExtraLoadAndStores, Instruction, BitState};
 
     #[test]
     fn from() {
         let instruction = Instruction::from(0b0000_000_1_0_1_0_1_1100_0011_1010_1_11_1_0101);
-        let value = ExtraLoadStores::from(&instruction);
+        let value = ExtraLoadAndStores::from(&instruction);
 
-        let expected_value = ExtraLoadStores {
+        let expected_value = ExtraLoadAndStores {
             p_flag: BitState::Set,
             u_flag: BitState::Unset,
             b_flag: BitState::Set,

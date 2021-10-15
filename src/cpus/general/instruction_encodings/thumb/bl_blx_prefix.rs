@@ -3,11 +3,11 @@ use crate::cpus::general::instruction::Instruction;
 use std::convert::{From, TryFrom};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct BlBlxPrefix {
+pub struct BlOrBlxPrefix {
     offset: u16,
 }
 
-impl From<&Instruction> for BlBlxPrefix {
+impl From<&Instruction> for BlOrBlxPrefix {
     fn from(instruction: &Instruction) -> Self {
         let instruction_val = instruction.get_value_as_u32();
 
@@ -18,14 +18,14 @@ impl From<&Instruction> for BlBlxPrefix {
 
 #[cfg(test)]
 mod tests {
-    use super::{BlBlxPrefix, Instruction};
+    use super::{BlOrBlxPrefix, Instruction};
 
     #[test]
     fn from() {
         let instruction = Instruction::from(0b11110_100_1010_0101);
-        let value = BlBlxPrefix::from(&instruction);
+        let value = BlOrBlxPrefix::from(&instruction);
 
-        let expected_value = BlBlxPrefix {
+        let expected_value = BlOrBlxPrefix {
             offset: 0b100_1010_0101,
         };
 

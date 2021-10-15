@@ -10,6 +10,8 @@ pub mod instruction_encodings;
 pub mod instruction;
 pub mod condition_code_flag;
 pub mod instruction_checker;
+pub mod instruction_map;
+pub mod instruction_state;
 
 pub use bit_state::BitState;
 pub use condition_flag::ConditionFlag;
@@ -18,3 +20,4 @@ pub use operating_mode::OperatingMode;
 pub use operating_state::OperatingState;
 pub use exception::Exception;
 pub use instruction::Instruction;
+pub use instruction_map::InstructionMap;

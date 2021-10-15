@@ -6,7 +6,7 @@ use crate::cpus::general::{
 use std::convert::{From, TryFrom};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct CoprocessorRegisterTranfsers {
+pub struct CoprocessorRegisterTransfers {
     opcode1: u8,
     l_flag: BitState,
     crn: u8,
@@ -16,7 +16,7 @@ pub struct CoprocessorRegisterTranfsers {
     crm: u8,
 }
 
-impl From<&Instruction> for CoprocessorRegisterTranfsers {
+impl From<&Instruction> for CoprocessorRegisterTransfers {
     fn from(instruction: &Instruction) -> Self {
         let instruction_val = instruction.get_value_as_u32();
 
@@ -33,14 +33,14 @@ impl From<&Instruction> for CoprocessorRegisterTranfsers {
 
 #[cfg(test)]
 mod tests {
-    use super::{CoprocessorRegisterTranfsers, Instruction, BitState};
+    use super::{CoprocessorRegisterTransfers, Instruction, BitState};
 
     #[test]
     fn from() {
         let instruction = Instruction::from(0b0000_1110_111_1_1110_1100_1000_101_1_0101);
-        let value = CoprocessorRegisterTranfsers::from(&instruction);
+        let value = CoprocessorRegisterTransfers::from(&instruction);
 
-        let expected_value = CoprocessorRegisterTranfsers {
+        let expected_value = CoprocessorRegisterTransfers {
             opcode1: 0b111,
             l_flag: BitState::Set,
             crn: 0b1110,

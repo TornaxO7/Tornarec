@@ -3,7 +3,7 @@ use crate::cpus::general::instruction::Instruction;
 use std::convert::{From, TryFrom};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct CoprocessorDataProessing {
+pub struct CoprocessorDataProcessing {
     opcode1: u8,
     crn: u8,
     crd: u8,
@@ -12,7 +12,7 @@ pub struct CoprocessorDataProessing {
     crm: u8,
 }
 
-impl From<&Instruction> for CoprocessorDataProessing {
+impl From<&Instruction> for CoprocessorDataProcessing {
     fn from(instruction: &Instruction) -> Self {
         let instruction_val = instruction.get_value_as_u32();
 
@@ -28,14 +28,14 @@ impl From<&Instruction> for CoprocessorDataProessing {
 
 #[cfg(test)]
 mod tests {
-    use super::{CoprocessorDataProessing, Instruction};
+    use super::{CoprocessorDataProcessing, Instruction};
 
     #[test]
     fn from() {
         let instruction = Instruction::from(0b0000_1110_1111_1110_1100_1000_111_0_1111);
-        let value = CoprocessorDataProessing::from(&instruction);
+        let value = CoprocessorDataProcessing::from(&instruction);
 
-        let expected_value = CoprocessorDataProessing {
+        let expected_value = CoprocessorDataProcessing {
             opcode1: 0b1111,
             crn: 0b1110,
             crd: 0b1100,

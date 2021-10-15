@@ -3,11 +3,11 @@ use crate::cpus::general::instruction::Instruction;
 use std::convert::{From, TryFrom};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct SoftwareInterrupt {
+pub struct SoftwareBreakpoint {
     immediate: u8,
 }
 
-impl From<&Instruction> for SoftwareInterrupt {
+impl From<&Instruction> for SoftwareBreakpoint {
     fn from(instruction: &Instruction) -> Self {
         let instruction_val = instruction.get_value_as_u32();
 
@@ -18,14 +18,14 @@ impl From<&Instruction> for SoftwareInterrupt {
 
 #[cfg(test)]
 mod tests {
-    use super::{SoftwareInterrupt, Instruction};
+    use super::{SoftwareBreakpoint, Instruction};
 
     #[test]
     fn from() {
         let instruction = Instruction::from(0b1011_1110_1100_0011);
-        let value = SoftwareInterrupt::from(&instruction);
+        let value = SoftwareBreakpoint::from(&instruction);
 
-        let expected_value = SoftwareInterrupt {
+        let expected_value = SoftwareBreakpoint {
             immediate: 0b1100_0011,
         };
 
