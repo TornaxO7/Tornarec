@@ -45,7 +45,7 @@ mod tests {
         let instruction = Instruction::from(0b0000_000_1010_1_1010_0101_11100_10_0_1001);
         let value = DataProcessingImmediateShift::from(&instruction);
 
-        let expected_output = DataProcessingImmediateShift {
+        let expected_value = DataProcessingImmediateShift {
             opcode: 0b1010,
             s_flag: BitState::Set,
             rn: 0b1010,
@@ -55,6 +55,6 @@ mod tests {
             rm: 0b1001,
         };
 
-        assert_eq!(value, expected_output);
+        assert_eq!(value, expected_value, "{:#?}, {:#?}", &value, &expected_value);
     }
 }
