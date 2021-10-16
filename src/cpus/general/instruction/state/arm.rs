@@ -1,5 +1,5 @@
-use crate::cpus::general::{
-    instruction_encodings::arm::{
+use crate::cpus::general::instruction::{
+    encodings::arm::{
         DataProcessingImmediateShift,
         Miscellaneous1,
         DataProcessingRegisterShift,
@@ -16,7 +16,7 @@ use crate::cpus::general::{
         CoprocessorDataProcessing,
         CoprocessorRegisterTransfers,
     },
-    instruction_checker::ArmInstructionChecker,
+    checker::ArmInstructionChecker,
     Instruction,
 };
 

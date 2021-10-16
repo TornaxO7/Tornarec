@@ -7,6 +7,7 @@ use super::ThumbCheckerError;
 
 use std::convert::From;
 
+// Tests are done in the thumb-checker-mod file.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum MiscellaneousInstruction {
     AdjustStackPointer,

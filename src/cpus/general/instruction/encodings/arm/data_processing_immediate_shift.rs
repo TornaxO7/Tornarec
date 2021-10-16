@@ -11,7 +11,7 @@ pub struct DataProcessingImmediateShift {
     s_flag: BitState,
     rn: u8,
     rd: u8,
-    shift_amount: u8,
+    shift_imm: u8,
     shift: u8,
     rm: u8,
 }
@@ -28,7 +28,7 @@ impl From<&Instruction> for DataProcessingImmediateShift {
         let shift = u8::try_from((instruction_val >> 5) & 0b11).unwrap();
         let rm = u8::try_from(instruction_val & 0b1111).unwrap();
 
-        Self{opcode, s_flag, rn, rd, shift_amount, shift, rm}
+        Self{opcode, s_flag, rn, rd, shift_imm: shift_amount, shift, rm}
     }
 }
 
@@ -50,7 +50,7 @@ mod tests {
             s_flag: BitState::Set,
             rn: 0b1010,
             rd: 0b0101,
-            shift_amount: 0b11100,
+            shift_imm: 0b11100,
             shift: 0b10,
             rm: 0b1001,
         };

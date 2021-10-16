@@ -27,7 +27,6 @@ pub enum PipelineError {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Pipeline {
     prefetch: Prefetch,
-    // TODO: HERE
     decoded_instruction: InstructionMap,
 }
 
@@ -58,7 +57,6 @@ impl Pipeline {
         match &self.prefetch {
             Prefetch::Success(instruction) => {
                 if cpsr.get_operating_state() == OperatingState::Arm {
-                    // get the condition
                     if cpsr.is_condition_set(instruction.get_condition_code_flag()) {
                         self.decoded_instruction = InstructionMap::get_arm_instruction(instruction);
                     } else {

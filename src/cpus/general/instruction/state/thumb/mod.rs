@@ -1,9 +1,9 @@
-use crate::cpus::general::{
-    instruction_checker::{
+use crate::cpus::general::instruction::{
+    checker::{
         ThumbInstructionChecker, 
         thumb::miscellaneous::MiscellaneousInstruction
     },
-    instruction_encodings::thumb::{
+    encodings::thumb::{
         ShiftByImmediate,
         AddSubtractRegister,
         AddSubtractImmediate,

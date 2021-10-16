@@ -1,6 +1,6 @@
-use crate::cpus::general::{
+use crate::cpus::general::instruction::{
     Instruction,
-    instruction_state::{
+    state::{
         ArmInstruction, ThumbInstruction
     },
 };

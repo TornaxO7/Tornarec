@@ -6,12 +6,9 @@ pub mod operating_state;
 pub mod exception;
 pub mod register;
 pub mod pipeline;
-pub mod instruction_encodings;
 pub mod instruction;
 pub mod condition_code_flag;
-pub mod instruction_checker;
 pub mod instruction_map;
-pub mod instruction_state;
 
 pub use bit_state::BitState;
 pub use condition_flag::ConditionFlag;
