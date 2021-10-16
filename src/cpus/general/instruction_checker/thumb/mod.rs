@@ -60,25 +60,24 @@ impl From<&Instruction> for ThumbInstructionChecker {
             },
             0b001 => Self::AddSubtractCompareMoveImmediate,
             0b010 => {
-                let bit10_12 = (instruction_val >> 10) & 0b111;
                 let bit8_9 = (instruction_val >> 8) & 0b11;
+                let bit10 = BitState::from(instruction_val >> 10);
                 let bit11 = BitState::from(instruction_val >> 11);
+                let bit12 = BitState::from(instruction_val >> 12);
 
-                if bit10_12 == 0b000 {
-                    Self::DataProcessingRegister
-                } else if bit10_12 == 0b001 {
-                    if bit8_9 == 0b11 {
-                        Self::BranchExchangeInstructionSet
-                    } else {
-                        Self::SpecialDataProcessing
-                    }
+                if bit12.is_set() {
+                    Self::LoadStoreRegisterOffset
                 } else if bit11.is_set() {
                     Self::LoadFromLiteralPool
+                } else if bit10.is_unset() {
+                    Self::DataProcessingRegister
+                } else if bit8_9 == 0b11 {
+                    Self::BranchExchangeInstructionSet
                 } else {
-                    unreachable!("{}", ThumbCheckerError::UnknownInstructionOfGroup(instruction_val));
+                    Self::SpecialDataProcessing
                 }
             },
-            0b011 => Self::LoadStoreHalfwordImmediateOffset,
+            0b011 => Self::LoadStoreWordByteImmediateOffset,
             0b100 => {
                 let bit12 = BitState::from(instruction_val >> 12);
 
@@ -126,5 +125,169 @@ impl From<&Instruction> for ThumbInstructionChecker {
             },
             _ => unreachable!("{}", ThumbCheckerError::UnknownInstructionGroup(instruction_val)),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{ThumbInstructionChecker, Instruction, MiscellaneousInstruction};
+
+    #[test]
+    fn shift_by_immediate() {
+        let instruction = Instruction::from(0b000_00_00000_000_000);
+        assert_eq!(ThumbInstructionChecker::from(&instruction), ThumbInstructionChecker::ShiftByImmediate);
+    }
+
+    #[test]
+    fn add_subtract_register() {
+        let instruction = Instruction::from(0b000_11_0_0_000_000_000);
+        assert_eq!(ThumbInstructionChecker::from(&instruction), ThumbInstructionChecker::AddSubtractRegister);
+    }
+
+    #[test]
+    fn add_subtract_immediate() {
+        let instruction = Instruction::from(0b000_11_1_0_000_000_000);
+        assert_eq!(ThumbInstructionChecker::from(&instruction), ThumbInstructionChecker::AddSubtractImmediate);
+    }
+
+    #[test]
+    fn add_subtract_compare_move_immediate() {
+        let instruction = Instruction::from(0b001_00_000_0000_0000);
+        assert_eq!(ThumbInstructionChecker::from(&instruction), ThumbInstructionChecker::AddSubtractCompareMoveImmediate);
+    }
+
+    #[test]
+    fn data_processing_register() {
+        let instruction = Instruction::from(0b010000_0000_000_000);
+        assert_eq!(ThumbInstructionChecker::from(&instruction), ThumbInstructionChecker::DataProcessingRegister);
+    }
+
+    #[test]
+    fn special_data_processing() {
+        let instruction = Instruction::from(0b010001_00_0_0000_000);
+        assert_eq!(ThumbInstructionChecker::from(&instruction), ThumbInstructionChecker::SpecialDataProcessing);
+    }
+
+    #[test]
+    fn branch_exchange_instruction_set() {
+        let instruction = Instruction::from(0b010001_11_0_0_000_000);
+        assert_eq!(ThumbInstructionChecker::from(&instruction), ThumbInstructionChecker::BranchExchangeInstructionSet);
+    }
+
+    #[test]
+    fn load_from_literal_pool() {
+        let instruction = Instruction::from(0b01001_000_0000_0000);
+        assert_eq!(ThumbInstructionChecker::from(&instruction), ThumbInstructionChecker::LoadFromLiteralPool);
+    }
+
+    #[test]
+    fn load_store_register_offset() {
+        let instruction = Instruction::from(0b0101_000_000_000_000);
+        assert_eq!(ThumbInstructionChecker::from(&instruction), ThumbInstructionChecker::LoadStoreRegisterOffset);
+    }
+
+    #[test]
+    fn load_store_word_byte_immediate_offset() {
+        let instruction = Instruction::from(0b011_0_0_00000_000_000);
+        assert_eq!(ThumbInstructionChecker::from(&instruction), ThumbInstructionChecker::LoadStoreWordByteImmediateOffset);
+    }
+
+    #[test]
+    fn load_store_halfword_immediate_offset() {
+        let instruction = Instruction::from(0b1000_0_00000_000_000);
+        assert_eq!(ThumbInstructionChecker::from(&instruction), ThumbInstructionChecker::LoadStoreHalfwordImmediateOffset);
+    }
+
+    #[test]
+    fn load_store_to_from_stack() {
+        let instruction = Instruction::from(0b1001_0_000_0000_0000);
+        assert_eq!(ThumbInstructionChecker::from(&instruction), ThumbInstructionChecker::LoadStoreToFromStack);
+    }
+
+    #[test]
+    fn add_to_sp_or_pc() {
+        let instruction = Instruction::from(0b1010_0_000_0000_0000);
+        assert_eq!(ThumbInstructionChecker::from(&instruction), ThumbInstructionChecker::AddToSpOrPc);
+    }
+
+    #[test]
+    fn miscellaneous_adjust_stack_pointer() {
+        let instruction = Instruction::from(0b1011_0000_0_000_0000);
+        assert_eq!(
+            ThumbInstructionChecker::from(&instruction),
+            ThumbInstructionChecker::Miscellaneous(MiscellaneousInstruction::AdjustStackPointer)
+        );
+    }
+
+    #[test]
+    fn miscellaneous_push_pop_register_list() {
+        let instruction = Instruction::from(0b1011_0100_0000_0000);
+        assert_eq!(
+            ThumbInstructionChecker::from(&instruction),
+            ThumbInstructionChecker::Miscellaneous(MiscellaneousInstruction::PushPopRegisterList),
+        );
+    }
+
+    #[test]
+    fn miscellaneous_software_breakpoint() {
+        let instruction = Instruction::from(0b1011_1110_0000_0000);
+        assert_eq!(
+            ThumbInstructionChecker::from(&instruction),
+            ThumbInstructionChecker::Miscellaneous(MiscellaneousInstruction::SoftwareBreakpoint),
+        );
+    }
+
+    #[test]
+    fn load_store_multiple() {
+        let instruction = Instruction::from(0b1100_0_000_0000_0000);
+        assert_eq!(ThumbInstructionChecker::from(&instruction), ThumbInstructionChecker::LoadStoreMultiple);
+    }
+
+    #[test]
+    fn conditional_branch() {
+        let instruction = Instruction::from(0b1101_0000_0000_0000);
+        assert_eq!(ThumbInstructionChecker::from(&instruction), ThumbInstructionChecker::ConditionalBranch);
+    }
+
+    #[test]
+    fn undefined_instruction2() {
+        let instruction = Instruction::from(0b1101_1110_0000_0000);
+        assert_eq!(ThumbInstructionChecker::from(&instruction), ThumbInstructionChecker::UndefinedInstruction);
+    }
+
+    #[test]
+    fn software_interrupt() {
+        let instruction = Instruction::from(0b1101_1111_0000_0000);
+        assert_eq!(ThumbInstructionChecker::from(&instruction), ThumbInstructionChecker::SoftwareInterrupt);
+    }
+
+    #[test]
+    fn unconditional_branch() {
+        let instruction = Instruction::from(0b11100_0_00000_00000);
+        assert_eq!(ThumbInstructionChecker::from(&instruction), ThumbInstructionChecker::UnconditionalBranch);
+    }
+
+    #[test]
+    fn blx_suffix() {
+        let instruction = Instruction::from(0b11101_00000_00000_0);
+        assert_eq!(ThumbInstructionChecker::from(&instruction), ThumbInstructionChecker::BlxSuffix);
+    }
+
+    #[test]
+    fn undefined_instruction1() {
+        let instruction = Instruction::from(0b11101_00000_00000_1);
+        assert_eq!(ThumbInstructionChecker::from(&instruction), ThumbInstructionChecker::UndefinedInstruction);
+    }
+
+    #[test]
+    fn bl_blx_prefix() {
+        let instruction = Instruction::from(0b11110_00000_00000_0);
+        assert_eq!(ThumbInstructionChecker::from(&instruction), ThumbInstructionChecker::BlOrBlxPrefix);
+    }
+
+    #[test]
+    fn bl_suffix() {
+        let instruction = Instruction::from(0b11111_00000_00000_0);
+        assert_eq!(ThumbInstructionChecker::from(&instruction), ThumbInstructionChecker::BlSuffix);
     }
 }
