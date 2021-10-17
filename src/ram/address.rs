@@ -3,8 +3,6 @@ use core::fmt::{UpperHex, LowerHex};
 use core::ops::Add;
 use core::convert::TryFrom;
 
-use crate::cpus::general::register::GeneralRegister;
-
 #[derive(thiserror::Error, Clone, Debug, PartialEq, Eq)]
 pub enum AddressError<T: fmt::Display> {
     #[error("[ADDRESS ERROR]: Couldn't convert value '{0}' to a u32.")]
@@ -37,12 +35,6 @@ impl Address {
 impl From<u32> for Address {
     fn from(num: u32) -> Self {
         Self(num)
-    }
-}
-
-impl From<GeneralRegister> for Address {
-    fn from(general_register: GeneralRegister) -> Self {
-        Self(general_register.get_as_u32())
     }
 }
 

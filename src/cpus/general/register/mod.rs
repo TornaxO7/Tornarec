@@ -1,10 +1,8 @@
-pub mod spsr;
-pub mod fiq_req;
-pub mod cpsr;
-pub mod general_register;
 pub mod types;
+mod cpsr;
+mod registers;
+mod register_name;
 
-pub use spsr::Spsr;
-pub use fiq_req::FiqReg;
+pub use register_name::RegisterName;
+pub use registers::Registers;
 pub use cpsr::Cpsr;
-pub use general_register::GeneralRegister;

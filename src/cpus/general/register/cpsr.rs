@@ -128,6 +128,14 @@ impl Cpsr {
             ConditionBit::V => self.0 = (self.0 & !(1 << 28)) | (state.get_as_u32() << 28),
         }
     }
+
+    pub fn get_as_u32(&self) -> u32 {
+        self.0
+    }
+
+    pub fn set(&mut self, new_val: u32) {
+        self.0 = new_val;
+    }
 }
 
 impl From<u32> for Cpsr {
