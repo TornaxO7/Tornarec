@@ -124,15 +124,6 @@ impl Arm7TDMI {
             let in_arm_state = old_cpsr.get_operating_state() == OperatingState::Arm;
 
             match exception {
-                // Exception::Bl => {
-                //     if in_arm_state {
-                //         self.lr[OperatingMode::as_usize(OperatingMode::Sys)] = GeneralRegister::from(self.pc.clone() + 2);
-                //     } else {
-                //         self.lr[OperatingMode::as_usize(OperatingMode::Sys)] = GeneralRegister::from(self.pc.clone() + 4);
-                //     }
-                //     self.cpsr.set_operating_mode(OperatingMode::Sys);
-                //
-                // },
                 Exception::Swi => {
                     if in_arm_state {
                         self.registers.set_reg(RegisterName::LrSvc, pc_val + 2);
