@@ -14,6 +14,13 @@ impl BitState {
     pub fn is_unset(&self) -> bool {
         !self.is_set()
     }
+
+    pub fn get_as_u32(&self) -> u32 {
+        match self {
+            BitState::Set => 1,
+            BitState::Unset => 0,
+        }
+    }
 }
 
 impl From<u32> for BitState {

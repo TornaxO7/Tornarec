@@ -10,8 +10,11 @@ use crate::cpus::general::{
     exception::{Exception, ExceptionStack},
     register::{Spsr, FiqReg, Cpsr, GeneralRegister},
     interruption::Interruption,
-    // InstructionMap,
-    // instruction_state::{ArmInstruction, ThumbInstruction},
+    InstructionMap,
+    instruction::{
+        state::{ArmInstruction, ThumbInstruction},
+        executer::{ArmExecuter, ThumbExecuter},
+    },
 };
 
 use crate::ram::{
@@ -63,6 +66,64 @@ impl Arm7TDMI {
     }
 
     pub fn execute(&mut self) {
+        let decoded_instruction = self.pipeline.get_decoded_instruction();
+
+        // let arm_executer = ArmExecuter::new();
+        // let thumb_executer = ThumbExecuter::new();
+        //
+        // match decoded_instruction {
+        //     InstructionMap::Arm(arm_instruction) => match arm_instruction {
+        //         ArmInstruction::DataProcessingImmediateShift(data) => ,
+        //         ArmInstruction::Miscellaneous1(data) => ,
+        //         ArmInstruction::DataProcessingRegisterShift(data) => ,
+        //         ArmInstruction::Miscellaneous2(data) => ,
+        //         ArmInstruction::Multiplies(data) => ,
+        //         ArmInstruction::ExtraLoadAndStores(data) => ,
+        //         ArmInstruction::DataProcessingImmediate(data) => ,
+        //         ArmInstruction::UndefinedInstruction => ,
+        //         ArmInstruction::MoveImmediateToStatusRegister(data) => ,
+        //         ArmInstruction::LoadAndStoreImmediateOffset(data) => ,
+        //         ArmInstruction::LoadAndStoreRegisterOffset(data) => ,
+        //         ArmInstruction::MediaInstructions => ,
+        //         ArmInstruction::ArchitecturallyUndefined,
+        //         ArmInstruction::LoadAndStoreMultiple(data) => ,
+        //         ArmInstruction::BranchAndBranchWithLink(data) => ,
+        //         ArmInstruction::CoprocessorLoadAndStoreAndDoubleRegisterTransfers(data) => ,
+        //         ArmInstruction::CoprocessorDataProcessing(data) => ,
+        //         ArmInstruction::CoprocessorRegisterTransfers(data) => ,
+        //         ArmInstruction::SoftwareInterrupt => ,
+        //     },
+        //     InstructionMap::Thumb(thumb_instruction) => match thumb_instruction {
+        //         ThumbInstruction::ShiftByImmediate(data) => ,
+        //         ThumbInstruction::AddSubtractRegister(data) => ,
+        //         ThumbInstruction::AddSubtractImmediate(data) => ,
+        //         ThumbInstruction::AddSubtractCompareMoveImmediate(data) => ,
+        //         ThumbInstruction::DataProcessingRegister(data) => ,
+        //         ThumbInstruction::SpecialDataProcessing(data) => ,
+        //         ThumbInstruction::UnconditionalBranch(data) => ,
+        //         ThumbInstruction::BranchExchangeInstructionSet(data) => ,
+        //         ThumbInstruction::LoadFromLiteralPool(data) => ,
+        //         ThumbInstruction::LoadStoreRegisterOffset(data) => ,
+        //         ThumbInstruction::LoadStoreWordByteImmediateOffset(data) => ,
+        //         ThumbInstruction::LoadStoreHalfwordImmediateOffset(data) => ,
+        //         ThumbInstruction::LoadStoretoFromStack(data) => ,
+        //         ThumbInstruction::AddToSpOrPc(data) => ,
+        //         ThumbInstruction::LoadStoreMultiple(data) => ,
+        //         ThumbInstruction::ConditionalBranch(data) => ,
+        //         ThumbInstruction::UndefinedInstruction,
+        //         ThumbInstruction::SoftwareInterrupt(data) => ,
+        //         ThumbInstruction::BlxSuffix(data) => ,
+        //         ThumbInstruction::BlOrBlxPrefix(data) => ,
+        //         ThumbInstruction::BlSuffix(data) => ,
+        //
+        //         ThumbInstruction::// miscellaneous instructions,
+        //         ThumbInstruction::AdjustStackPointer(data) => ,
+        //         ThumbInstruction::PushPopRegisterList(data) => ,
+        //         ThumbInstruction::SoftwareBreakpoint(data) => ,
+        //
+        //     },
+        //     InstructionMap::Noop => (),
+        // }
     }
 
     pub fn enter_exception(&mut self, exception: Exception) {

@@ -7,13 +7,13 @@ use std::convert::{From, TryFrom};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DataProcessingImmediateShift {
-    opcode: u8,
-    s_flag: BitState,
-    rn: u8,
-    rd: u8,
-    shift_imm: u8,
-    shift: u8,
-    rm: u8,
+    pub opcode: u8,
+    pub s_flag: BitState,
+    pub rn: u8,
+    pub rd: u8,
+    pub shift_imm: u8,
+    pub shift: u8,
+    pub rm: u8,
 }
 
 impl From<&Instruction> for DataProcessingImmediateShift {
