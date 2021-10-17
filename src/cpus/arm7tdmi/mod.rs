@@ -5,7 +5,7 @@ use crate::cpus::general::{
     pipeline::Pipeline,
     operating_state::OperatingState,
     operating_mode::OperatingMode,
-    exception::{Exception, ExceptionStack},
+    exception::{Exception, ExceptionStack, ExceptionVector},
     register::{Registers, RegisterName, Cpsr},
     interruption::Interruption,
 };
@@ -132,7 +132,7 @@ impl Arm7TDMI {
                     }
 
                     self.registers.set_reg(RegisterName::SpsrSvc, cpsr.get_as_u32());
-                    self.registers.set_reg(RegisterName::Pc, Exception::Swi.get_exception_vector().get_as_u32());
+                    self.registers.set_reg(RegisterName::Pc, ExceptionVector::SWI);
                 },
                 Exception::Udef => {
                     if in_arm_state {
@@ -142,29 +142,29 @@ impl Arm7TDMI {
                     }
 
                     self.registers.set_reg(RegisterName::SpsrUnd, cpsr.get_as_u32());
-                    self.registers.set_reg(RegisterName::Pc, Exception::Udef.get_exception_vector().get_as_u32());
+                    self.registers.set_reg(RegisterName::Pc, ExceptionVector::UDEF);
                 },
                 Exception::Pabt => {
                     self.registers.set_reg(RegisterName::LrAbt, pc_val + 4);
                     self.registers.set_reg(RegisterName::SpsrAbt, cpsr.get_as_u32());
-                    self.registers.set_reg(RegisterName::Pc, Exception::Pabt.get_exception_vector().get_as_u32());
+                    self.registers.set_reg(RegisterName::Pc, ExceptionVector::PABT);
                 },
                 Exception::Fiq  => {
                     self.registers.set_reg(RegisterName::LrFiq, pc_val + 4);
                     self.registers.set_reg(RegisterName::SpsrFiq, cpsr.get_as_u32());
-                    self.registers.set_reg(RegisterName::Pc, Exception::Fiq.get_exception_vector().get_as_u32());
+                    self.registers.set_reg(RegisterName::Pc, ExceptionVector::FIQ);
                 },
                 Exception::Irq  => {
                     self.registers.set_reg(RegisterName::LrIrq, pc_val + 4);
                     self.registers.set_reg(RegisterName::SpsrIrq, cpsr.get_as_u32());
-                    self.registers.set_reg(RegisterName::Pc, Exception::Fiq.get_exception_vector().get_as_u32());
+                    self.registers.set_reg(RegisterName::Pc, ExceptionVector::FIQ);
                 },
                 Exception::Dabt => {
                     self.registers.set_reg(RegisterName::LrAbt, pc_val + 8);
                     self.registers.set_reg(RegisterName::SpsrAbt, cpsr.get_as_u32());
-                    self.registers.set_reg(RegisterName::Pc, Exception::Dabt.get_exception_vector().get_as_u32());
+                    self.registers.set_reg(RegisterName::Pc, ExceptionVector::DABT);
                 },
-                Exception::Reset => self.registers.set_reg(RegisterName::Pc, Exception::Reset.get_exception_vector().get_as_u32()),
+                Exception::Reset => self.registers.set_reg(RegisterName::Pc, ExceptionVector::RESET),
             };
 
             // update the cpsr
