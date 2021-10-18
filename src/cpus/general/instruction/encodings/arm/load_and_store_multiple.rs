@@ -4,9 +4,10 @@ use crate::cpus::general::{
         Instruction,
         encodings::encoding_fields::RegisterList,
     },
+    register::RegisterName,
 };
 
-use std::convert::{From, TryFrom};
+use std::convert::From;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct LoadAndStoreMultiple {
@@ -15,7 +16,7 @@ pub struct LoadAndStoreMultiple {
     s_flag: BitState,
     w_flag: BitState,
     l_flag: BitState,
-    rn: u8,
+    rn: RegisterName,
     register_list: RegisterList,
 }
 
@@ -28,7 +29,7 @@ impl From<&Instruction> for LoadAndStoreMultiple {
         let s_flag = BitState::from(instruction_val >> 22);
         let w_flag = BitState::from(instruction_val >> 21);
         let l_flag = BitState::from(instruction_val >> 20);
-        let rn = u8::try_from((instruction_val >> 16) & 0b1111).unwrap();
+        let rn = RegisterName::from((instruction_val >> 16) & 0b1111);
         let register_list = RegisterList::from(instruction_val);
         Self{p_flag, u_flag, s_flag, w_flag, l_flag, rn, register_list}
     }
@@ -36,7 +37,7 @@ impl From<&Instruction> for LoadAndStoreMultiple {
 
 #[cfg(test)]
 mod tests {
-    use super::{LoadAndStoreMultiple, Instruction, BitState, RegisterList};
+    use super::{LoadAndStoreMultiple, Instruction, BitState, RegisterList, RegisterName};
 
     #[test]
     fn from() {
@@ -49,7 +50,7 @@ mod tests {
             s_flag: BitState::Set,
             w_flag: BitState::Unset,
             l_flag: BitState::Set,
-            rn: 0b1111,
+            rn: RegisterName::R15,
             register_list: RegisterList::from(0b1110_1100_1000_0000),
         };
 

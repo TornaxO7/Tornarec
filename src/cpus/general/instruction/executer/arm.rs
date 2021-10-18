@@ -1,8 +1,7 @@
-use crate::{
-    cpus::general::{
-        instruction::encodings::arm::DataProcessingImmediateShift,
-        register::Registers,
-    },
+use crate:: cpus::general::{
+    instruction::encodings::arm::DataProcessingImmediateShift,
+    register::{Registers, types::ConditionBit},
+    BitState,
 };
 
 #[derive(Debug, PartialEq, Eq)]
@@ -10,7 +9,18 @@ pub struct ArmExecuter<'a>(&'a mut Registers);
 
 impl<'a> ArmExecuter<'a> {
 
-    pub fn data_processing_immediate_shift(&self, _data: DataProcessingImmediateShift) {
+    pub fn new(registers: &'a mut Registers) -> Self {
+        Self(registers)
+    }
+
+    pub fn data_processing_immediate_shift(&mut self, _data: DataProcessingImmediateShift) {
+        // let cpsr = self.0.get_mut_cpsr();
+        //
+        // let (shifter_operand, shifter_carry_out) = if data.shift_imm == 0 {
+        //     (data.rm, cpsr.get_condition_bit(ConditionBit::C).get_as_u32())
+        // } else {
+        //     (data.rm << data.shift_imm, 0, )
+        // };
     }
 
     pub fn miscellaneous_1(&self) {

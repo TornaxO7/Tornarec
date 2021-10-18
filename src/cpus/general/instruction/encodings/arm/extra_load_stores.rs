@@ -1,6 +1,7 @@
 use crate::cpus::general::{
     bit_state::BitState,
     instruction::Instruction,
+    register::RegisterName,
 };
 
 use std::convert::{From, TryFrom};
@@ -12,11 +13,11 @@ pub struct ExtraLoadAndStores {
     b_flag: BitState,
     w_flag: BitState,
     l_flag: BitState,
-    rn: u8,
-    rd: u8,
-    rs: u8,
+    rn: RegisterName,
+    rd: RegisterName,
+    rs: RegisterName,
     op1: u8,
-    rm: u8,
+    rm: RegisterName,
 }
 
 impl From<&Instruction> for ExtraLoadAndStores {
@@ -28,18 +29,18 @@ impl From<&Instruction> for ExtraLoadAndStores {
         let b_flag = BitState::from(instruction_val >> 22);
         let w_flag = BitState::from(instruction_val >> 21);
         let l_flag = BitState::from(instruction_val >> 20);
-        let rn = u8::try_from((instruction_val >> 16) & 0b1111).unwrap();
-        let rd = u8::try_from((instruction_val >> 12) & 0b1111).unwrap();
-        let rs = u8::try_from((instruction_val >> 8) & 0b1111).unwrap();
+        let rn = RegisterName::from((instruction_val >> 16) & 0b1111);
+        let rd = RegisterName::from((instruction_val >> 12) & 0b1111);
+        let rs = RegisterName::from((instruction_val >> 8) & 0b1111);
         let op1 = u8::try_from((instruction_val >> 5) & 0b11).unwrap();
-        let rm = u8::try_from(instruction_val & 0b1111).unwrap();
+        let rm = RegisterName::from(instruction_val & 0b1111);
         Self{p_flag, u_flag, b_flag, w_flag, l_flag, rn, rd, rs, op1, rm}
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::{ExtraLoadAndStores, Instruction, BitState};
+    use super::{ExtraLoadAndStores, Instruction, BitState, RegisterName};
 
     #[test]
     fn from() {
@@ -52,11 +53,11 @@ mod tests {
             b_flag: BitState::Set,
             w_flag: BitState::Unset,
             l_flag: BitState::Set,
-            rn: 0b1100,
-            rd: 0b0011,
-            rs: 0b1010,
+            rn: RegisterName::R12,
+            rd: RegisterName::R3,
+            rs: RegisterName::R10,
             op1: 0b11,
-            rm: 0b0101,
+            rm: RegisterName::R5,
         };
 
         assert_eq!(value, expected_value, "{:#?}, {:#?}", &value, &expected_value);

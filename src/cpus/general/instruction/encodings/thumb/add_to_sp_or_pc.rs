@@ -1,6 +1,7 @@
 use crate::cpus::general::{
     instruction::Instruction,
     BitState,
+    register::RegisterName,
 };
 
 use std::convert::{From, TryFrom};
@@ -8,7 +9,7 @@ use std::convert::{From, TryFrom};
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AddToSpOrPc {
     sp: BitState,
-    rd: u8,
+    rd: RegisterName,
     immediate: u8,
 }
 
@@ -17,7 +18,7 @@ impl From<&Instruction> for AddToSpOrPc {
         let instruction_val = instruction.get_value_as_u32();
 
         let sp = BitState::from(instruction_val >> 11);
-        let rd = u8::try_from((instruction_val >> 8) & 0b111).unwrap();
+        let rd = RegisterName::from((instruction_val >> 8) & 0b111);
         let immediate = u8::try_from(instruction_val & 0b1111_1111).unwrap();
         Self {sp, rd, immediate}
     }
@@ -25,7 +26,7 @@ impl From<&Instruction> for AddToSpOrPc {
 
 #[cfg(test)]
 mod tests {
-    use super::{AddToSpOrPc, Instruction, BitState};
+    use super::{AddToSpOrPc, Instruction, BitState, RegisterName};
 
     #[test]
     fn from() {
@@ -34,7 +35,7 @@ mod tests {
         
         let expected_value = AddToSpOrPc {
             sp: BitState::Set,
-            rd: 0b101,
+            rd: RegisterName::R5,
             immediate: 0b1100_1000,
         };
 

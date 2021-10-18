@@ -1,6 +1,7 @@
 use crate::cpus::general::{
     instruction::Instruction,
     BitState,
+    register::RegisterName,
 };
 
 use std::convert::{From, TryFrom};
@@ -10,8 +11,8 @@ pub struct LoadStoreWordByteImmediateOffset {
     b_flag: BitState,
     l_flag: BitState,
     offset: u8,
-    rn: u8,
-    rd: u8,
+    rn: RegisterName,
+    rd: RegisterName,
 }
 
 impl From<&Instruction> for LoadStoreWordByteImmediateOffset {
@@ -21,15 +22,15 @@ impl From<&Instruction> for LoadStoreWordByteImmediateOffset {
         let b_flag = BitState::from(instruction_val >> 12);
         let l_flag = BitState::from(instruction_val >> 11);
         let offset = u8::try_from((instruction_val >> 6) & 0b1_1111).unwrap();
-        let rn = u8::try_from((instruction_val >> 3) & 0b111).unwrap();
-        let rd = u8::try_from(instruction_val & 0b111).unwrap();
+        let rn = RegisterName::from((instruction_val >> 3) & 0b111);
+        let rd = RegisterName::from(instruction_val & 0b111);
         Self {b_flag, l_flag, offset, rn, rd}
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::{LoadStoreWordByteImmediateOffset, Instruction, BitState};
+    use super::{LoadStoreWordByteImmediateOffset, Instruction, BitState, RegisterName};
 
     #[test]
     fn from() {
@@ -40,8 +41,8 @@ mod tests {
             b_flag: BitState::Set,
             l_flag: BitState::Unset,
             offset: 0b11100,
-            rn: 0b101,
-            rd: 0b010,
+            rn: RegisterName::R5,
+            rd: RegisterName::R2,
         };
 
         assert_eq!(value, expected_value, "{:#?}, {:#?}", &value, &expected_value);

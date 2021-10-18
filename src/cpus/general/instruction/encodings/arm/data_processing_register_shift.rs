@@ -1,6 +1,7 @@
 use crate::cpus::general::{
     bit_state::BitState,
     instruction::Instruction,
+    register::RegisterName,
 };
 
 use std::convert::{From, TryFrom};
@@ -9,11 +10,11 @@ use std::convert::{From, TryFrom};
 pub struct DataProcessingRegisterShift {
     opcode: u8,
     s_flag: BitState,
-    rn: u8,
-    rd: u8,
-    rs: u8,
+    rn: RegisterName,
+    rd: RegisterName,
+    rs: RegisterName,
     shift: u8,
-    rm: u8,
+    rm: RegisterName,
 }
 
 impl From<&Instruction> for DataProcessingRegisterShift {
@@ -22,11 +23,11 @@ impl From<&Instruction> for DataProcessingRegisterShift {
 
         let opcode = u8::try_from((instruction_val >> 21) & 0b1111).unwrap();
         let s_flag = BitState::from(instruction_val >> 20);
-        let rn = u8::try_from((instruction_val >> 16) & 0b1111).unwrap();
-        let rd = u8::try_from((instruction_val >> 12) & 0b1111).unwrap();
-        let rs = u8::try_from((instruction_val >> 8) & 0b1111).unwrap();
+        let rn = RegisterName::from((instruction_val >> 16) & 0b1111);
+        let rd = RegisterName::from((instruction_val >> 12) & 0b1111);
+        let rs = RegisterName::from((instruction_val >> 8) & 0b1111);
         let shift = u8::try_from((instruction_val >> 5) & 0b11).unwrap();
-        let rm = u8::try_from(instruction_val & 0b1111).unwrap();
+        let rm = RegisterName::from(instruction_val & 0b1111);
 
         Self{opcode, s_flag, rn, rd, rs, shift, rm}
     }
@@ -34,7 +35,7 @@ impl From<&Instruction> for DataProcessingRegisterShift {
 
 #[cfg(test)]
 mod tests {
-    use super::{DataProcessingRegisterShift, Instruction, BitState};
+    use super::{DataProcessingRegisterShift, Instruction, BitState, RegisterName};
 
     #[test]
     fn test_from() {
@@ -44,11 +45,11 @@ mod tests {
         let expected_value = DataProcessingRegisterShift {
             opcode: 0b1111,
             s_flag: BitState::Set,
-            rn: 0b1010,
-            rd: 0b0101,
-            rs: 0b0110,
+            rn: RegisterName::R10,
+            rd: RegisterName::R5,
+            rs: RegisterName::R6,
             shift: 0b11,
-            rm: 0b1001,
+            rm: RegisterName::R9,
         };
 
         assert_eq!(value, expected_value);

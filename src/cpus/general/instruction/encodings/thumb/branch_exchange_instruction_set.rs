@@ -1,15 +1,16 @@
 use crate::cpus::general::{
     instruction::Instruction,
     BitState,
+    register::RegisterName,
 };
 
-use std::convert::{From, TryFrom};
+use std::convert::From;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct BranchExchangeInstructionSet {
     l_flag: BitState,
     h2: BitState,
-    rm: u8,
+    rm: RegisterName,
 }
 
 impl From<&Instruction> for BranchExchangeInstructionSet {
@@ -18,14 +19,14 @@ impl From<&Instruction> for BranchExchangeInstructionSet {
 
         let l_flag = BitState::from(instruction_val >> 7);
         let h2 = BitState::from(instruction_val >> 6);
-        let rm = u8::try_from((instruction_val >> 3) & 0b111).unwrap();
+        let rm = RegisterName::from((instruction_val >> 3) & 0b111);
         Self {l_flag, h2, rm}
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::{BranchExchangeInstructionSet, Instruction, BitState};
+    use super::{BranchExchangeInstructionSet, Instruction, BitState, RegisterName};
 
     #[test]
     fn from() {
@@ -35,7 +36,7 @@ mod tests {
         let expected_value = BranchExchangeInstructionSet {
             l_flag: BitState::Set,
             h2: BitState::Unset,
-            rm: 0b101,
+            rm: RegisterName::R5,
         };
 
         assert_eq!(value, expected_value, "{:#?}, {:#?}", &value, &expected_value);

@@ -1,6 +1,7 @@
 use crate::cpus::general::{
     BitState,
     instruction::Instruction,
+    register::RegisterName,
 };
 
 use std::convert::{From, TryFrom};
@@ -12,7 +13,7 @@ pub struct CoprocessorLoadAndStoreAndDoubleRegisterTransfers {
     n_flag: BitState,
     w_flag: BitState,
     l_flag: BitState,
-    rn: u8,
+    rn: RegisterName,
     crd: u8,
     cp_num: u8,
     offset: u8,
@@ -27,7 +28,7 @@ impl From<&Instruction> for CoprocessorLoadAndStoreAndDoubleRegisterTransfers {
         let n_flag = BitState::from(instruction_val >> 22);
         let w_flag = BitState::from(instruction_val >> 21);
         let l_flag = BitState::from(instruction_val >> 20);
-        let rn = u8::try_from((instruction_val >> 16) & 0b1111).unwrap();
+        let rn = RegisterName::from((instruction_val >> 16) & 0b1111);
         let crd = u8::try_from((instruction_val >> 12) & 0b1111).unwrap();
         let cp_num = u8::try_from((instruction_val >> 8) & 0b1111).unwrap();
         let offset = u8::try_from(instruction_val & 0b1111_1111).unwrap();
@@ -37,7 +38,7 @@ impl From<&Instruction> for CoprocessorLoadAndStoreAndDoubleRegisterTransfers {
 
 #[cfg(test)]
 mod tests {
-    use super::{CoprocessorLoadAndStoreAndDoubleRegisterTransfers, BitState, Instruction};
+    use super::{CoprocessorLoadAndStoreAndDoubleRegisterTransfers, BitState, Instruction, RegisterName};
 
     #[test]
     fn from() {
@@ -50,7 +51,7 @@ mod tests {
             n_flag: BitState::Set,
             w_flag: BitState::Unset,
             l_flag: BitState::Set,
-            rn: 0b1111,
+            rn: RegisterName::R15,
             crd: 0b1110,
             cp_num: 0b1100,
             offset: 0b1010_1010,

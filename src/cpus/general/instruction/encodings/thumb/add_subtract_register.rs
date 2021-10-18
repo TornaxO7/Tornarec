@@ -1,16 +1,17 @@
 use crate::cpus::general::{
     instruction::Instruction,
     BitState,
+    register::RegisterName,
 };
 
-use std::convert::{From, TryFrom};
+use std::convert::From;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AddSubtractRegister {
     opc: BitState,
-    rm: u8,
-    rn: u8,
-    rd: u8,
+    rm: RegisterName,
+    rn: RegisterName,
+    rd: RegisterName,
 }
 
 impl From<&Instruction> for AddSubtractRegister {
@@ -18,16 +19,16 @@ impl From<&Instruction> for AddSubtractRegister {
         let instruction_val = instruction.get_value_as_u32();
 
         let opc = BitState::from(instruction_val >> 9);
-        let rm = u8::try_from((instruction_val >> 6) & 0b111).unwrap();
-        let rn = u8::try_from((instruction_val >> 3) & 0b111).unwrap();
-        let rd = u8::try_from(instruction_val & 0b111).unwrap();
+        let rm = RegisterName::from((instruction_val >> 6) & 0b111);
+        let rn = RegisterName::from((instruction_val >> 3) & 0b111);
+        let rd = RegisterName::from(instruction_val & 0b111);
         Self {opc, rm, rn, rd}
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::{AddSubtractRegister, BitState, Instruction};
+    use super::{AddSubtractRegister, BitState, Instruction, RegisterName};
 
     #[test]
     fn from() {
@@ -36,9 +37,9 @@ mod tests {
 
         let expected_value = AddSubtractRegister {
             opc: BitState::Set,
-            rm: 0b111,
-            rn: 0b110,
-            rd: 0b100,
+            rm: RegisterName::R7,
+            rn: RegisterName::R6,
+            rd: RegisterName::R4,
         };
 
         assert_eq!(value, expected_value, "{:#?}, {:#?}", &value, &expected_value);

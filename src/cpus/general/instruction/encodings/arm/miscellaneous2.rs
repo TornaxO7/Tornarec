@@ -1,15 +1,18 @@
-use std::convert::{From, TryFrom};
+use crate::cpus::general::{
+    instruction::Instruction,
+    register::RegisterName,
+};
 
-use crate::cpus::general::instruction::Instruction;
+use std::convert::{From, TryFrom};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Miscellaneous2 {
     op1: u8,
-    rn: u8,
-    rd: u8,
-    rs: u8,
+    rn: RegisterName,
+    rd: RegisterName,
+    rs: RegisterName,
     op2: u8,
-    rm: u8,
+    rm: RegisterName,
 }
 
 impl From<&Instruction> for Miscellaneous2 {
@@ -17,18 +20,18 @@ impl From<&Instruction> for Miscellaneous2 {
         let instruction_val = instruction.get_value_as_u32();
 
         let op1 = u8::try_from((instruction_val >> 21) & 0b11).unwrap();
-        let rn = u8::try_from((instruction_val >> 16) & 0b1111).unwrap();
-        let rd = u8::try_from((instruction_val >> 12) & 0b1111).unwrap();
-        let rs = u8::try_from((instruction_val >> 8) & 0b1111).unwrap();
+        let rn = RegisterName::from((instruction_val >> 16) & 0b1111);
+        let rd = RegisterName::from((instruction_val >> 12) & 0b1111);
+        let rs = RegisterName::from((instruction_val >> 8) & 0b1111);
         let op2 = u8::try_from((instruction_val >> 5) & 0b11).unwrap();
-        let rm = u8::try_from(instruction_val & 0b1111).unwrap();
+        let rm = RegisterName::from(instruction_val & 0b1111);
         Self{op1, rn, rd, rs, op2, rm}
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::{Miscellaneous2, Instruction};
+    use super::{Miscellaneous2, Instruction, RegisterName};
 
     #[test]
     fn test_from() {
@@ -37,11 +40,11 @@ mod tests {
 
         let expected_value = Miscellaneous2 {
             op1: 0b11,
-            rn: 0b1010,
-            rd: 0b0101,
-            rs: 0b1001,
+            rn: RegisterName::R10,
+            rd: RegisterName::R5,
+            rs: RegisterName::R9,
             op2: 0b11,
-            rm: 0b1111,
+            rm: RegisterName::R15,
         };
 
         assert_eq!(value, expected_value);

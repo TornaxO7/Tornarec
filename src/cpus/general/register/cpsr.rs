@@ -129,6 +129,15 @@ impl Cpsr {
         }
     }
 
+    pub fn get_condition_bit(&self, condition_bit: ConditionBit) -> BitState {
+        match condition_bit {
+            ConditionBit::N => BitState::from(self.0 >> 31),
+            ConditionBit::Z => BitState::from(self.0 >> 30),
+            ConditionBit::C => BitState::from(self.0 >> 29),
+            ConditionBit::V => BitState::from(self.0 >> 28),
+        }
+    }
+
     pub fn get_as_u32(&self) -> u32 {
         self.0
     }

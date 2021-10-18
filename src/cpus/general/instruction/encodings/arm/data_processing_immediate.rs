@@ -1,6 +1,7 @@
 use crate::cpus::general::{
     instruction::Instruction,
     bit_state::BitState,
+    register::RegisterName,
 };
 
 use std::convert::{From, TryFrom};
@@ -9,8 +10,8 @@ use std::convert::{From, TryFrom};
 pub struct DataProcessingImmediate {
     opcode: u8,
     s_flag: BitState,
-    rn: u8,
-    rd: u8,
+    rn: RegisterName,
+    rd: RegisterName,
     rotate: u8,
     immediate: u8,
 }
@@ -21,8 +22,8 @@ impl From<&Instruction> for DataProcessingImmediate {
 
         let opcode = u8::try_from((instruction_val >> 21) & 0b1111).unwrap();
         let s_flag = BitState::from(instruction_val >> 20);
-        let rn = u8::try_from((instruction_val >> 16) & 0b1111).unwrap();
-        let rd = u8::try_from((instruction_val >> 12) & 0b1111).unwrap();
+        let rn = RegisterName::from((instruction_val >> 16) & 0b1111);
+        let rd = RegisterName::from((instruction_val >> 12) & 0b1111);
         let rotate = u8::try_from((instruction_val >> 8) & 0b1111).unwrap();
         let immediate = u8::try_from(instruction_val & 0b1111_1111).unwrap();
         Self{opcode, s_flag, rn, rd, rotate, immediate}
@@ -31,7 +32,7 @@ impl From<&Instruction> for DataProcessingImmediate {
 
 #[cfg(test)]
 mod tests {
-    use super::{DataProcessingImmediate, Instruction, BitState};
+    use super::{DataProcessingImmediate, Instruction, BitState, RegisterName};
 
     #[test]
     fn from() {
@@ -41,8 +42,8 @@ mod tests {
         let expected_value = DataProcessingImmediate {
             opcode: 0b1111,
             s_flag: BitState::Set,
-            rn: 0b1100,
-            rd: 0b0011,
+            rn: RegisterName::R12,
+            rd: RegisterName::R3,
             rotate: 0b1010,
             immediate: 0b0011_1011,
         };

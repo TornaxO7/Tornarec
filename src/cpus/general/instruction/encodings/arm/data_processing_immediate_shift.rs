@@ -1,6 +1,7 @@
 use crate::cpus::general::{
     bit_state::BitState,
     instruction::Instruction,
+    register::RegisterName,
 };
 
 use std::convert::{From, TryFrom};
@@ -9,11 +10,11 @@ use std::convert::{From, TryFrom};
 pub struct DataProcessingImmediateShift {
     pub opcode: u8,
     pub s_flag: BitState,
-    pub rn: u8,
-    pub rd: u8,
+    pub rn: RegisterName,
+    pub rd: RegisterName,
     pub shift_imm: u8,
     pub shift: u8,
-    pub rm: u8,
+    pub rm: RegisterName,
 }
 
 impl From<&Instruction> for DataProcessingImmediateShift {
@@ -22,11 +23,11 @@ impl From<&Instruction> for DataProcessingImmediateShift {
 
         let opcode = u8::try_from((instruction_val >> 21) & 0b1111).unwrap();
         let s_flag = BitState::from(instruction_val >> 20);
-        let rn = u8::try_from((instruction_val >> 16) & 0b1111).unwrap();
-        let rd = u8::try_from((instruction_val >> 12) & 0b1111).unwrap();
+        let rn = RegisterName::from((instruction_val >> 16) & 0b1111);
+        let rd = RegisterName::from((instruction_val >> 12) & 0b1111);
         let shift_amount = u8::try_from((instruction_val >> 7) & 0b1_1111).unwrap();
         let shift = u8::try_from((instruction_val >> 5) & 0b11).unwrap();
-        let rm = u8::try_from(instruction_val & 0b1111).unwrap();
+        let rm = RegisterName::from(instruction_val & 0b1111);
 
         Self{opcode, s_flag, rn, rd, shift_imm: shift_amount, shift, rm}
     }
@@ -38,6 +39,7 @@ mod tests {
         DataProcessingImmediateShift,
         BitState,
         Instruction,
+        RegisterName,
     };
 
     #[test]
@@ -48,11 +50,11 @@ mod tests {
         let expected_value = DataProcessingImmediateShift {
             opcode: 0b1010,
             s_flag: BitState::Set,
-            rn: 0b1010,
-            rd: 0b0101,
+            rn: RegisterName::R10,
+            rd: RegisterName::R5,
             shift_imm: 0b11100,
             shift: 0b10,
-            rm: 0b1001,
+            rm: RegisterName::R9,
         };
 
         assert_eq!(value, expected_value, "{:#?}, {:#?}", &value, &expected_value);

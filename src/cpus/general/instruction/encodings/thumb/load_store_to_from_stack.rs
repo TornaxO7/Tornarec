@@ -1,6 +1,7 @@
 use crate::cpus::general::{
     instruction::Instruction,
     BitState,
+    register::RegisterName,
 };
 
 use std::convert::{From, TryFrom};
@@ -8,7 +9,7 @@ use std::convert::{From, TryFrom};
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct LoadStoreToFromStack {
     l_flag: BitState,
-    rd: u8,
+    rd: RegisterName,
     sp_relative_offset: u8,
 }
 
@@ -17,7 +18,7 @@ impl From<&Instruction> for LoadStoreToFromStack {
         let instruction_val = instruction.get_value_as_u32();
 
         let l_flag = BitState::from(instruction_val >> 11);
-        let rd = u8::try_from((instruction_val >> 8) & 0b111).unwrap();
+        let rd = RegisterName::from((instruction_val >> 8) & 0b111);
         let sp_relative_offset = u8::try_from(instruction_val & 0b1111_1111).unwrap();
         Self {l_flag, rd, sp_relative_offset}
     }
@@ -25,7 +26,7 @@ impl From<&Instruction> for LoadStoreToFromStack {
 
 #[cfg(test)]
 mod tests {
-    use super::{LoadStoreToFromStack, Instruction, BitState};
+    use super::{LoadStoreToFromStack, Instruction, BitState, RegisterName};
 
     #[test]
     fn from() {
@@ -34,7 +35,7 @@ mod tests {
 
         let expected_value = LoadStoreToFromStack {
             l_flag: BitState::Set,
-            rd: 0b101,
+            rd: RegisterName::R5,
             sp_relative_offset: 0b1100_0011,
         };
 

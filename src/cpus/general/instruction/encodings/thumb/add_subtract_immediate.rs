@@ -1,6 +1,7 @@
 use crate::cpus::general::{
     instruction::Instruction,
     BitState,
+    register::RegisterName,
 };
 
 use std::convert::{From, TryFrom};
@@ -9,8 +10,8 @@ use std::convert::{From, TryFrom};
 pub struct AddSubtractImmediate {
     opc: BitState,
     immediate: u8,
-    rn: u8,
-    rd: u8,
+    rn: RegisterName,
+    rd: RegisterName,
 }
 
 impl From<&Instruction> for AddSubtractImmediate {
@@ -19,15 +20,15 @@ impl From<&Instruction> for AddSubtractImmediate {
 
         let opc = BitState::from(instruction_val >> 9);
         let immediate = u8::try_from((instruction_val >> 6) & 0b111).unwrap();
-        let rn = u8::try_from((instruction_val >> 3) & 0b111).unwrap();
-        let rd = u8::try_from(instruction_val & 0b111).unwrap();
+        let rn = RegisterName::from((instruction_val >> 3) & 0b111);
+        let rd = RegisterName::from(instruction_val & 0b111);
         Self {opc, immediate, rn, rd}
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::{AddSubtractImmediate, Instruction, BitState};
+    use super::{AddSubtractImmediate, Instruction, BitState, RegisterName};
 
     #[test]
     fn from() {
@@ -37,8 +38,8 @@ mod tests {
         let expected_value = AddSubtractImmediate {
             opc: BitState::Set,
             immediate: 0b111,
-            rn: 0b110,
-            rd: 0b100,
+            rn: RegisterName::R6,
+            rd: RegisterName::R4,
         };
 
         assert_eq!(value, expected_value, "{:#?}, {:#?}", &value, &expected_value);

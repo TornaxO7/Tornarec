@@ -13,15 +13,10 @@ pub struct ConditionBits {
 impl From<u32> for ConditionBits {
     fn from(num: u32) -> Self {
         let n = BitState::from(num >> 31);
-        let z = BitState::from((num >> 30) & 1);
-        let c = BitState::from((num >> 29) & 1);
-        let v = BitState::from((num >> 28) & 1);
+        let z = BitState::from(num >> 30);
+        let c = BitState::from(num >> 29);
+        let v = BitState::from(num >> 28);
 
-        Self {
-            n,
-            z,
-            c,
-            v
-        }
+        Self { n, z, c, v }
     }
 }

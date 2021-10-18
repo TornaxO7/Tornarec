@@ -4,8 +4,6 @@ mod exception_vector;
 pub use exception_stack::ExceptionStack;
 pub use exception_vector::ExceptionVector;
 
-use crate::ram::Address;
-
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Exception {
     Swi,

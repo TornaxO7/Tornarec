@@ -1,11 +1,14 @@
-use crate::cpus::general::instruction::Instruction;
+use crate::cpus::general::{
+    instruction::Instruction,
+    register::RegisterName,
+};
 
 use std::convert::{From, TryFrom};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AddSubtractCompareMoveImmediate {
     opcode: u8,
-    rd_rn: u8,
+    rd_rn: RegisterName,
     immediate: u8,
 }
 
@@ -14,7 +17,7 @@ impl From<&Instruction> for AddSubtractCompareMoveImmediate {
         let instruction_val = instruction.get_value_as_u32();
 
         let opcode = u8::try_from((instruction_val >> 11) & 0b11).unwrap();
-        let rd_rn = u8::try_from((instruction_val >> 8) & 0b111).unwrap();
+        let rd_rn = RegisterName::from((instruction_val >> 8) & 0b111);
         let immediate = u8::try_from(instruction_val & 0b1111_1111).unwrap();
         Self {opcode, rd_rn, immediate}
     }
@@ -22,7 +25,7 @@ impl From<&Instruction> for AddSubtractCompareMoveImmediate {
 
 #[cfg(test)]
 mod tests {
-    use super::{AddSubtractCompareMoveImmediate, Instruction};
+    use super::{AddSubtractCompareMoveImmediate, Instruction, RegisterName};
 
     #[test]
     fn from() {
@@ -31,7 +34,7 @@ mod tests {
 
         let expected_value = AddSubtractCompareMoveImmediate {
             opcode: 0b11,
-            rd_rn: 0b110,
+            rd_rn: RegisterName::R6,
             immediate: 0b1010_0101,
         };
 

@@ -1,4 +1,7 @@
-use crate::cpus::general::instruction::Instruction;
+use crate::cpus::general::{
+    instruction::Instruction,
+    register::RegisterName,
+};
 
 use std::convert::{From, TryFrom};
 
@@ -6,8 +9,8 @@ use std::convert::{From, TryFrom};
 pub struct ShiftByImmediate {
     opcode: u8,
     immediate: u8,
-    rm: u8,
-    rd: u8,
+    rm: RegisterName,
+    rd: RegisterName,
 }
 
 impl From<&Instruction> for ShiftByImmediate {
@@ -16,15 +19,15 @@ impl From<&Instruction> for ShiftByImmediate {
 
         let opcode = u8::try_from((instruction_val >> 11) & 0b11).unwrap();
         let immediate = u8::try_from((instruction_val >> 6) & 0b11111).unwrap();
-        let rm = u8::try_from((instruction_val >> 3) & 0b111).unwrap();
-        let rd = u8::try_from(instruction_val & 0b111).unwrap();
+        let rm = RegisterName::from((instruction_val >> 3) & 0b111);
+        let rd = RegisterName::from(instruction_val & 0b111);
         Self {opcode, immediate, rm, rd}
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::{ShiftByImmediate, Instruction};
+    use super::{ShiftByImmediate, Instruction, RegisterName};
 
     #[test]
     fn from() {
@@ -34,8 +37,8 @@ mod tests {
         let expected_value = ShiftByImmediate {
             opcode: 0b11,
             immediate: 0b10101,
-            rm: 0b101,
-            rd: 0b010,
+            rm: RegisterName::R5,
+            rd: RegisterName::R2,
         };
 
         assert_eq!(value, expected_value, "{:#?}, {:#?}", &value, &expected_value);
