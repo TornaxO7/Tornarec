@@ -1,26 +1,74 @@
-use crate:: cpus::general::{
-    instruction::encodings::arm::DataProcessingImmediateShift,
-    register::{Registers, types::ConditionBit},
-    BitState,
+use crate::{
+    cpus::general::{
+        instruction::encodings::{
+            arm::DataProcessingImmediateShift,
+            encoding_fields::DataProcessingInstruction,
+        },
+        register::{Registers, RegisterName},
+    },
+    ram::{Ram, data_types::DataType},
 };
 
 #[derive(Debug, PartialEq, Eq)]
-pub struct ArmExecuter<'a>(&'a mut Registers);
+pub struct ArmExecuter<'a> {
+    registers: &'a mut Registers,
+    ram: &'a Ram,
+}
 
 impl<'a> ArmExecuter<'a> {
 
-    pub fn new(registers: &'a mut Registers) -> Self {
-        Self(registers)
+    pub fn new(registers: &'a mut Registers, ram: &'a Ram) -> Self {
+        Self {
+            registers,
+            ram,
+        }
     }
 
-    pub fn data_processing_immediate_shift(&mut self, _data: DataProcessingImmediateShift) {
-        // let cpsr = self.0.get_mut_cpsr();
-        //
-        // let (shifter_operand, shifter_carry_out) = if data.shift_imm == 0 {
-        //     (data.rm, cpsr.get_condition_bit(ConditionBit::C).get_as_u32())
-        // } else {
-        //     (data.rm << data.shift_imm, 0, )
-        // };
+    pub fn get_next_instrution_val(&self) -> DataType {
+        let pc = self.registers.get_reg(RegisterName::Pc);
+        match DataType::get_word(&self.ram[pc + 8 .. pc + 12]) {
+            Ok(word) => word,
+            Err(err) => panic!("{}", err),
+        }
+    }
+
+    pub fn data_processing_immediate_shift(&mut self, data: DataProcessingImmediateShift) {
+        let _next_instruction_val = self.get_next_instrution_val();
+
+        match data.opcode {
+            DataProcessingInstruction::AND => {
+            },
+            DataProcessingInstruction::EOR => {
+            },
+            DataProcessingInstruction::SUB => {
+			},
+            DataProcessingInstruction::RSB => {
+			},
+            DataProcessingInstruction::ADD => {
+			},
+            DataProcessingInstruction::ADC => {
+			},
+            DataProcessingInstruction::SBC => {
+			},
+            DataProcessingInstruction::RSC => {
+			},
+            DataProcessingInstruction::TST => {
+			},
+            DataProcessingInstruction::TEQ => {
+			},
+            DataProcessingInstruction::CMP => {
+			},
+            DataProcessingInstruction::CMN => {
+			},
+            DataProcessingInstruction::ORR => {
+			},
+            DataProcessingInstruction::MOV => {
+			},
+            DataProcessingInstruction::BIC => {
+			},
+            DataProcessingInstruction::MVN => {
+			},
+        }
     }
 
     pub fn miscellaneous_1(&self) {

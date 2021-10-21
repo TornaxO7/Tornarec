@@ -1,19 +1,21 @@
 pub mod error;
 
-use crate::cpus::general::{
-    bit_state::BitState,
-    pipeline::Pipeline,
-    operating_state::OperatingState,
-    operating_mode::OperatingMode,
-    exception::{Exception, ExceptionStack, ExceptionVector},
-    register::{Registers, RegisterName, Cpsr},
-    interruption::Interruption,
-};
-
-use crate::ram::{
-    Ram,
-    Address,
-    data_types::DataTypeSize
+use crate::{
+    cpus::general::{
+        bit_state::BitState,
+        pipeline::Pipeline,
+        operating_state::OperatingState,
+        operating_mode::OperatingMode,
+        exception::{Exception, ExceptionStack, ExceptionVector},
+        register::{Registers, RegisterName, Cpsr},
+        interruption::Interruption,
+        instruction::executer::{ArmExecuter, ThumbExecuter},
+    },
+    ram::{
+        Ram,
+        Address,
+        data_types::DataTypeSize
+    },
 };
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
@@ -30,10 +32,10 @@ impl Arm7TDMI {
         Self::default()
     }
 
-    pub fn step(&mut self, ram: &Ram) {
+    pub fn step(&mut self, ram: &mut Ram) {
         self.fetch(ram);
         self.decode();
-        self.execute();
+        self.execute(ram);
     }
 
     pub fn fetch(&mut self, ram: &Ram) {
@@ -53,12 +55,12 @@ impl Arm7TDMI {
         self.pipeline.decode(cpsr);
     }
 
-    pub fn execute(&mut self) {
-        // let decoded_instruction = self.pipeline.get_decoded_instruction();
+    pub fn execute(&mut self, ram: &mut Ram) {
+        let _decoded_instruction = self.pipeline.get_decoded_instruction();
+        
+        let _arm = ArmExecuter::new(&mut self.registers, ram);
+        let _thumb = ThumbExecuter::new();
 
-        // let arm_executer = ArmExecuter::new();
-        // let thumb_executer = ThumbExecuter::new();
-        //
         // match decoded_instruction {
         //     InstructionMap::Arm(arm_instruction) => match arm_instruction {
         //         ArmInstruction::DataProcessingImmediateShift(data) => ,

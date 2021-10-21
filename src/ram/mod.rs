@@ -5,8 +5,10 @@ pub mod data_types;
 pub use address::Address;
 pub use data_block::DataBlock;
 
-use core::ops::{Index, Range};
-use core::convert::TryFrom;
+use std::{
+    ops::{Index, Range},
+    convert::TryFrom,
+};
 
 #[derive(thiserror::Error, Debug, Clone, PartialEq, Eq)]
 pub enum RamError {
@@ -57,12 +59,25 @@ impl Ram {
     }
 }
 
-impl Index<Range<usize>> for Ram
-{
+impl Index<Range<usize>> for Ram {
     type Output = [u8];
 
     fn index(&self, index: Range<usize>) -> &Self::Output {
         &self.ram[index]
+    }
+}
+
+impl Index<Range<u32>> for Ram {
+    type Output = [u8];
+
+    fn index(&self, index: Range<u32>) -> &Self::Output {
+
+        let range = Range {
+            start: usize::try_from(index.start).unwrap(),
+            end: usize::try_from(index.end).unwrap(),
+        };
+
+        &self.ram[range]
     }
 }
 

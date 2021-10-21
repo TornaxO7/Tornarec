@@ -35,7 +35,7 @@ use crate::cpus::general::instruction::{
 };
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub enum ThumbInstruction {
+pub enum ThumbDecoder {
     ShiftByImmediate(ShiftByImmediate),
     AddSubtractRegister(AddSubtractRegister),
     AddSubtractImmediate(AddSubtractImmediate),
@@ -64,7 +64,7 @@ pub enum ThumbInstruction {
     SoftwareBreakpoint(SoftwareBreakpoint),
 }
 
-impl From<&Instruction> for ThumbInstruction {
+impl From<&Instruction> for ThumbDecoder {
     fn from(instruction: &Instruction) -> Self {
         match ThumbInstructionChecker::from(instruction) {
             ThumbInstructionChecker::ShiftByImmediate =>

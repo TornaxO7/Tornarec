@@ -1,6 +1,9 @@
 use crate::cpus::general::{
     bit_state::BitState,
-    instruction::Instruction,
+    instruction::{
+        Instruction,
+        encodings::encoding_fields::DataProcessingInstruction,
+    },
     register::RegisterName,
 };
 
@@ -8,7 +11,7 @@ use std::convert::{From, TryFrom};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DataProcessingRegisterShift {
-    opcode: u8,
+    opcode: DataProcessingInstruction,
     s_flag: BitState,
     rn: RegisterName,
     rd: RegisterName,
@@ -21,7 +24,7 @@ impl From<&Instruction> for DataProcessingRegisterShift {
     fn from(instruction: &Instruction) -> Self {
         let instruction_val = instruction.get_value_as_u32();
 
-        let opcode = u8::try_from((instruction_val >> 21) & 0b1111).unwrap();
+        let opcode = DataProcessingInstruction::from((instruction_val >> 21) & 0b1111);
         let s_flag = BitState::from(instruction_val >> 20);
         let rn = RegisterName::from((instruction_val >> 16) & 0b1111);
         let rd = RegisterName::from((instruction_val >> 12) & 0b1111);
