@@ -1,13 +1,16 @@
 use crate::cpus::general::{
     bit_state::BitState,
     instruction::{
-        encodings::encoding_fields::DataProcessingInstruction,
         decode::DecodeData,
+        encodings::encoding_fields::DataProcessingInstruction,
     },
     register::NormalizedRegister,
 };
 
-use std::convert::{From, TryFrom};
+use std::convert::{
+    From,
+    TryFrom,
+};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DataProcessingImmediateShift {
@@ -23,7 +26,7 @@ pub struct DataProcessingImmediateShift {
 impl<'a> From<DecodeData<'a>> for DataProcessingImmediateShift {
     fn from(decode_data: DecodeData<'a>) -> Self {
         let instruction_val = decode_data.instruction.get_value_as_u32();
-        
+
         let opcode = DataProcessingInstruction::from((instruction_val >> 21) & 0b1111);
         let s_flag = BitState::from(instruction_val >> 20);
         let rn = NormalizedRegister::from((instruction_val >> 16) & 0b1111);
@@ -32,26 +35,43 @@ impl<'a> From<DecodeData<'a>> for DataProcessingImmediateShift {
         let shift = u8::try_from((instruction_val >> 5) & 0b11).unwrap();
         let rm = NormalizedRegister::from(instruction_val & 0b1111);
 
-        Self{opcode, s_flag, rn, rd, shift_imm: shift_amount, shift, rm}
+        Self {
+            opcode,
+            s_flag,
+            rn,
+            rd,
+            shift_imm: shift_amount,
+            shift,
+            rm,
+        }
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::{
-        DataProcessingImmediateShift,
         BitState,
-        Instruction,
-        NormalizedRegister,
+        DataProcessingImmediateShift,
         DataProcessingInstruction,
+        DecodeData,
+        NormalizedRegister,
     };
 
-    use crate::cpus::general::register::RegisterName;
+    use crate::{
+        cpus::general::{
+            register::RegisterName,
+            Instruction,
+        },
+        NintendoDS,
+    };
 
     #[test]
     fn test_from() {
+        let nds = NintendoDS::default();
         let instruction = Instruction::from(0b0000_000_1010_1_1010_0101_11100_10_0_1001);
-        let value = DataProcessingImmediateShift::from(&instruction);
+        let data = DecodeData::new(&nds.arm7tdmi.registers, &nds.ram, &instruction);
+
+        let value = DataProcessingImmediateShift::from(data);
 
         let expected_value = DataProcessingImmediateShift {
             opcode: DataProcessingInstruction::CMP,
@@ -63,6 +83,10 @@ mod tests {
             rm: NormalizedRegister::from(RegisterName::R9),
         };
 
-        assert_eq!(value, expected_value, "{:#?}, {:#?}", &value, &expected_value);
+        assert_eq!(
+            value, expected_value,
+            "{:#?}, {:#?}",
+            &value, &expected_value
+        );
     }
 }

@@ -1,10 +1,13 @@
 use crate::cpus::general::{
     instruction::decode::DecodeData,
-    BitState,
     register::NormalizedRegister,
+    BitState,
 };
 
-use std::convert::{From, TryFrom};
+use std::convert::{
+    From,
+    TryFrom,
+};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SpecialDataProcessing {
@@ -24,21 +27,41 @@ impl<'a> From<DecodeData<'a>> for SpecialDataProcessing {
         let h2 = BitState::from(instruction_val >> 6);
         let rm = NormalizedRegister::from((instruction_val >> 3) & 0b111);
         let rd_rn = NormalizedRegister::from(instruction_val & 0b111);
-        Self {opcode, h1, h2, rm, rd_rn}
+        Self {
+            opcode,
+            h1,
+            h2,
+            rm,
+            rd_rn,
+        }
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::{SpecialDataProcessing, Instruction, BitState, NormalizedRegister};
+    use super::{
+        BitState,
+        DecodeData,
+        NormalizedRegister,
+        SpecialDataProcessing,
+    };
 
-    use crate::cpus::general::register::RegisterName;
+    use crate::{
+        cpus::general::{
+            register::RegisterName,
+            Instruction,
+        },
+        NintendoDS,
+    };
 
     #[test]
     fn from() {
+        let nds = NintendoDS::default();
         let instruction = Instruction::from(0b010001_11_1_0_101_010);
-        let value = SpecialDataProcessing::from(&instruction);
-        
+        let data = DecodeData::new(&nds.arm7tdmi.registers, &nds.ram, &instruction);
+
+        let value = SpecialDataProcessing::from(data);
+
         let expected_value = SpecialDataProcessing {
             opcode: 0b11,
             h1: BitState::Set,
@@ -47,6 +70,10 @@ mod tests {
             rd_rn: NormalizedRegister::from(RegisterName::R2),
         };
 
-        assert_eq!(value, expected_value, "{:#?}, {:#?}", &value, &expected_value);
+        assert_eq!(
+            value, expected_value,
+            "{:#?}, {:#?}",
+            &value, &expected_value
+        );
     }
 }

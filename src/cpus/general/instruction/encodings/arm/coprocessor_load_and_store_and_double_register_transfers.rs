@@ -55,14 +55,24 @@ mod tests {
     use super::{
         BitState,
         CoprocessorLoadAndStoreAndDoubleRegisterTransfers,
-        Instruction,
-        RegisterName,
+        DecodeData,
+    };
+
+    use crate::{
+        NintendoDS,
+        cpus::general::{
+            Instruction,
+            register::{RegisterName, NormalizedRegister},
+        },
     };
 
     #[test]
     fn from() {
+        let nds = NintendoDS::default();
         let instruction = Instruction::from(0b0000_110_1_0_1_0_1_1111_1110_1100_1010_1010);
-        let value = CoprocessorLoadAndStoreAndDoubleRegisterTransfers::from(&instruction);
+        let data = DecodeData::new(&nds.arm7tdmi.registers, &nds.ram, &instruction);
+
+        let value = CoprocessorLoadAndStoreAndDoubleRegisterTransfers::from(data);
 
         let expected_value = CoprocessorLoadAndStoreAndDoubleRegisterTransfers {
             p_flag: BitState::Set,
@@ -70,7 +80,7 @@ mod tests {
             n_flag: BitState::Set,
             w_flag: BitState::Unset,
             l_flag: BitState::Set,
-            rn: RegisterName::R15,
+            rn: NormalizedRegister::from(RegisterName::R15),
             crd: 0b1110,
             cp_num: 0b1100,
             offset: 0b1010_1010,

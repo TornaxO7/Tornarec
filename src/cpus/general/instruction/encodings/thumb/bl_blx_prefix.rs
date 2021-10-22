@@ -23,13 +23,21 @@ impl<'a> From<DecodeData<'a>> for BlOrBlxPrefix {
 mod tests {
     use super::{
         BlOrBlxPrefix,
-        Instruction,
+        DecodeData,
+    };
+
+    use crate::{
+        NintendoDS,
+        cpus::general::Instruction,
     };
 
     #[test]
     fn from() {
+        let nds = NintendoDS::default();
         let instruction = Instruction::from(0b11110_100_1010_0101);
-        let value = BlOrBlxPrefix::from(&instruction);
+        let data = DecodeData::new(&nds.arm7tdmi.registers, &nds.ram, &instruction);
+
+        let value = BlOrBlxPrefix::from(data);
 
         let expected_value = BlOrBlxPrefix {
             offset: 0b100_1010_0101,

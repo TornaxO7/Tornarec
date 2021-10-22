@@ -31,7 +31,7 @@ use crate::{
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct Arm7TDMI {
-    registers: Registers,
+    pub registers: Registers,
 
     pipeline: Pipeline,
     exception_stack: ExceptionStack,
@@ -65,10 +65,10 @@ impl Arm7TDMI {
     }
 
     pub fn execute(&mut self, ram: &mut Ram) {
-        let decoded_instruction = self.pipeline.get_decoded_instruction();
-
-        let arm = ArmExecuter::new(&mut self.registers, ram);
-        let thumb = ThumbExecuter::new();
+        let _decoded_instruction = self.pipeline.get_decoded_instruction();
+        
+        let _arm = ArmExecuter::new(&mut self.registers, ram);
+        let _thumb = ThumbExecuter::new();
 
         // match decoded_instruction {
         //     InstructionMap::Arm(arm_instruction) => match arm_instruction {

@@ -23,13 +23,21 @@ impl<'a> From<DecodeData<'a>> for BlSuffix {
 mod tests {
     use super::{
         BlSuffix,
-        Instruction,
+        DecodeData,
+    };
+
+    use crate::{
+        NintendoDS,
+        cpus::general::Instruction,
     };
 
     #[test]
     fn from() {
+        let nds = NintendoDS::default();
         let instruction = Instruction::from(0b11111_100_1000_0001);
-        let value = BlSuffix::from(&instruction);
+        let data = DecodeData::new(&nds.arm7tdmi.registers, &nds.ram, &instruction);
+
+        let value = BlSuffix::from(data);
 
         let expected_value = BlSuffix {
             offset: 0b100_1000_0001,

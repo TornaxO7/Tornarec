@@ -27,14 +27,22 @@ impl<'a> From<DecodeData<'a>> for LoadFromLiteralPool {
 #[cfg(test)]
 mod tests {
     use super::{
-        Instruction,
+        DecodeData,
         LoadFromLiteralPool,
+    };
+
+    use crate::{
+        NintendoDS,
+        cpus::general::Instruction,
     };
 
     #[test]
     fn from() {
+        let nds = NintendoDS::default();
         let instruction = Instruction::from(0b01001_111_1010_0101);
-        let value = LoadFromLiteralPool::from(&instruction);
+        let data = DecodeData::new(&nds.arm7tdmi.registers, &nds.ram, &instruction);
+
+        let value = LoadFromLiteralPool::from(data);
 
         let expected_value = LoadFromLiteralPool {
             rd: 0b111,

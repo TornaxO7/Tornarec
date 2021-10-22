@@ -40,13 +40,21 @@ impl<'a> From<DecodeData<'a>> for CoprocessorDataProcessing {
 mod tests {
     use super::{
         CoprocessorDataProcessing,
-        Instruction,
+        DecodeData,
+    };
+
+    use crate::{
+        NintendoDS,
+        cpus::general::Instruction,
     };
 
     #[test]
     fn from() {
+        let nds = NintendoDS::default();
         let instruction = Instruction::from(0b0000_1110_1111_1110_1100_1000_111_0_1111);
-        let value = CoprocessorDataProcessing::from(&instruction);
+        let data = DecodeData::new(&nds.arm7tdmi.registers, &nds.ram, &instruction);
+
+        let value = CoprocessorDataProcessing::from(data);
 
         let expected_value = CoprocessorDataProcessing {
             opcode1: 0b1111,

@@ -3,7 +3,10 @@ use crate::cpus::general::{
     register::NormalizedRegister,
 };
 
-use std::convert::{From, TryFrom};
+use std::convert::{
+    From,
+    TryFrom,
+};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Multiplies {
@@ -23,24 +26,39 @@ impl<'a> From<DecodeData<'a>> for Multiplies {
         let rd = NormalizedRegister::from((instruction_val >> 12) & 0b1111);
         let rs = NormalizedRegister::from((instruction_val >> 8) & 0b1111);
         let rm = NormalizedRegister::from(instruction_val & 0b1111);
-        Self{op1, rn, rd, rs, rm}
+        Self {
+            op1,
+            rn,
+            rd,
+            rs,
+            rm,
+        }
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::{
+        DecodeData,
         Multiplies,
-        Instruction,
-        NormalizedRegister
+        NormalizedRegister,
     };
 
-    use crate::cpus::general::register::RegisterName;
+    use crate::{
+        cpus::general::{
+            register::RegisterName,
+            Instruction,
+        },
+        NintendoDS,
+    };
 
     #[test]
     fn test_from() {
+        let nds = NintendoDS::default();
         let instruction = Instruction::from(0b0000_0000_1111_1100_0011_1110_1001_0110);
-        let value = Multiplies::from(&instruction);
+        let data = DecodeData::new(&nds.arm7tdmi.registers, &nds.ram, &instruction);
+
+        let value = Multiplies::from(data);
 
         let expected_value = Multiplies {
             op1: 0b1111,
@@ -50,6 +68,10 @@ mod tests {
             rm: NormalizedRegister::from(RegisterName::R6),
         };
 
-        assert_eq!(value, expected_value, "{:#?}, {:#?}", &value, &expected_value);
+        assert_eq!(
+            value, expected_value,
+            "{:#?}, {:#?}",
+            &value, &expected_value
+        );
     }
 }

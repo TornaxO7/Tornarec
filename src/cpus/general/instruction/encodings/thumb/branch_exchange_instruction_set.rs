@@ -29,14 +29,22 @@ mod tests {
     use super::{
         BitState,
         BranchExchangeInstructionSet,
-        Instruction,
+        DecodeData,
         RegisterName,
+    };
+
+    use crate::{
+        NintendoDS,
+        cpus::general::Instruction,
     };
 
     #[test]
     fn from() {
+        let nds = NintendoDS::default();
         let instruction = Instruction::from(0b010001_11_1_0_101_111);
-        let value = BranchExchangeInstructionSet::from(&instruction);
+        let data = DecodeData::new(&nds.arm7tdmi.registers, &nds.ram, &instruction);
+
+        let value = BranchExchangeInstructionSet::from(data);
 
         let expected_value = BranchExchangeInstructionSet {
             l_flag: BitState::Set,

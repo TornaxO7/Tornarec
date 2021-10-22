@@ -42,17 +42,26 @@ impl<'a> From<DecodeData<'a>> for ExtraLoadAndStores {
 mod tests {
     use super::{
         ExtraLoadAndStores,
-        Instruction,
         BitState,
-        NormalizedRegister
+        NormalizedRegister,
+        DecodeData,
     };
 
-    use crate::cpus::general::register::RegisterName;
+    use crate::{
+        cpus::general::{
+            register::RegisterName,
+            Instruction,
+        },
+        NintendoDS,
+    };
 
     #[test]
     fn from() {
+        let nds = NintendoDS::default();
         let instruction = Instruction::from(0b0000_000_1_0_1_0_1_1100_0011_1010_1_11_1_0101);
-        let value = ExtraLoadAndStores::from(&instruction);
+        let data = DecodeData::new(&nds.arm7tdmi.registers, &nds.ram, &instruction);
+
+        let value = ExtraLoadAndStores::from(data);
 
         let expected_value = ExtraLoadAndStores {
             p_flag: BitState::Set,

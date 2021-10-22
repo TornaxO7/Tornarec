@@ -3,7 +3,10 @@ use crate::cpus::general::{
     BitState,
 };
 
-use std::convert::{From, TryFrom};
+use std::convert::{
+    From,
+    TryFrom,
+};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CoprocessorRegisterTransfers {
@@ -27,18 +30,38 @@ impl<'a> From<DecodeData<'a>> for CoprocessorRegisterTransfers {
         let cp_num = u8::try_from((instruction_val >> 8) & 0b1111).unwrap();
         let opcode2 = u8::try_from((instruction_val >> 5) & 0b111).unwrap();
         let crm = u8::try_from(instruction_val & 0b1111).unwrap();
-        Self {opcode1, l_flag, crn, rd, cp_num, opcode2, crm}
+        Self {
+            opcode1,
+            l_flag,
+            crn,
+            rd,
+            cp_num,
+            opcode2,
+            crm,
+        }
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::{CoprocessorRegisterTransfers, Instruction, BitState};
+    use super::{
+        BitState,
+        CoprocessorRegisterTransfers,
+        DecodeData,
+    };
+
+    use crate::{
+        NintendoDS,
+        cpus::general::instruction::Instruction,
+    };
 
     #[test]
     fn from() {
+        let nds = NintendoDS::default();
         let instruction = Instruction::from(0b0000_1110_111_1_1110_1100_1000_101_1_0101);
-        let value = CoprocessorRegisterTransfers::from(&instruction);
+        let data = DecodeData::new(&nds.arm7tdmi.registers, &nds.ram, &instruction);
+
+        let value = CoprocessorRegisterTransfers::from(data);
 
         let expected_value = CoprocessorRegisterTransfers {
             opcode1: 0b111,
@@ -50,6 +73,10 @@ mod tests {
             crm: 0b0101,
         };
 
-        assert_eq!(value, expected_value, "{:#?}, {:#?}", &value, &expected_value);
+        assert_eq!(
+            value, expected_value,
+            "{:#?}, {:#?}",
+            &value, &expected_value
+        );
     }
 }

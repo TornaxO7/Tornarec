@@ -32,16 +32,25 @@ mod tests {
     use super::{
         AddToSpOrPc,
         BitState,
-        Instruction,
+        DecodeData,
         NormalizedRegister,
     };
 
-    use crate::cpus::general::register::RegisterName;
+    use crate::{
+        cpus::general::{
+            register::RegisterName,
+            Instruction,
+        },
+        NintendoDS,
+    };
 
     #[test]
     fn from() {
+        let nds = NintendoDS::default();
         let instruction = Instruction::from(0b1011_1_101_1100_1000);
-        let value = AddToSpOrPc::from(&instruction);
+        let data = DecodeData::new(&nds.arm7tdmi.registers, &nds.ram, &instruction);
+
+        let value = AddToSpOrPc::from(data);
 
         let expected_value = AddToSpOrPc {
             sp: BitState::Set,

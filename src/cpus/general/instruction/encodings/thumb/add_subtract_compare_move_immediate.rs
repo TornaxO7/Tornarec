@@ -27,16 +27,25 @@ impl<'a> From<DecodeData<'a>> for AddSubtractCompareMoveImmediate {
 mod tests {
     use super::{
         AddSubtractCompareMoveImmediate,
-        Instruction,
+        DecodeData,
         NormalizedRegister
     };
 
-    use crate::cpus::general::register::RegisterName;
+    use crate::{
+        cpus::general::{
+            register::RegisterName,
+            Instruction,
+        },
+        NintendoDS,
+    };
 
     #[test]
     fn from() {
+        let nds = NintendoDS::default();
         let instruction = Instruction::from(0b001_11_110_1010_0101);
-        let value = AddSubtractCompareMoveImmediate::from(&instruction);
+        let data = DecodeData::new(&nds.arm7tdmi.registers, &nds.ram, &instruction);
+
+        let value = AddSubtractCompareMoveImmediate::from(data);
 
         let expected_value = AddSubtractCompareMoveImmediate {
             opcode: 0b11,

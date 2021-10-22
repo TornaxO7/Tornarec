@@ -1,10 +1,13 @@
 use crate::cpus::general::instruction::decode::DecodeData;
 
-use std::convert::{From, TryFrom};
+use std::convert::{
+    From,
+    TryFrom,
+};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SoftwareInterrupt {
-    immediate: u8
+    immediate: u8,
 }
 
 impl<'a> From<DecodeData<'a>> for SoftwareInterrupt {
@@ -12,23 +15,38 @@ impl<'a> From<DecodeData<'a>> for SoftwareInterrupt {
         let instruction_val = decode_data.instruction.get_value_as_u32();
 
         let immediate = u8::try_from(instruction_val & 0b1111_1111).unwrap();
-        Self {immediate}
+        Self { immediate }
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::{SoftwareInterrupt, Instruction};
+    use super::{
+        DecodeData,
+        SoftwareInterrupt,
+    };
+
+    use crate::{
+        NintendoDS,
+        cpus::general::Instruction,
+    };
 
     #[test]
     fn from() {
+        let nds = NintendoDS::default();
         let instruction = Instruction::from(0b1101_1111_1100_1000);
-        let value = SoftwareInterrupt::from(&instruction);
+        let data = DecodeData::new(&nds.arm7tdmi.registers, &nds.ram, &instruction);
+
+        let value = SoftwareInterrupt::from(data);
 
         let expected_value = SoftwareInterrupt {
             immediate: 0b1100_1000,
         };
 
-        assert_eq!(value, expected_value, "{:#?}, {:#?}", &value, &expected_value);
+        assert_eq!(
+            value, expected_value,
+            "{:#?}, {:#?}",
+            &value, &expected_value
+        );
     }
 }

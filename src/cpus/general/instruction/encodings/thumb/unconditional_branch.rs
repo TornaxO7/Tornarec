@@ -22,14 +22,22 @@ impl<'a> From<DecodeData<'a>> for UnconditionalBranch {
 #[cfg(test)]
 mod tests {
     use super::{
-        Instruction,
+        DecodeData,
         UnconditionalBranch,
+    };
+
+    use crate::{
+        NintendoDS,
+        cpus::general::Instruction,
     };
 
     #[test]
     fn from() {
+        let nds = NintendoDS::default();
         let instruction = Instruction::from(0b11100_111_1010_1010);
-        let value = UnconditionalBranch::from(&instruction);
+        let data = DecodeData::new(&nds.arm7tdmi.registers, &nds.ram, &instruction);
+
+        let value = UnconditionalBranch::from(data);
 
         let expected_value = UnconditionalBranch {
             offset: 0b111_1010_1010,

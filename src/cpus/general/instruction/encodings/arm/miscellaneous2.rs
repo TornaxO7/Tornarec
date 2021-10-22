@@ -33,16 +33,25 @@ impl<'a> From<DecodeData<'a>> for Miscellaneous2 {
 mod tests {
     use super::{
         Miscellaneous2,
-        Instruction,
-        NormalizedRegister
+        NormalizedRegister,
+        DecodeData,
     };
 
-    use crate::cpus::general::register::RegisterName;
+    use crate::{
+        cpus::general::{
+            register::RegisterName,
+            Instruction,
+        },
+        NintendoDS,
+    };
 
     #[test]
     fn test_from() {
+        let nds = NintendoDS::default();
         let instruction = Instruction::from(0b0000_00010_11_0_1010_0101_1001_0_11_1_1111);
-        let value = Miscellaneous2::from(&instruction);
+        let data = DecodeData::new(&nds.arm7tdmi.registers, &nds.ram, &instruction);
+
+        let value = Miscellaneous2::from(data);
 
         let expected_value = Miscellaneous2 {
             op1: 0b11,

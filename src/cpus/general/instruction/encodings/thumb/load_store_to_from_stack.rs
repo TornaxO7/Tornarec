@@ -1,10 +1,13 @@
 use crate::cpus::general::{
     instruction::decode::DecodeData,
-    BitState,
     register::NormalizedRegister,
+    BitState,
 };
 
-use std::convert::{From, TryFrom};
+use std::convert::{
+    From,
+    TryFrom,
+};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct LoadStoreToFromStack {
@@ -20,20 +23,38 @@ impl<'a> From<DecodeData<'a>> for LoadStoreToFromStack {
         let l_flag = BitState::from(instruction_val >> 11);
         let rd = NormalizedRegister::from((instruction_val >> 8) & 0b111);
         let sp_relative_offset = u8::try_from(instruction_val & 0b1111_1111).unwrap();
-        Self {l_flag, rd, sp_relative_offset}
+        Self {
+            l_flag,
+            rd,
+            sp_relative_offset,
+        }
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::{LoadStoreToFromStack, Instruction, BitState, NormalizedRegister};
+    use super::{
+        BitState,
+        DecodeData,
+        LoadStoreToFromStack,
+        NormalizedRegister,
+    };
 
-    use crate::cpus::general::register::RegisterName;
+    use crate::{
+        cpus::general::{
+            register::RegisterName,
+            Instruction,
+        },
+        NintendoDS,
+    };
 
     #[test]
     fn from() {
+        let nds = NintendoDS::default();
         let instruction = Instruction::from(0b1001_1_101_1100_0011);
-        let value = LoadStoreToFromStack::from(&instruction);
+        let data = DecodeData::new(&nds.arm7tdmi.registers, &nds.ram, &instruction);
+        
+        let value = LoadStoreToFromStack::from(data);
 
         let expected_value = LoadStoreToFromStack {
             l_flag: BitState::Set,
@@ -41,6 +62,10 @@ mod tests {
             sp_relative_offset: 0b1100_0011,
         };
 
-        assert_eq!(value, expected_value, "{:#?}, {:#?}", &value, &expected_value);
+        assert_eq!(
+            value, expected_value,
+            "{:#?}, {:#?}",
+            &value, &expected_value
+        );
     }
 }

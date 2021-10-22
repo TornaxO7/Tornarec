@@ -22,18 +22,35 @@ impl<'a> From<DecodeData<'a>> for PushPopRegisterList {
         let l_flag = BitState::from(instruction_val >> 11);
         let r_flag = BitState::from(instruction_val >> 8);
         let register_list = RegisterList::from(instruction_val & 0b1111_1111);
-        Self {l_flag, r_flag, register_list}
+        Self {
+            l_flag,
+            r_flag,
+            register_list,
+        }
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::{PushPopRegisterList, Instruction, BitState, RegisterList};
+    use super::{
+        BitState,
+        DecodeData,
+        PushPopRegisterList,
+        RegisterList,
+    };
+
+    use crate::{
+        NintendoDS,
+        cpus::general::Instruction,
+    };
 
     #[test]
     fn from() {
+        let nds = NintendoDS::default();
         let instruction = Instruction::from(0b1011_1_10_0_1111_0000);
-        let value = PushPopRegisterList::from(&instruction);
+        let data = DecodeData::new(&nds.arm7tdmi.registers, &nds.ram, &instruction);
+
+        let value = PushPopRegisterList::from(data);
 
         let expected_value = PushPopRegisterList {
             l_flag: BitState::Set,
@@ -41,6 +58,10 @@ mod tests {
             register_list: RegisterList::from(0b1111_0000),
         };
 
-        assert_eq!(value, expected_value, "{:#?}, {:#?}", &value, &expected_value);
+        assert_eq!(
+            value, expected_value,
+            "{:#?}, {:#?}",
+            &value, &expected_value
+        );
     }
 }

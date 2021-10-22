@@ -3,7 +3,10 @@ use crate::cpus::general::{
     register::NormalizedRegister,
 };
 
-use std::convert::{From, TryFrom};
+use std::convert::{
+    From,
+    TryFrom,
+};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct LoadStoreRegisterOffset {
@@ -21,20 +24,33 @@ impl<'a> From<DecodeData<'a>> for LoadStoreRegisterOffset {
         let rm = NormalizedRegister::from((instruction_val >> 6) & 0b111);
         let rn = NormalizedRegister::from((instruction_val >> 3) & 0b111);
         let rd = NormalizedRegister::from(instruction_val & 0b111);
-        Self {opcode, rm, rn, rd}
+        Self { opcode, rm, rn, rd }
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::{LoadStoreRegisterOffset, Instruction, NormalizedRegister};
+    use super::{
+        DecodeData,
+        LoadStoreRegisterOffset,
+        NormalizedRegister,
+    };
 
-    use crate::cpus::general::register::RegisterName;
+    use crate::{
+        cpus::general::{
+            register::RegisterName,
+            Instruction,
+        },
+        NintendoDS,
+    };
 
     #[test]
     fn from() {
+        let nds = NintendoDS::default();
         let instruction = Instruction::from(0b0101_111_110_100_101);
-        let value = LoadStoreRegisterOffset::from(&instruction);
+        let data = DecodeData::new(&nds.arm7tdmi.registers, &nds.ram, &instruction);
+
+        let value = LoadStoreRegisterOffset::from(data);
 
         let expected_value = LoadStoreRegisterOffset {
             opcode: 0b111,
@@ -43,6 +59,10 @@ mod tests {
             rd: NormalizedRegister::from(RegisterName::R5),
         };
 
-        assert_eq!(value, expected_value, "{:#?}, {:#?}", &value, &expected_value);
+        assert_eq!(
+            value, expected_value,
+            "{:#?}, {:#?}",
+            &value, &expected_value
+        );
     }
 }

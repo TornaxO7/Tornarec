@@ -27,13 +27,21 @@ mod tests {
     use super::{
         BitState,
         BranchAndBranchWithLink,
-        Instruction,
+        DecodeData,
+    };
+
+    use crate::{
+        NintendoDS,
+        cpus::general::Instruction,
     };
 
     #[test]
     fn from_branch() {
+        let nds = NintendoDS::default();
         let branch_instruction = Instruction::from(0b0000_101_0_1111_1111_1111_1111_0000_0000);
-        let value = BranchAndBranchWithLink::from(&branch_instruction);
+        let data = DecodeData::new(&nds.arm7tdmi.registers, &nds.ram, &branch_instruction);
+
+        let value = BranchAndBranchWithLink::from(data);
 
         let expected_value = BranchAndBranchWithLink {
             l_flag: BitState::Unset,
@@ -49,8 +57,11 @@ mod tests {
 
     #[test]
     fn from_branch_with_link() {
+        let nds = NintendoDS::default();
         let branch_with_link = Instruction::from(0b0000_101_1_1111_1111_1111_1111_0000_0000);
-        let value = BranchAndBranchWithLink::from(&branch_with_link);
+        let data = DecodeData::new(&nds.arm7tdmi.registers, &nds.ram, &branch_with_link);
+
+        let value = BranchAndBranchWithLink::from(data);
 
         let expected_value = BranchAndBranchWithLink {
             l_flag: BitState::Set,

@@ -38,17 +38,26 @@ impl<'a> From<DecodeData<'a>> for LoadAndStoreImmediateOffset {
 mod tests {
     use super::{
         BitState,
-        Instruction,
         LoadAndStoreImmediateOffset,
-        NormalizedRegister
+        NormalizedRegister,
+        DecodeData,
     };
 
-    use crate::cpus::general::register::RegisterName;
+    use crate::{
+        cpus::general::{
+            register::RegisterName,
+            Instruction,
+        },
+        NintendoDS,
+    };
 
     #[test]
     fn from() {
+        let nds = NintendoDS::default();
         let instruction = Instruction::from(0b0000_010_1_0_1_0_1_1100_0011_1110_1100_1000);
-        let value = LoadAndStoreImmediateOffset::from(&instruction);
+        let data = DecodeData::new(&nds.arm7tdmi.registers, &nds.ram, &instruction);
+
+        let value = LoadAndStoreImmediateOffset::from(data);
 
         let expected_value = LoadAndStoreImmediateOffset {
             p_flag: BitState::Set,

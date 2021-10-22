@@ -43,16 +43,25 @@ mod tests {
     use super::{
         LoadAndStoreRegisterOffset,
         BitState,
-        Instruction,
-        NormalizedRegister
+        NormalizedRegister,
+            DecodeData,
     };
 
-    use crate::cpus::general::register::RegisterName;
+    use crate::{
+        cpus::general::{
+            register::RegisterName,
+            Instruction,
+        },
+        NintendoDS,
+    };
 
     #[test]
     fn from() {
+        let nds = NintendoDS::default();
         let instruction = Instruction::from(0b0000_011_1_0_1_0_1_1100_0011_11100_01_0_1010);
-        let value = LoadAndStoreRegisterOffset::from(&instruction);
+        let data = DecodeData::new(&nds.arm7tdmi.registers, &nds.ram, &instruction);
+
+        let value = LoadAndStoreRegisterOffset::from(data);
 
         let expected_value = LoadAndStoreRegisterOffset {
             p_flag: BitState::Set,

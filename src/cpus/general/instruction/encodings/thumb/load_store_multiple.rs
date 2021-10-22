@@ -35,18 +35,27 @@ impl<'a> From<DecodeData<'a>> for LoadStoreMultiple {
 mod tests {
     use super::{
         BitState,
-        Instruction,
+        DecodeData,
         LoadStoreMultiple,
         NormalizedRegister,
         RegisterList,
     };
 
-    use crate::cpus::general::register::RegisterName;
+    use crate::{
+        cpus::general::{
+            register::RegisterName,
+            Instruction,
+        },
+        NintendoDS,
+    };
 
     #[test]
     fn from() {
+        let nds = NintendoDS::default();
         let instruction = Instruction::from(0b1100_1_101_1111_0011);
-        let value = LoadStoreMultiple::from(&instruction);
+        let data = DecodeData::new(&nds.arm7tdmi.registers, &nds.ram, &instruction);
+
+        let value = LoadStoreMultiple::from(data);
 
         let expected_value = LoadStoreMultiple {
             l_flag: BitState::Set,

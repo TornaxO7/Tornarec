@@ -38,17 +38,26 @@ impl<'a> From<DecodeData<'a>> for LoadStoreHalfwordImmediateOffset {
 mod tests {
     use super::{
         BitState,
-        Instruction,
+        DecodeData,
         LoadStoreHalfwordImmediateOffset,
         NormalizedRegister,
     };
 
-    use crate::cpus::general::register::RegisterName;
+    use crate::{
+        cpus::general::{
+            register::RegisterName,
+            Instruction,
+        },
+        NintendoDS,
+    };
 
     #[test]
     fn from() {
+        let nds = NintendoDS::default();
         let instruction = Instruction::from(0b1000_1_10101_110_100);
-        let value = LoadStoreHalfwordImmediateOffset::from(&instruction);
+        let data = DecodeData::new(&nds.arm7tdmi.registers, &nds.ram, &instruction);
+
+        let value = LoadStoreHalfwordImmediateOffset::from(data);
 
         let expected_value = LoadStoreHalfwordImmediateOffset {
             l_flag: BitState::Set,

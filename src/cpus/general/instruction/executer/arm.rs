@@ -48,7 +48,7 @@ impl<'a> ArmExecuter<'a> {
             DataProcessingInstruction::ADD => {
 			},
             DataProcessingInstruction::ADC => {
-                let rm: u32 = if data.rm == NormalizedRegister::from(RegisterName::Pc) {
+                let _rm: u32 = if data.rm == NormalizedRegister::from(RegisterName::Pc) {
                     next_instruction_val
                 } else {
                     self.registers.get_reg(data.rm.get_reg())

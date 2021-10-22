@@ -40,18 +40,27 @@ impl<'a> From<DecodeData<'a>> for DataProcessingRegisterShift {
 mod tests {
     use super::{
         DataProcessingRegisterShift,
-        Instruction,
+        DecodeData,
         BitState,
         NormalizedRegister,
         DataProcessingInstruction
     };
 
-    use crate::cpus::general::register::RegisterName;
+    use crate::{
+        cpus::general::{
+            register::RegisterName,
+            Instruction,
+        },
+        NintendoDS,
+    };
 
     #[test]
     fn test_from() {
+        let nds = NintendoDS::default();
         let instruction = Instruction::from(0b0000_000_1111_1_1010_0101_0110_0_11_1_1001);
-        let value = DataProcessingRegisterShift::from(&instruction);
+        let data = DecodeData::new(&nds.arm7tdmi.registers, &nds.ram, &instruction);
+
+        let value = DataProcessingRegisterShift::from(data);
 
         let expected_value = DataProcessingRegisterShift {
             opcode: DataProcessingInstruction::MVN,

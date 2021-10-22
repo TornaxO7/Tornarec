@@ -1,6 +1,9 @@
 use crate::cpus::general::instruction::decode::DecodeData;
 
-use std::convert::{From, TryFrom};
+use std::convert::{
+    From,
+    TryFrom,
+};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ConditionalBranch {
@@ -14,24 +17,39 @@ impl<'a> From<DecodeData<'a>> for ConditionalBranch {
 
         let cond = u8::try_from((instruction_val >> 8) & 0b1111).unwrap();
         let offset = u8::try_from(instruction_val & 0b1111_1111).unwrap();
-        Self {cond, offset}
+        Self { cond, offset }
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::{ConditionalBranch, Instruction};
+    use super::{
+        ConditionalBranch,
+        DecodeData,
+    };
+
+    use crate::{
+        NintendoDS,
+        cpus::general::Instruction,
+    };
 
     #[test]
     fn from() {
+        let nds = NintendoDS::default();
         let instruction = Instruction::from(0b1101_1001_1110_1100);
-        let value = ConditionalBranch::from(&instruction);
+        let data = DecodeData::new(&nds.arm7tdmi.registers, &nds.ram, &instruction);
+
+        let value = ConditionalBranch::from(data);
 
         let expected_value = ConditionalBranch {
             cond: 0b1001,
             offset: 0b1110_1100,
         };
 
-        assert_eq!(value, expected_value, "{:#?}, {:#?}", &value, &expected_value);
+        assert_eq!(
+            value, expected_value,
+            "{:#?}, {:#?}",
+            &value, &expected_value
+        );
     }
 }
