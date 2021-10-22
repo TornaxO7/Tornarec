@@ -1,11 +1,9 @@
-use crate::cpus::general::{
-        instruction::{
-            Instruction,
-            decoder::{
-                ArmDecoder, ThumbDecoder
-            },
-        },
-    };
+use crate::cpus::general::instruction::{
+    Instruction,
+    decoder::{
+        ArmDecoder, ThumbDecoder
+    },
+};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum InstructionMap {

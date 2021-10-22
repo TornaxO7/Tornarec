@@ -38,7 +38,7 @@ impl From<&Instruction> for DataProcessingRegisterShift {
 
 #[cfg(test)]
 mod tests {
-    use super::{DataProcessingRegisterShift, Instruction, BitState, RegisterName};
+    use super::{DataProcessingRegisterShift, Instruction, BitState, RegisterName, DataProcessingInstruction};
 
     #[test]
     fn test_from() {
@@ -46,7 +46,7 @@ mod tests {
         let value = DataProcessingRegisterShift::from(&instruction);
 
         let expected_value = DataProcessingRegisterShift {
-            opcode: 0b1111,
+            opcode: DataProcessingInstruction::MVN,
             s_flag: BitState::Set,
             rn: RegisterName::R10,
             rd: RegisterName::R5,

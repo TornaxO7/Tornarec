@@ -81,6 +81,20 @@ impl Index<Range<u32>> for Ram {
     }
 }
 
+impl Index<Range<i32>> for Ram {
+    type Output = [u8];
+
+    fn index(&self, index: Range<i32>) -> &Self::Output {
+
+        let range = Range {
+            start: usize::try_from(index.start).unwrap(),
+            end: usize::try_from(index.end).unwrap(),
+        };
+
+        &self.ram[range]
+    }
+}
+
 #[cfg(test)]
 mod tests {
 

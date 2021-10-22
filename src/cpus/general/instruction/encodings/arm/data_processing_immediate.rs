@@ -35,7 +35,7 @@ impl From<&Instruction> for DataProcessingImmediate {
 
 #[cfg(test)]
 mod tests {
-    use super::{DataProcessingImmediate, Instruction, BitState, RegisterName};
+    use super::{DataProcessingImmediate, Instruction, BitState, RegisterName, DataProcessingInstruction};
 
     #[test]
     fn from() {
@@ -43,7 +43,7 @@ mod tests {
         let value = DataProcessingImmediate::from(&instruction);
 
         let expected_value = DataProcessingImmediate {
-            opcode: 0b1111,
+            opcode: DataProcessingInstruction::MVN,
             s_flag: BitState::Set,
             rn: RegisterName::R12,
             rd: RegisterName::R3,

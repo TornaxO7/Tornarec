@@ -117,11 +117,13 @@ impl From<u32> for RegisterName {
     }
 }
 
-impl PartialEq for RegisterName {
+impl PartialEq<RegisterName> for RegisterName {
     fn eq(&self, other: &Self) -> bool {
         let current = Self::normalize(self);
         let other = Self::normalize(other);
 
-        current == other
+        // we can't compare the Registernames directly because otherwise we'd call the PartialEq
+        // trait again and again which would lead to an infinity recursive call.
+        current as u32 == other as u32
     }
 }
