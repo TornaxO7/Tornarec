@@ -95,26 +95,3 @@ impl From<u32> for RegisterName {
         }
     }
 }
-
-#[cfg(test)]
-mod tests {
-
-    use super::RegisterName;
-
-    #[test]
-    fn eq() {
-        assert_eq!(RegisterName::Sp, RegisterName::R13);
-        assert_eq!(RegisterName::SpSvc, RegisterName::R13Svc);
-        assert_eq!(RegisterName::SpAbt, RegisterName::R13Abt);
-        assert_eq!(RegisterName::SpUnd, RegisterName::R13Und);
-        assert_eq!(RegisterName::SpIrq, RegisterName::R13Irq);
-        assert_eq!(RegisterName::SpFiq, RegisterName::R13Fiq);
-
-        assert_eq!(RegisterName::Lr, RegisterName::R14);
-        assert_eq!(RegisterName::LrSvc, RegisterName::R14Svc);
-        assert_eq!(RegisterName::LrAbt, RegisterName::R14Abt);
-        assert_eq!(RegisterName::LrUnd, RegisterName::R14Und);
-        assert_eq!(RegisterName::LrIrq, RegisterName::R14Irq);
-        assert_eq!(RegisterName::LrFiq, RegisterName::R14Fiq);
-    }
-}

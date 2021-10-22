@@ -30,3 +30,26 @@ impl From<RegisterName> for NormalizedRegister {
         Self(register_name)
     }
 }
+
+#[cfg(test)]
+mod tests {
+
+    use super::{RegisterName, NormalizedRegister};
+
+    #[test]
+    fn eq() {
+        assert_eq!(NormalizedRegister::from(RegisterName::Sp), NormalizedRegister::from(RegisterName::R13));
+        assert_eq!(NormalizedRegister::from(RegisterName::SpSvc), NormalizedRegister::from(RegisterName::R13Svc));
+        assert_eq!(NormalizedRegister::from(RegisterName::SpAbt), NormalizedRegister::from(RegisterName::R13Abt));
+        assert_eq!(NormalizedRegister::from(RegisterName::SpUnd), NormalizedRegister::from(RegisterName::R13Und));
+        assert_eq!(NormalizedRegister::from(RegisterName::SpIrq), NormalizedRegister::from(RegisterName::R13Irq));
+        assert_eq!(NormalizedRegister::from(RegisterName::SpFiq), NormalizedRegister::from(RegisterName::R13Fiq));
+
+        assert_eq!(NormalizedRegister::from(RegisterName::Lr), NormalizedRegister::from(RegisterName::R14));
+        assert_eq!(NormalizedRegister::from(RegisterName::LrSvc), NormalizedRegister::from(RegisterName::R14Svc));
+        assert_eq!(NormalizedRegister::from(RegisterName::LrAbt), NormalizedRegister::from(RegisterName::R14Abt));
+        assert_eq!(NormalizedRegister::from(RegisterName::LrUnd), NormalizedRegister::from(RegisterName::R14Und));
+        assert_eq!(NormalizedRegister::from(RegisterName::LrIrq), NormalizedRegister::from(RegisterName::R14Irq));
+        assert_eq!(NormalizedRegister::from(RegisterName::LrFiq), NormalizedRegister::from(RegisterName::R14Fiq));
+    }
+}
