@@ -31,6 +31,12 @@ impl From<RegisterName> for NormalizedRegister {
     }
 }
 
+impl From<u32> for NormalizedRegister {
+    fn from(num: u32) -> Self {
+        Self::from(RegisterName::from(num))
+    }
+}
+
 #[cfg(test)]
 mod tests {
 

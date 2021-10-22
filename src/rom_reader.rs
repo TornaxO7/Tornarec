@@ -1,20 +1,25 @@
-use std::fs::File;
-use std::io::Read;
+use std::{
+    fs::File,
+    io::Read,
+};
 
 use nds::parser::NDSParser;
 
 use core::convert::TryFrom;
 
-use crate::ram::{Address, DataBlock, Ram};
+use crate::ram::{
+    Address,
+    DataBlock,
+    Ram,
+};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub enum RomError {
-}
+pub enum RomError {}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RomReader {
     rom_content: Vec<u8>,
-    parser: NDSParser,
+    parser:      NDSParser,
 }
 
 impl RomReader {
@@ -53,7 +58,6 @@ impl RomReader {
     }
 
     pub fn load_arm7_tdmi(&self, ram: &mut Ram) {
-
         let start_address = self.parser.arm7.rom_offset as usize;
         let end_address = start_address + self.parser.arm7.size as usize;
 

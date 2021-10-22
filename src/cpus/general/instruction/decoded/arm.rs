@@ -23,7 +23,7 @@ use crate::cpus::general::instruction::{
 use std::convert::From;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub enum ArmDecoder {
+pub enum ArmDecoded {
     DataProcessingImmediateShift(DataProcessingImmediateShift),
     Miscellaneous1(Miscellaneous1),
     DataProcessingRegisterShift(DataProcessingRegisterShift),
@@ -45,7 +45,7 @@ pub enum ArmDecoder {
     SoftwareInterrupt,
 }
 
-impl From<&Instruction> for ArmDecoder {
+impl From<&Instruction> for ArmDecoded {
     fn from(instruction: &Instruction) -> Self {
         match ArmInstructionChecker::from(instruction) {
            ArmInstructionChecker::DataProcessingImmediateShift =>

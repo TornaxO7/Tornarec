@@ -4,7 +4,7 @@ use crate::cpus::general::{
         encodings::encoding_fields::DataProcessingInstruction,
     },
     bit_state::BitState,
-    register::RegisterName,
+    register::NormalizedRegister,
 };
 
 use std::convert::{From, TryFrom};
@@ -13,8 +13,8 @@ use std::convert::{From, TryFrom};
 pub struct DataProcessingImmediate {
     opcode: DataProcessingInstruction,
     s_flag: BitState,
-    rn: RegisterName,
-    rd: RegisterName,
+    rn: NormalizedRegister,
+    rd: NormalizedRegister,
     rotate: u8,
     immediate: u8,
 }
@@ -25,8 +25,8 @@ impl From<&Instruction> for DataProcessingImmediate {
 
         let opcode = DataProcessingInstruction::from((instruction_val >> 21) & 0b1111);
         let s_flag = BitState::from(instruction_val >> 20);
-        let rn = RegisterName::from((instruction_val >> 16) & 0b1111);
-        let rd = RegisterName::from((instruction_val >> 12) & 0b1111);
+        let rn = NormalizedRegister::from((instruction_val >> 16) & 0b1111);
+        let rd = NormalizedRegister::from((instruction_val >> 12) & 0b1111);
         let rotate = u8::try_from((instruction_val >> 8) & 0b1111).unwrap();
         let immediate = u8::try_from(instruction_val & 0b1111_1111).unwrap();
         Self{opcode, s_flag, rn, rd, rotate, immediate}
@@ -35,7 +35,15 @@ impl From<&Instruction> for DataProcessingImmediate {
 
 #[cfg(test)]
 mod tests {
-    use super::{DataProcessingImmediate, Instruction, BitState, RegisterName, DataProcessingInstruction};
+    use super::{
+        DataProcessingImmediate,
+        Instruction,
+        BitState,
+        NormalizedRegister,
+        DataProcessingInstruction,
+    };
+
+    use crate::cpus::general::register::RegisterName;
 
     #[test]
     fn from() {
@@ -45,8 +53,8 @@ mod tests {
         let expected_value = DataProcessingImmediate {
             opcode: DataProcessingInstruction::MVN,
             s_flag: BitState::Set,
-            rn: RegisterName::R12,
-            rd: RegisterName::R3,
+            rn: NormalizedRegister::from(RegisterName::R12),
+            rd: NormalizedRegister::from(RegisterName::R3),
             rotate: 0b1010,
             immediate: 0b0011_1011,
         };

@@ -4,7 +4,7 @@ use crate::{
             arm::DataProcessingImmediateShift,
             encoding_fields::DataProcessingInstruction,
         },
-        register::{Registers, RegisterName},
+        register::{Registers, RegisterName, NormalizedRegister},
     },
     ram::{Ram, data_types::DataType},
 };
@@ -24,16 +24,16 @@ impl<'a> ArmExecuter<'a> {
         }
     }
 
-    pub fn get_next_instrution_val(&self) -> DataType {
+    pub fn get_next_instrution_val(&self) -> u32 {
         let pc = self.registers.get_reg(RegisterName::Pc);
         match DataType::get_word(&self.ram[pc + 8 .. pc + 12]) {
-            Ok(word) => word,
+            Ok(word) => word.get_value_as_u32(),
             Err(err) => panic!("{}", err),
         }
     }
 
     pub fn data_processing_immediate_shift(&mut self, data: DataProcessingImmediateShift) {
-        let _next_instruction_val = self.get_next_instrution_val();
+        let next_instruction_val = self.get_next_instrution_val();
 
         match data.opcode {
             DataProcessingInstruction::AND => {

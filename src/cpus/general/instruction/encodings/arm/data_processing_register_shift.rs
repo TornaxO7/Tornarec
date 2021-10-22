@@ -4,7 +4,7 @@ use crate::cpus::general::{
         Instruction,
         encodings::encoding_fields::DataProcessingInstruction,
     },
-    register::RegisterName,
+    register::NormalizedRegister,
 };
 
 use std::convert::{From, TryFrom};
@@ -13,11 +13,11 @@ use std::convert::{From, TryFrom};
 pub struct DataProcessingRegisterShift {
     opcode: DataProcessingInstruction,
     s_flag: BitState,
-    rn: RegisterName,
-    rd: RegisterName,
-    rs: RegisterName,
+    rn: NormalizedRegister,
+    rd: NormalizedRegister,
+    rs: NormalizedRegister,
     shift: u8,
-    rm: RegisterName,
+    rm: NormalizedRegister,
 }
 
 impl From<&Instruction> for DataProcessingRegisterShift {
@@ -26,11 +26,11 @@ impl From<&Instruction> for DataProcessingRegisterShift {
 
         let opcode = DataProcessingInstruction::from((instruction_val >> 21) & 0b1111);
         let s_flag = BitState::from(instruction_val >> 20);
-        let rn = RegisterName::from((instruction_val >> 16) & 0b1111);
-        let rd = RegisterName::from((instruction_val >> 12) & 0b1111);
-        let rs = RegisterName::from((instruction_val >> 8) & 0b1111);
+        let rn = NormalizedRegister::from((instruction_val >> 16) & 0b1111);
+        let rd = NormalizedRegister::from((instruction_val >> 12) & 0b1111);
+        let rs = NormalizedRegister::from((instruction_val >> 8) & 0b1111);
         let shift = u8::try_from((instruction_val >> 5) & 0b11).unwrap();
-        let rm = RegisterName::from(instruction_val & 0b1111);
+        let rm = NormalizedRegister::from(instruction_val & 0b1111);
 
         Self{opcode, s_flag, rn, rd, rs, shift, rm}
     }
@@ -38,7 +38,15 @@ impl From<&Instruction> for DataProcessingRegisterShift {
 
 #[cfg(test)]
 mod tests {
-    use super::{DataProcessingRegisterShift, Instruction, BitState, RegisterName, DataProcessingInstruction};
+    use super::{
+        DataProcessingRegisterShift,
+        Instruction,
+        BitState,
+        NormalizedRegister,
+        DataProcessingInstruction
+    };
+
+    use crate::cpus::general::register::RegisterName;
 
     #[test]
     fn test_from() {
@@ -48,11 +56,11 @@ mod tests {
         let expected_value = DataProcessingRegisterShift {
             opcode: DataProcessingInstruction::MVN,
             s_flag: BitState::Set,
-            rn: RegisterName::R10,
-            rd: RegisterName::R5,
-            rs: RegisterName::R6,
+            rn: NormalizedRegister::from(RegisterName::R10),
+            rd: NormalizedRegister::from(RegisterName::R5),
+            rs: NormalizedRegister::from(RegisterName::R6),
             shift: 0b11,
-            rm: RegisterName::R9,
+            rm: NormalizedRegister::from(RegisterName::R9),
         };
 
         assert_eq!(value, expected_value);

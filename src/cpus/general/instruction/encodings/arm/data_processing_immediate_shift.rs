@@ -4,7 +4,7 @@ use crate::cpus::general::{
         Instruction,
         encodings::encoding_fields::DataProcessingInstruction,
     },
-    register::RegisterName,
+    register::NormalizedRegister,
 };
 
 use std::convert::{From, TryFrom};
@@ -13,11 +13,11 @@ use std::convert::{From, TryFrom};
 pub struct DataProcessingImmediateShift {
     pub opcode: DataProcessingInstruction,
     pub s_flag: BitState,
-    pub rn: RegisterName,
-    pub rd: RegisterName,
+    pub rn: NormalizedRegister,
+    pub rd: NormalizedRegister,
     pub shift_imm: u8,
     pub shift: u8,
-    pub rm: RegisterName,
+    pub rm: NormalizedRegister,
 }
 
 impl From<&Instruction> for DataProcessingImmediateShift {
@@ -26,11 +26,11 @@ impl From<&Instruction> for DataProcessingImmediateShift {
 
         let opcode = DataProcessingInstruction::from((instruction_val >> 21) & 0b1111);
         let s_flag = BitState::from(instruction_val >> 20);
-        let rn = RegisterName::from((instruction_val >> 16) & 0b1111);
-        let rd = RegisterName::from((instruction_val >> 12) & 0b1111);
+        let rn = NormalizedRegister::from((instruction_val >> 16) & 0b1111);
+        let rd = NormalizedRegister::from((instruction_val >> 12) & 0b1111);
         let shift_amount = u8::try_from((instruction_val >> 7) & 0b1_1111).unwrap();
         let shift = u8::try_from((instruction_val >> 5) & 0b11).unwrap();
-        let rm = RegisterName::from(instruction_val & 0b1111);
+        let rm = NormalizedRegister::from(instruction_val & 0b1111);
 
         Self{opcode, s_flag, rn, rd, shift_imm: shift_amount, shift, rm}
     }
@@ -42,9 +42,11 @@ mod tests {
         DataProcessingImmediateShift,
         BitState,
         Instruction,
-        RegisterName,
+        NormalizedRegister,
         DataProcessingInstruction,
     };
+
+    use crate::cpus::general::register::RegisterName;
 
     #[test]
     fn test_from() {
@@ -54,11 +56,11 @@ mod tests {
         let expected_value = DataProcessingImmediateShift {
             opcode: DataProcessingInstruction::CMP,
             s_flag: BitState::Set,
-            rn: RegisterName::R10,
-            rd: RegisterName::R5,
+            rn: NormalizedRegister::from(RegisterName::R10),
+            rd: NormalizedRegister::from(RegisterName::R5),
             shift_imm: 0b11100,
             shift: 0b10,
-            rm: RegisterName::R9,
+            rm: NormalizedRegister::from(RegisterName::R9),
         };
 
         assert_eq!(value, expected_value, "{:#?}, {:#?}", &value, &expected_value);

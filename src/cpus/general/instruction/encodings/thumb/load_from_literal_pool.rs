@@ -1,6 +1,9 @@
 use crate::cpus::general::instruction::Instruction;
 
-use std::convert::{From, TryFrom};
+use std::convert::{
+    From,
+    TryFrom,
+};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct LoadFromLiteralPool {
@@ -14,13 +17,19 @@ impl From<&Instruction> for LoadFromLiteralPool {
 
         let rd = u8::try_from((instruction_val >> 8) & 0b111).unwrap();
         let pc_relative_offset = u8::try_from(instruction_val & 0b1111_1111).unwrap();
-        Self {rd, pc_relative_offset}
+        Self {
+            rd,
+            pc_relative_offset,
+        }
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::{LoadFromLiteralPool, Instruction};
+    use super::{
+        Instruction,
+        LoadFromLiteralPool,
+    };
 
     #[test]
     fn from() {
@@ -32,6 +41,10 @@ mod tests {
             pc_relative_offset: 0b1010_0101,
         };
 
-        assert_eq!(value, expected_value, "{:#?}, {:#?}", &value, &expected_value);
+        assert_eq!(
+            value, expected_value,
+            "{:#?}, {:#?}",
+            &value, &expected_value
+        );
     }
 }

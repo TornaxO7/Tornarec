@@ -6,4 +6,5 @@ mod normalized_register;
 
 pub use register_name::RegisterName;
 pub use registers::Registers;
+pub use normalized_register::NormalizedRegister;
 pub use cpsr::Cpsr;

@@ -1,7 +1,7 @@
 use crate::cpus::general::{
     instruction::Instruction,
     BitState,
-    register::RegisterName,
+    register::NormalizedRegister,
 };
 
 use std::convert::{From, TryFrom};
@@ -11,8 +11,8 @@ pub struct SpecialDataProcessing {
     opcode: u8,
     h1: BitState,
     h2: BitState,
-    rm: RegisterName,
-    rd_rn: RegisterName,
+    rm: NormalizedRegister,
+    rd_rn: NormalizedRegister,
 }
 
 impl From<&Instruction> for SpecialDataProcessing {
@@ -22,15 +22,17 @@ impl From<&Instruction> for SpecialDataProcessing {
         let opcode = u8::try_from((instruction_val >> 8) & 0b11).unwrap();
         let h1 = BitState::from(instruction_val >> 7);
         let h2 = BitState::from(instruction_val >> 6);
-        let rm = RegisterName::from((instruction_val >> 3) & 0b111);
-        let rd_rn = RegisterName::from(instruction_val & 0b111);
+        let rm = NormalizedRegister::from((instruction_val >> 3) & 0b111);
+        let rd_rn = NormalizedRegister::from(instruction_val & 0b111);
         Self {opcode, h1, h2, rm, rd_rn}
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::{SpecialDataProcessing, Instruction, BitState, RegisterName};
+    use super::{SpecialDataProcessing, Instruction, BitState, NormalizedRegister};
+
+    use crate::cpus::general::register::RegisterName;
 
     #[test]
     fn from() {
@@ -41,8 +43,8 @@ mod tests {
             opcode: 0b11,
             h1: BitState::Set,
             h2: BitState::Unset,
-            rm: RegisterName::R5,
-            rd_rn: RegisterName::R2,
+            rm: NormalizedRegister::from(RegisterName::R5),
+            rd_rn: NormalizedRegister::from(RegisterName::R2),
         };
 
         assert_eq!(value, expected_value, "{:#?}, {:#?}", &value, &expected_value);

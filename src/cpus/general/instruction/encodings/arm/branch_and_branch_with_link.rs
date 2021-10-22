@@ -18,13 +18,17 @@ impl From<&Instruction> for BranchAndBranchWithLink {
         let l_flag = BitState::from(instruction_val >> 24);
         let offset = instruction_val & 0b1111_1111_1111_1111_1111_1111;
 
-        Self {l_flag, offset}
+        Self { l_flag, offset }
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::{BranchAndBranchWithLink, Instruction, BitState};
+    use super::{
+        BitState,
+        BranchAndBranchWithLink,
+        Instruction,
+    };
 
     #[test]
     fn from_branch() {
@@ -36,7 +40,11 @@ mod tests {
             offset: 0b1111_1111_1111_1111_0000_0000,
         };
 
-        assert_eq!(value, expected_value, "{:#?}, {:#?}", &value, &expected_value);
+        assert_eq!(
+            value, expected_value,
+            "{:#?}, {:#?}",
+            &value, &expected_value
+        );
     }
 
     #[test]
@@ -49,6 +57,10 @@ mod tests {
             offset: 0b1111_1111_1111_1111_0000_0000,
         };
 
-        assert_eq!(value, expected_value, "{:#?}, {:#?}", &value, &expected_value);
+        assert_eq!(
+            value, expected_value,
+            "{:#?}, {:#?}",
+            &value, &expected_value
+        );
     }
 }

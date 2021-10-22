@@ -1,7 +1,7 @@
 use crate::cpus::general::{
     instruction::Instruction,
     BitState,
-    register::RegisterName,
+    register::NormalizedRegister,
 };
 
 use std::convert::{From, TryFrom};
@@ -13,8 +13,8 @@ pub struct LoadAndStoreImmediateOffset {
     b_flag: BitState,
     w_flag: BitState,
     l_flag: BitState,
-    rn: RegisterName,
-    rd: RegisterName,
+    rn: NormalizedRegister,
+    rd: NormalizedRegister,
     immediate: u16,
 }
 
@@ -27,8 +27,8 @@ impl From<&Instruction> for LoadAndStoreImmediateOffset {
         let b_flag = BitState::from(instruction_val >> 22);
         let w_flag = BitState::from(instruction_val >> 21);
         let l_flag = BitState::from(instruction_val >> 20);
-        let rn = RegisterName::from((instruction_val >> 16) & 0b1111);
-        let rd = RegisterName::from((instruction_val >> 12) & 0b1111);
+        let rn = NormalizedRegister::from((instruction_val >> 16) & 0b1111);
+        let rd = NormalizedRegister::from((instruction_val >> 12) & 0b1111);
         let immediate = u16::try_from(instruction_val & 0b1111_1111_1111).unwrap();
         Self { p_flag, u_flag, b_flag, w_flag, l_flag, rn, rd, immediate }
     }
@@ -36,7 +36,14 @@ impl From<&Instruction> for LoadAndStoreImmediateOffset {
 
 #[cfg(test)]
 mod tests {
-    use super::{BitState, Instruction, LoadAndStoreImmediateOffset, RegisterName};
+    use super::{
+        BitState,
+        Instruction,
+        LoadAndStoreImmediateOffset,
+        NormalizedRegister
+    };
+
+    use crate::cpus::general::register::RegisterName;
 
     #[test]
     fn from() {
@@ -49,8 +56,8 @@ mod tests {
             b_flag: BitState::Set,
             w_flag: BitState::Unset,
             l_flag: BitState::Set,
-            rn: RegisterName::R12,
-            rd: RegisterName::R3,
+            rn: NormalizedRegister::from(RegisterName::R12),
+            rd: NormalizedRegister::from(RegisterName::R3),
             immediate: 0b1110_1100_1000,
         };
 

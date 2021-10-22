@@ -1,13 +1,13 @@
 use crate::cpus::general::instruction::{
     Instruction,
-    decoder::{
-        ArmDecoder, ThumbDecoder
+    decoded::{
+        ArmDecoded, ThumbDecoder
     },
 };
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum InstructionMap {
-    Arm(ArmDecoder),
+    Arm(ArmDecoded),
     Thumb(ThumbDecoder),
     Noop,
     Unpredictable,
@@ -15,7 +15,7 @@ pub enum InstructionMap {
 
 impl InstructionMap {
     pub fn get_arm_instruction(instruction: &Instruction) -> Self {
-        Self::Arm(ArmDecoder::from(instruction))
+        Self::Arm(ArmDecoded::from(instruction))
     }
 
     pub fn get_thumb_instruction(instruction: &Instruction) -> Self {

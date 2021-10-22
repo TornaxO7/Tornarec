@@ -1,5 +1,5 @@
 mod arm;
 mod thumb;
 
-pub use arm::ArmDecoder;
+pub use arm::ArmDecoded;
 pub use thumb::ThumbDecoder;

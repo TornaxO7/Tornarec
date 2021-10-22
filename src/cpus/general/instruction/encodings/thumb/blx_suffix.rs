@@ -1,6 +1,9 @@
 use crate::cpus::general::instruction::Instruction;
 
-use std::convert::{From, TryFrom};
+use std::convert::{
+    From,
+    TryFrom,
+};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct BlxSuffix {
@@ -12,13 +15,16 @@ impl From<&Instruction> for BlxSuffix {
         let instruction_val = instruction.get_value_as_u32();
 
         let offset = u16::try_from((instruction_val >> 1) & 0b11_1111_1111).unwrap();
-        Self {offset}
+        Self { offset }
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::{BlxSuffix, Instruction};
+    use super::{
+        BlxSuffix,
+        Instruction,
+    };
 
     #[test]
     fn from() {
@@ -29,6 +35,10 @@ mod tests {
             offset: 0b10_1010_1010,
         };
 
-        assert_eq!(value, expected_value, "{:#?}, {:#?}", &value, &expected_value);
+        assert_eq!(
+            value, expected_value,
+            "{:#?}, {:#?}",
+            &value, &expected_value
+        );
     }
 }

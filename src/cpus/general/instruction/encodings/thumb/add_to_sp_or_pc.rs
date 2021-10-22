@@ -1,15 +1,18 @@
 use crate::cpus::general::{
     instruction::Instruction,
+    register::NormalizedRegister,
     BitState,
-    register::RegisterName,
 };
 
-use std::convert::{From, TryFrom};
+use std::convert::{
+    From,
+    TryFrom,
+};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AddToSpOrPc {
     sp: BitState,
-    rd: RegisterName,
+    rd: NormalizedRegister,
     immediate: u8,
 }
 
@@ -18,27 +21,38 @@ impl From<&Instruction> for AddToSpOrPc {
         let instruction_val = instruction.get_value_as_u32();
 
         let sp = BitState::from(instruction_val >> 11);
-        let rd = RegisterName::from((instruction_val >> 8) & 0b111);
+        let rd = NormalizedRegister::from((instruction_val >> 8) & 0b111);
         let immediate = u8::try_from(instruction_val & 0b1111_1111).unwrap();
-        Self {sp, rd, immediate}
+        Self { sp, rd, immediate }
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::{AddToSpOrPc, Instruction, BitState, RegisterName};
+    use super::{
+        AddToSpOrPc,
+        BitState,
+        Instruction,
+        NormalizedRegister,
+    };
+
+    use crate::cpus::general::register::RegisterName;
 
     #[test]
     fn from() {
         let instruction = Instruction::from(0b1011_1_101_1100_1000);
         let value = AddToSpOrPc::from(&instruction);
-        
+
         let expected_value = AddToSpOrPc {
             sp: BitState::Set,
-            rd: RegisterName::R5,
+            rd: NormalizedRegister::from(RegisterName::R5),
             immediate: 0b1100_1000,
         };
 
-        assert_eq!(value, expected_value, "{:#?}, {:#?}", &value, &expected_value);
+        assert_eq!(
+            value, expected_value,
+            "{:#?}, {:#?}",
+            &value, &expected_value
+        );
     }
 }

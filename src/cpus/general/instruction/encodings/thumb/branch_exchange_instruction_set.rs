@@ -1,7 +1,7 @@
 use crate::cpus::general::{
     instruction::Instruction,
-    BitState,
     register::RegisterName,
+    BitState,
 };
 
 use std::convert::From;
@@ -20,13 +20,18 @@ impl From<&Instruction> for BranchExchangeInstructionSet {
         let l_flag = BitState::from(instruction_val >> 7);
         let h2 = BitState::from(instruction_val >> 6);
         let rm = RegisterName::from((instruction_val >> 3) & 0b111);
-        Self {l_flag, h2, rm}
+        Self { l_flag, h2, rm }
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::{BranchExchangeInstructionSet, Instruction, BitState, RegisterName};
+    use super::{
+        BitState,
+        BranchExchangeInstructionSet,
+        Instruction,
+        RegisterName,
+    };
 
     #[test]
     fn from() {
@@ -39,6 +44,10 @@ mod tests {
             rm: RegisterName::R5,
         };
 
-        assert_eq!(value, expected_value, "{:#?}, {:#?}", &value, &expected_value);
+        assert_eq!(
+            value, expected_value,
+            "{:#?}, {:#?}",
+            &value, &expected_value
+        );
     }
 }

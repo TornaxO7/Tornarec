@@ -54,20 +54,22 @@ impl Pipeline {
     }
 
     pub fn decode(&mut self, cpsr: &Cpsr) {
-        match &self.prefetch {
+        let decoded_instruction = match &self.prefetch {
             Prefetch::Success(instruction) => {
                 if cpsr.get_operating_state() == OperatingState::Arm {
                     if cpsr.is_condition_set(instruction.get_condition_code_flag()) {
-                        self.decoded_instruction = InstructionMap::get_arm_instruction(instruction);
+                        InstructionMap::get_arm_instruction(instruction)
                     } else {
-                        self.decoded_instruction = InstructionMap::Noop;
+                        InstructionMap::Noop
                     }
                 } else {
-                    self.decoded_instruction = InstructionMap::get_thumb_instruction(instruction);
+                    InstructionMap::get_thumb_instruction(instruction)
                 }
             },
             Prefetch::Invalid => panic!("Houston, we've a little problem..."),
-        }
+        };
+
+        self.decoded_instruction = decoded_instruction;
     }
 
     pub fn get_decoded_instruction(&self) -> InstructionMap {
