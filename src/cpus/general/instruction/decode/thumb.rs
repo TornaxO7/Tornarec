@@ -1,4 +1,5 @@
 use crate::cpus::general::instruction::{
+    decode::DecodeData,
     checker::{
         ThumbInstructionChecker, 
         thumb::miscellaneous::MiscellaneousInstruction
@@ -31,11 +32,10 @@ use crate::cpus::general::instruction::{
             SoftwareBreakpoint,
         },
     },
-    Instruction,
 };
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub enum ThumbDecoder {
+pub enum ThumbDecode {
     ShiftByImmediate(ShiftByImmediate),
     AddSubtractRegister(AddSubtractRegister),
     AddSubtractImmediate(AddSubtractImmediate),
@@ -64,59 +64,59 @@ pub enum ThumbDecoder {
     SoftwareBreakpoint(SoftwareBreakpoint),
 }
 
-impl From<&Instruction> for ThumbDecoder {
-    fn from(instruction: &Instruction) -> Self {
-        match ThumbInstructionChecker::from(instruction) {
+impl<'a> From<DecodeData<'a>> for ThumbDecode {
+    fn from(decode_data: DecodeData<'a>) -> Self {
+        match ThumbInstructionChecker::from(decode_data.instruction) {
             ThumbInstructionChecker::ShiftByImmediate =>
-                Self::ShiftByImmediate(ShiftByImmediate::from(instruction)),
+                Self::ShiftByImmediate(ShiftByImmediate::from(decode_data)),
             ThumbInstructionChecker::AddSubtractRegister =>
-                Self::AddSubtractRegister(AddSubtractRegister::from(instruction)),
+                Self::AddSubtractRegister(AddSubtractRegister::from(decode_data)),
             ThumbInstructionChecker::AddSubtractImmediate =>
-                Self::AddSubtractImmediate(AddSubtractImmediate::from(instruction)),
+                Self::AddSubtractImmediate(AddSubtractImmediate::from(decode_data)),
             ThumbInstructionChecker::AddSubtractCompareMoveImmediate =>
-                Self::AddSubtractCompareMoveImmediate(AddSubtractCompareMoveImmediate::from(instruction)),
+                Self::AddSubtractCompareMoveImmediate(AddSubtractCompareMoveImmediate::from(decode_data)),
             ThumbInstructionChecker::DataProcessingRegister =>
-                Self::DataProcessingRegister(DataProcessingRegister::from(instruction)),
+                Self::DataProcessingRegister(DataProcessingRegister::from(decode_data)),
             ThumbInstructionChecker::SpecialDataProcessing =>
-                Self::SpecialDataProcessing(SpecialDataProcessing::from(instruction)),
+                Self::SpecialDataProcessing(SpecialDataProcessing::from(decode_data)),
             ThumbInstructionChecker::BranchExchangeInstructionSet =>
-                Self::BranchExchangeInstructionSet(BranchExchangeInstructionSet::from(instruction)),
+                Self::BranchExchangeInstructionSet(BranchExchangeInstructionSet::from(decode_data)),
             ThumbInstructionChecker::LoadFromLiteralPool =>
-                Self::LoadFromLiteralPool(LoadFromLiteralPool::from(instruction)),
+                Self::LoadFromLiteralPool(LoadFromLiteralPool::from(decode_data)),
             ThumbInstructionChecker::LoadStoreRegisterOffset =>
-                Self::LoadStoreRegisterOffset(LoadStoreRegisterOffset::from(instruction)),
+                Self::LoadStoreRegisterOffset(LoadStoreRegisterOffset::from(decode_data)),
             ThumbInstructionChecker::LoadStoreWordByteImmediateOffset =>
-                Self::LoadStoreWordByteImmediateOffset(LoadStoreWordByteImmediateOffset::from(instruction)),
+                Self::LoadStoreWordByteImmediateOffset(LoadStoreWordByteImmediateOffset::from(decode_data)),
             ThumbInstructionChecker::LoadStoreHalfwordImmediateOffset =>
-                Self::LoadStoreHalfwordImmediateOffset(LoadStoreHalfwordImmediateOffset::from(instruction)),
+                Self::LoadStoreHalfwordImmediateOffset(LoadStoreHalfwordImmediateOffset::from(decode_data)),
             ThumbInstructionChecker::LoadStoreToFromStack =>
-                Self::LoadStoretoFromStack(LoadStoreToFromStack::from(instruction)),
+                Self::LoadStoretoFromStack(LoadStoreToFromStack::from(decode_data)),
             ThumbInstructionChecker::AddToSpOrPc =>
-                Self::AddToSpOrPc(AddToSpOrPc::from(instruction)),
+                Self::AddToSpOrPc(AddToSpOrPc::from(decode_data)),
             ThumbInstructionChecker::Miscellaneous(miscellaneous_instruction) => match miscellaneous_instruction {
                 MiscellaneousInstruction::AdjustStackPointer =>
-                    Self::AdjustStackPointer(AdjustStackPointer::from(instruction)),
+                    Self::AdjustStackPointer(AdjustStackPointer::from(decode_data)),
                 MiscellaneousInstruction::PushPopRegisterList =>
-                    Self::PushPopRegisterList(PushPopRegisterList::from(instruction)),
+                    Self::PushPopRegisterList(PushPopRegisterList::from(decode_data)),
                 MiscellaneousInstruction::SoftwareBreakpoint =>
-                    Self::SoftwareBreakpoint(SoftwareBreakpoint::from(instruction)),
+                    Self::SoftwareBreakpoint(SoftwareBreakpoint::from(decode_data)),
             },
             ThumbInstructionChecker::LoadStoreMultiple =>
-                Self::LoadStoreMultiple(LoadStoreMultiple::from(instruction)),
+                Self::LoadStoreMultiple(LoadStoreMultiple::from(decode_data)),
             ThumbInstructionChecker::ConditionalBranch =>
-                Self::ConditionalBranch(ConditionalBranch::from(instruction)),
+                Self::ConditionalBranch(ConditionalBranch::from(decode_data)),
             ThumbInstructionChecker::UndefinedInstruction =>
                 Self::UndefinedInstruction,
             ThumbInstructionChecker::SoftwareInterrupt =>
-                Self::SoftwareInterrupt(SoftwareInterrupt::from(instruction)),
+                Self::SoftwareInterrupt(SoftwareInterrupt::from(decode_data)),
             ThumbInstructionChecker::UnconditionalBranch =>
-                Self::UnconditionalBranch(UnconditionalBranch::from(instruction)),
+                Self::UnconditionalBranch(UnconditionalBranch::from(decode_data)),
             ThumbInstructionChecker::BlxSuffix =>
-                Self::BlxSuffix(BlxSuffix::from(instruction)),
+                Self::BlxSuffix(BlxSuffix::from(decode_data)),
             ThumbInstructionChecker::BlOrBlxPrefix =>
-                Self::BlOrBlxPrefix(BlOrBlxPrefix::from(instruction)),
+                Self::BlOrBlxPrefix(BlOrBlxPrefix::from(decode_data)),
             ThumbInstructionChecker::BlSuffix =>
-                Self::BlSuffix(BlSuffix::from(instruction)),
+                Self::BlSuffix(BlSuffix::from(decode_data)),
         }
     }
 }

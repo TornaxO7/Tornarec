@@ -1,5 +1,5 @@
 use crate::cpus::general::{
-    instruction::Instruction,
+    instruction::decode::DecodeData,
     BitState,
 };
 
@@ -16,9 +16,9 @@ pub struct CoprocessorRegisterTransfers {
     crm: u8,
 }
 
-impl From<&Instruction> for CoprocessorRegisterTransfers {
-    fn from(instruction: &Instruction) -> Self {
-        let instruction_val = instruction.get_value_as_u32();
+impl<'a> From<DecodeData<'a>> for CoprocessorRegisterTransfers {
+    fn from(decode_data: DecodeData<'a>) -> Self {
+        let instruction_val = decode_data.instruction.get_value_as_u32();
 
         let opcode1 = u8::try_from((instruction_val >> 21) & 0b111).unwrap();
         let l_flag = BitState::from(instruction_val >> 20);

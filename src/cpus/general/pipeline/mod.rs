@@ -9,8 +9,11 @@ use crate::{
         Address,
     },
     cpus::general::{
-        instruction::Instruction,
-        register::Cpsr,
+        instruction::{
+            Instruction,
+            decode::DecodeData,
+        },
+        register::Registers,
         OperatingState,
         InstructionMap,
     },
@@ -53,17 +56,22 @@ impl Pipeline {
         }
     }
 
-    pub fn decode(&mut self, cpsr: &Cpsr) {
+    pub fn decode(&mut self, registers: &Registers, ram: &Ram) {
+        let cpsr = registers.get_ref_cpsr();
+
         let decoded_instruction = match &self.prefetch {
             Prefetch::Success(instruction) => {
+
+                let decode_data = DecodeData::new(registers, ram, instruction);
+
                 if cpsr.get_operating_state() == OperatingState::Arm {
                     if cpsr.is_condition_set(instruction.get_condition_code_flag()) {
-                        InstructionMap::get_arm_instruction(instruction)
+                        InstructionMap::get_arm_instruction(decode_data)
                     } else {
                         InstructionMap::Noop
                     }
                 } else {
-                    InstructionMap::get_thumb_instruction(instruction)
+                    InstructionMap::get_thumb_instruction(decode_data)
                 }
             },
             Prefetch::Invalid => panic!("Houston, we've a little problem..."),

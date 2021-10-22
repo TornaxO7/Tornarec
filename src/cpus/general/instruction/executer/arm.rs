@@ -9,6 +9,7 @@ use crate::{
     ram::{Ram, data_types::DataType},
 };
 
+
 #[derive(Debug, PartialEq, Eq)]
 pub struct ArmExecuter<'a> {
     registers: &'a mut Registers,
@@ -47,6 +48,16 @@ impl<'a> ArmExecuter<'a> {
             DataProcessingInstruction::ADD => {
 			},
             DataProcessingInstruction::ADC => {
+                let rm: u32 = if data.rm == NormalizedRegister::from(RegisterName::Pc) {
+                    next_instruction_val
+                } else {
+                    self.registers.get_reg(data.rm.get_reg())
+                };
+
+                if data.shift_imm == 0 {
+
+                } else {
+                }
 			},
             DataProcessingInstruction::SBC => {
 			},

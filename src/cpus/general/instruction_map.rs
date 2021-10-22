@@ -1,25 +1,22 @@
-use crate::cpus::general::instruction::{
-    Instruction,
-    decoded::{
-        ArmDecoded, ThumbDecoder
-    },
+use crate::cpus::general::instruction::decode::{
+    ArmDecode, ThumbDecode, DecodeData,
 };
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum InstructionMap {
-    Arm(ArmDecoded),
-    Thumb(ThumbDecoder),
+    Arm(ArmDecode),
+    Thumb(ThumbDecode),
     Noop,
     Unpredictable,
 }
 
 impl InstructionMap {
-    pub fn get_arm_instruction(instruction: &Instruction) -> Self {
-        Self::Arm(ArmDecoded::from(instruction))
+    pub fn get_arm_instruction(decode_data: DecodeData) -> Self {
+        Self::Arm(ArmDecode::from(decode_data))
     }
 
-    pub fn get_thumb_instruction(instruction: &Instruction) -> Self {
-        Self::Thumb(ThumbDecoder::from(instruction))
+    pub fn get_thumb_instruction(decode_data: DecodeData) -> Self {
+        Self::Thumb(ThumbDecode::from(decode_data))
     }
 }
 

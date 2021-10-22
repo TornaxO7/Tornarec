@@ -1,5 +1,5 @@
 use crate::cpus::general::{
-    instruction::Instruction,
+    instruction::decode::DecodeData,
     register::NormalizedRegister,
 };
 
@@ -16,9 +16,9 @@ pub struct Miscellaneous1 {
     // Line3 { r_flag: BitState, rn: u8, rd: u8, rotate_imm: u8, immed_8: u8 }
 }
 
-impl From<&Instruction> for Miscellaneous1 {
-    fn from(instruction: &Instruction) -> Self {
-        let instruction_val = instruction.get_value_as_u32();
+impl<'a> From<DecodeData<'a>> for Miscellaneous1 {
+    fn from(decode_data: DecodeData<'a>) -> Self {
+        let instruction_val = decode_data.instruction.get_value_as_u32();
 
         let rn = NormalizedRegister::from((instruction_val >> 16) & 0b1111);
         let rd = NormalizedRegister::from((instruction_val >> 12) & 0b1111);
@@ -34,7 +34,6 @@ impl From<&Instruction> for Miscellaneous1 {
 mod tests {
     use super::{
         Miscellaneous1,
-        Instruction,
         NormalizedRegister
     };
 

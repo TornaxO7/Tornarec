@@ -4,7 +4,7 @@ use error::MoveImmediateToStatusRegisterError;
 
 use crate::cpus::general::{
     BitState,
-    instruction::Instruction,
+    instruction::decode::DecodeData,
 };
 
 use std::convert::{From, TryFrom};
@@ -17,9 +17,9 @@ pub struct MoveImmediateToStatusRegister {
     immediate: u8,
 }
 
-impl From<&Instruction> for MoveImmediateToStatusRegister {
-    fn from(instruction: &Instruction) -> Self {
-        let instruction_val = instruction.get_value_as_u32();
+impl<'a> From<DecodeData<'a>> for MoveImmediateToStatusRegister {
+    fn from(decode_data: DecodeData<'a>) -> Self {
+        let instruction_val = decode_data.instruction.get_value_as_u32();
 
         let r_flag = BitState::from(instruction_val >> 22);
         let mask = u8::try_from((instruction_val >> 16) & 0b1111).unwrap();

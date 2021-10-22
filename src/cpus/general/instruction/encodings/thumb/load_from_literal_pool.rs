@@ -1,4 +1,4 @@
-use crate::cpus::general::instruction::Instruction;
+use crate::cpus::general::instruction::decode::DecodeData;
 
 use std::convert::{
     From,
@@ -11,9 +11,9 @@ pub struct LoadFromLiteralPool {
     pc_relative_offset: u8,
 }
 
-impl From<&Instruction> for LoadFromLiteralPool {
-    fn from(instruction: &Instruction) -> Self {
-        let instruction_val = instruction.get_value_as_u32();
+impl<'a> From<DecodeData<'a>> for LoadFromLiteralPool {
+    fn from(decode_data: DecodeData<'a>) -> Self {
+        let instruction_val = decode_data.instruction.get_value_as_u32();
 
         let rd = u8::try_from((instruction_val >> 8) & 0b111).unwrap();
         let pc_relative_offset = u8::try_from(instruction_val & 0b1111_1111).unwrap();

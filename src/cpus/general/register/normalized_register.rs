@@ -5,6 +5,12 @@ use std::convert::From;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct NormalizedRegister(RegisterName);
 
+impl NormalizedRegister {
+    pub fn get_reg(&self) -> RegisterName {
+        self.0.clone()
+    }
+}
+
 impl From<RegisterName> for NormalizedRegister {
     fn from(register_name: RegisterName) -> Self {
 

@@ -1,6 +1,13 @@
-use crate::cpus::general::{instruction::Instruction, register::NormalizedRegister, BitState};
+use crate::cpus::general::{
+    instruction::decode::DecodeData,
+    register::NormalizedRegister,
+    BitState,
+};
 
-use std::convert::{From, TryFrom};
+use std::convert::{
+    From,
+    TryFrom,
+};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AddSubtractImmediate {
@@ -10,9 +17,9 @@ pub struct AddSubtractImmediate {
     rd: NormalizedRegister,
 }
 
-impl From<&Instruction> for AddSubtractImmediate {
-    fn from(instruction: &Instruction) -> Self {
-        let instruction_val = instruction.get_value_as_u32();
+impl<'a> From<DecodeData<'a>> for AddSubtractImmediate {
+    fn from(decode_data: DecodeData<'a>) -> Self {
+        let instruction_val = decode_data.instruction.get_value_as_u32();
 
         let opc = BitState::from(instruction_val >> 9);
         let immediate = u8::try_from((instruction_val >> 6) & 0b111).unwrap();
@@ -29,7 +36,12 @@ impl From<&Instruction> for AddSubtractImmediate {
 
 #[cfg(test)]
 mod tests {
-    use super::{AddSubtractImmediate, BitState, Instruction, NormalizedRegister};
+    use super::{
+        AddSubtractImmediate,
+        BitState,
+        Instruction,
+        NormalizedRegister,
+    };
 
     #[test]
     fn from() {

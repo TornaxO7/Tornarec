@@ -1,5 +1,5 @@
 use crate::cpus::general::{
-    instruction::Instruction,
+    instruction::decode::DecodeData,
     register::NormalizedRegister,
 };
 
@@ -15,9 +15,9 @@ pub struct DataProcessingRegister {
     rd_rn: NormalizedRegister,
 }
 
-impl From<&Instruction> for DataProcessingRegister {
-    fn from(instruction: &Instruction) -> Self {
-        let instruction_val = instruction.get_value_as_u32();
+impl<'a> From<DecodeData<'a>> for DataProcessingRegister {
+    fn from(decode_data: DecodeData<'a>) -> Self {
+        let instruction_val = decode_data.instruction.get_value_as_u32();
 
         let opcode = u8::try_from((instruction_val >> 6) & 0b1111).unwrap();
         let rm_rs = NormalizedRegister::from((instruction_val >> 3) & 0b111);

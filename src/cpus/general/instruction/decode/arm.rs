@@ -1,4 +1,5 @@
 use crate::cpus::general::instruction::{
+    decode::DecodeData,
     encodings::arm::{
         DataProcessingImmediateShift,
         Miscellaneous1,
@@ -17,13 +18,12 @@ use crate::cpus::general::instruction::{
         CoprocessorRegisterTransfers,
     },
     checker::ArmInstructionChecker,
-    Instruction,
 };
 
 use std::convert::From;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub enum ArmDecoded {
+pub enum ArmDecode {
     DataProcessingImmediateShift(DataProcessingImmediateShift),
     Miscellaneous1(Miscellaneous1),
     DataProcessingRegisterShift(DataProcessingRegisterShift),
@@ -45,45 +45,45 @@ pub enum ArmDecoded {
     SoftwareInterrupt,
 }
 
-impl From<&Instruction> for ArmDecoded {
-    fn from(instruction: &Instruction) -> Self {
-        match ArmInstructionChecker::from(instruction) {
+impl<'a> From<DecodeData<'a>> for ArmDecode {
+    fn from(decode_data: DecodeData) -> Self {
+        match ArmInstructionChecker::from(decode_data.instruction) {
            ArmInstructionChecker::DataProcessingImmediateShift =>
-               Self::DataProcessingImmediateShift(DataProcessingImmediateShift::from(instruction)),
+               Self::DataProcessingImmediateShift(DataProcessingImmediateShift::from(decode_data)),
            ArmInstructionChecker::Miscellaneous1 =>
-               Self::Miscellaneous1(Miscellaneous1::from(instruction)),
+               Self::Miscellaneous1(Miscellaneous1::from(decode_data)),
            ArmInstructionChecker::DataProcessingRegisterShift =>
-               Self::DataProcessingRegisterShift(DataProcessingRegisterShift::from(instruction)),
+               Self::DataProcessingRegisterShift(DataProcessingRegisterShift::from(decode_data)),
            ArmInstructionChecker::Miscellaneous2 =>
-               Self::Miscellaneous2(Miscellaneous2::from(instruction)),
+               Self::Miscellaneous2(Miscellaneous2::from(decode_data)),
            ArmInstructionChecker::Multiplies =>
-               Self::Multiplies(Multiplies::from(instruction)),
+               Self::Multiplies(Multiplies::from(decode_data)),
            ArmInstructionChecker::ExtraLoadAndStores =>
-               Self::ExtraLoadAndStores(ExtraLoadAndStores::from(instruction)),
+               Self::ExtraLoadAndStores(ExtraLoadAndStores::from(decode_data)),
            ArmInstructionChecker::DataProcessingImmediate =>
-               Self::DataProcessingImmediate(DataProcessingImmediate::from(instruction)),
+               Self::DataProcessingImmediate(DataProcessingImmediate::from(decode_data)),
            ArmInstructionChecker::UndefinedInstruction =>
                Self::UndefinedInstruction,
            ArmInstructionChecker::MoveImmediateToStatusRegister =>
-               Self::MoveImmediateToStatusRegister(MoveImmediateToStatusRegister::from(instruction)),
+               Self::MoveImmediateToStatusRegister(MoveImmediateToStatusRegister::from(decode_data)),
            ArmInstructionChecker::LoadAndStoreImmediateOffset =>
-               Self::LoadAndStoreImmediateOffset(LoadAndStoreImmediateOffset::from(instruction)),
+               Self::LoadAndStoreImmediateOffset(LoadAndStoreImmediateOffset::from(decode_data)),
            ArmInstructionChecker::LoadAndStoreRegisterOffset =>
-               Self::LoadAndStoreRegisterOffset(LoadAndStoreRegisterOffset::from(instruction)),
+               Self::LoadAndStoreRegisterOffset(LoadAndStoreRegisterOffset::from(decode_data)),
            ArmInstructionChecker::MediaInstructions =>
                Self::MediaInstructions,
            ArmInstructionChecker::ArchitecturallyUndefined =>
                Self::ArchitecturallyUndefined,
            ArmInstructionChecker::LoadAndStoreMultiple =>
-               Self::LoadAndStoreMultiple(LoadAndStoreMultiple::from(instruction)),
+               Self::LoadAndStoreMultiple(LoadAndStoreMultiple::from(decode_data)),
            ArmInstructionChecker::BranchAndBranchWithLink =>
-               Self::BranchAndBranchWithLink(BranchAndBranchWithLink::from(instruction)),
+               Self::BranchAndBranchWithLink(BranchAndBranchWithLink::from(decode_data)),
            ArmInstructionChecker::CoprocessorLoadAndStoreAndDoubleRegisterTransfers =>
-               Self::CoprocessorLoadAndStoreAndDoubleRegisterTransfers(CoprocessorLoadAndStoreAndDoubleRegisterTransfers::from(instruction)),
+               Self::CoprocessorLoadAndStoreAndDoubleRegisterTransfers(CoprocessorLoadAndStoreAndDoubleRegisterTransfers::from(decode_data)),
            ArmInstructionChecker::CoprocessorDataProcessing =>
-               Self::CoprocessorDataProcessing(CoprocessorDataProcessing::from(instruction)),
+               Self::CoprocessorDataProcessing(CoprocessorDataProcessing::from(decode_data)),
            ArmInstructionChecker::CoprocessorRegisterTransfers =>
-               Self::CoprocessorRegisterTransfers(CoprocessorRegisterTransfers::from(instruction)),
+               Self::CoprocessorRegisterTransfers(CoprocessorRegisterTransfers::from(decode_data)),
            ArmInstructionChecker::SoftwareInterrupt =>
                Self::SoftwareInterrupt,
            ArmInstructionChecker::UnconditionalInstructions =>

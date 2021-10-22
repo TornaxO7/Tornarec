@@ -1,5 +1,5 @@
 use crate::cpus::general::{
-    instruction::Instruction,
+    instruction::decode::DecodeData,
     register::NormalizedRegister,
     BitState,
 };
@@ -17,9 +17,9 @@ pub struct LoadStoreHalfwordImmediateOffset {
     rd: NormalizedRegister,
 }
 
-impl From<&Instruction> for LoadStoreHalfwordImmediateOffset {
-    fn from(instruction: &Instruction) -> Self {
-        let instruction_val = instruction.get_value_as_u32();
+impl<'a> From<DecodeData<'a>> for LoadStoreHalfwordImmediateOffset {
+    fn from(decode_data: DecodeData<'a>) -> Self {
+        let instruction_val = decode_data.instruction.get_value_as_u32();
 
         let l_flag = BitState::from(instruction_val >> 11);
         let offset = u8::try_from((instruction_val >> 6) & 0b1_1111).unwrap();

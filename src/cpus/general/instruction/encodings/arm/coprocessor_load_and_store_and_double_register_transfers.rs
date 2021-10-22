@@ -1,6 +1,13 @@
-use crate::cpus::general::{instruction::Instruction, register::NormalizedRegister, BitState};
+use crate::cpus::general::{
+    instruction::decode::DecodeData,
+    register::NormalizedRegister,
+    BitState,
+};
 
-use std::convert::{From, TryFrom};
+use std::convert::{
+    From,
+    TryFrom,
+};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CoprocessorLoadAndStoreAndDoubleRegisterTransfers {
@@ -9,15 +16,15 @@ pub struct CoprocessorLoadAndStoreAndDoubleRegisterTransfers {
     n_flag: BitState,
     w_flag: BitState,
     l_flag: BitState,
-    rn:     NormalizedRegister,
-    crd:    u8,
+    rn: NormalizedRegister,
+    crd: u8,
     cp_num: u8,
     offset: u8,
 }
 
-impl From<&Instruction> for CoprocessorLoadAndStoreAndDoubleRegisterTransfers {
-    fn from(instruction: &Instruction) -> Self {
-        let instruction_val = instruction.get_value_as_u32();
+impl<'a> From<DecodeData<'a>> for CoprocessorLoadAndStoreAndDoubleRegisterTransfers {
+    fn from(decode_data: DecodeData<'a>) -> Self {
+        let instruction_val = decode_data.instruction.get_value_as_u32();
 
         let p_flag = BitState::from(instruction_val >> 24);
         let u_flag = BitState::from(instruction_val >> 23);
@@ -46,7 +53,10 @@ impl From<&Instruction> for CoprocessorLoadAndStoreAndDoubleRegisterTransfers {
 #[cfg(test)]
 mod tests {
     use super::{
-        BitState, CoprocessorLoadAndStoreAndDoubleRegisterTransfers, Instruction, RegisterName,
+        BitState,
+        CoprocessorLoadAndStoreAndDoubleRegisterTransfers,
+        Instruction,
+        RegisterName,
     };
 
     #[test]
@@ -60,8 +70,8 @@ mod tests {
             n_flag: BitState::Set,
             w_flag: BitState::Unset,
             l_flag: BitState::Set,
-            rn:     RegisterName::R15,
-            crd:    0b1110,
+            rn: RegisterName::R15,
+            crd: 0b1110,
             cp_num: 0b1100,
             offset: 0b1010_1010,
         };

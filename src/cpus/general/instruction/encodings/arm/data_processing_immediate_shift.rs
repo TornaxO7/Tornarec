@@ -1,8 +1,8 @@
 use crate::cpus::general::{
     bit_state::BitState,
     instruction::{
-        Instruction,
         encodings::encoding_fields::DataProcessingInstruction,
+        decode::DecodeData,
     },
     register::NormalizedRegister,
 };
@@ -20,10 +20,10 @@ pub struct DataProcessingImmediateShift {
     pub rm: NormalizedRegister,
 }
 
-impl From<&Instruction> for DataProcessingImmediateShift {
-    fn from(instruction: &Instruction) -> Self {
-        let instruction_val = instruction.get_value_as_u32();
-
+impl<'a> From<DecodeData<'a>> for DataProcessingImmediateShift {
+    fn from(decode_data: DecodeData<'a>) -> Self {
+        let instruction_val = decode_data.instruction.get_value_as_u32();
+        
         let opcode = DataProcessingInstruction::from((instruction_val >> 21) & 0b1111);
         let s_flag = BitState::from(instruction_val >> 20);
         let rn = NormalizedRegister::from((instruction_val >> 16) & 0b1111);

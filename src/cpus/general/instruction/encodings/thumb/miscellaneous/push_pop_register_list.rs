@@ -1,6 +1,6 @@
 use crate::cpus::general::{
     instruction::{
-        Instruction,
+        decode::DecodeData,
         encodings::encoding_fields::RegisterList,
     },
     BitState,
@@ -15,9 +15,9 @@ pub struct PushPopRegisterList {
     register_list: RegisterList,
 }
 
-impl From<&Instruction> for PushPopRegisterList {
-    fn from(instruction: &Instruction) -> Self {
-        let instruction_val = instruction.get_value_as_u32();
+impl<'a> From<DecodeData<'a>> for PushPopRegisterList {
+    fn from(decode_data: DecodeData<'a>) -> Self {
+        let instruction_val = decode_data.instruction.get_value_as_u32();
 
         let l_flag = BitState::from(instruction_val >> 11);
         let r_flag = BitState::from(instruction_val >> 8);

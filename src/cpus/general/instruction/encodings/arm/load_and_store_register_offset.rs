@@ -1,6 +1,6 @@
 use crate::cpus::general::{
     BitState,
-    instruction::Instruction,
+    instruction::decode::DecodeData,
     register::NormalizedRegister,
 };
 
@@ -20,9 +20,9 @@ pub struct LoadAndStoreRegisterOffset {
     rm: NormalizedRegister,
 }
 
-impl From<&Instruction> for LoadAndStoreRegisterOffset {
-    fn from(instruction: &Instruction) -> Self {
-        let instruction_val = instruction.get_value_as_u32();
+impl<'a> From<DecodeData<'a>> for LoadAndStoreRegisterOffset {
+    fn from(decode_data: DecodeData<'a>) -> Self {
+        let instruction_val = decode_data.instruction.get_value_as_u32();
 
         let p_flag = BitState::from(instruction_val >> 24);
         let u_flag = BitState::from(instruction_val >> 23);

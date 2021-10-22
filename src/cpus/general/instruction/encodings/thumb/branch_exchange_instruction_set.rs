@@ -1,5 +1,5 @@
 use crate::cpus::general::{
-    instruction::Instruction,
+    instruction::decode::DecodeData,
     register::RegisterName,
     BitState,
 };
@@ -13,9 +13,9 @@ pub struct BranchExchangeInstructionSet {
     rm: RegisterName,
 }
 
-impl From<&Instruction> for BranchExchangeInstructionSet {
-    fn from(instruction: &Instruction) -> Self {
-        let instruction_val = instruction.get_value_as_u32();
+impl<'a> From<DecodeData<'a>> for BranchExchangeInstructionSet {
+    fn from(decode_data: DecodeData<'a>) -> Self {
+        let instruction_val = decode_data.instruction.get_value_as_u32();
 
         let l_flag = BitState::from(instruction_val >> 7);
         let h2 = BitState::from(instruction_val >> 6);

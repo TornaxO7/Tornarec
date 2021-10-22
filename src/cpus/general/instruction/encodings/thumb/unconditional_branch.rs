@@ -1,4 +1,4 @@
-use crate::cpus::general::instruction::Instruction;
+use crate::cpus::general::instruction::decode::DecodeData;
 
 use std::convert::{
     From,
@@ -10,9 +10,9 @@ pub struct UnconditionalBranch {
     offset: u16,
 }
 
-impl From<&Instruction> for UnconditionalBranch {
-    fn from(instruction: &Instruction) -> Self {
-        let instruction_val = instruction.get_value_as_u32();
+impl<'a> From<DecodeData<'a>> for UnconditionalBranch {
+    fn from(decode_data: DecodeData<'a>) -> Self {
+        let instruction_val = decode_data.instruction.get_value_as_u32();
 
         let offset = u16::try_from(instruction_val & 0b111_1111_1111).unwrap();
         Self { offset }

@@ -1,6 +1,9 @@
-use crate::cpus::general::instruction::Instruction;
+use crate::cpus::general::instruction::decode::DecodeData;
 
-use std::convert::{From, TryFrom};
+use std::convert::{
+    From,
+    TryFrom,
+};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CoprocessorDataProcessing {
@@ -12,9 +15,9 @@ pub struct CoprocessorDataProcessing {
     crm: u8,
 }
 
-impl From<&Instruction> for CoprocessorDataProcessing {
-    fn from(instruction: &Instruction) -> Self {
-        let instruction_val = instruction.get_value_as_u32();
+impl<'a> From<DecodeData<'a>> for CoprocessorDataProcessing {
+    fn from(decode_data: DecodeData<'a>) -> Self {
+        let instruction_val = decode_data.instruction.get_value_as_u32();
 
         let opcode1 = u8::try_from((instruction_val >> 20) & 0b1111).unwrap();
         let crn = u8::try_from((instruction_val >> 16) & 0b1111).unwrap();
@@ -22,13 +25,23 @@ impl From<&Instruction> for CoprocessorDataProcessing {
         let cp_num = u8::try_from((instruction_val >> 8) & 0b1111).unwrap();
         let opcode2 = u8::try_from((instruction_val >> 5) & 0b111).unwrap();
         let crm = u8::try_from(instruction_val & 0b1111).unwrap();
-        Self {opcode1, crn, crd, cp_num, opcode2, crm}
+        Self {
+            opcode1,
+            crn,
+            crd,
+            cp_num,
+            opcode2,
+            crm,
+        }
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use super::{CoprocessorDataProcessing, Instruction};
+    use super::{
+        CoprocessorDataProcessing,
+        Instruction,
+    };
 
     #[test]
     fn from() {
@@ -44,6 +57,10 @@ mod tests {
             crm: 0b1111,
         };
 
-        assert_eq!(value, expected_value, "{:#?}, {:#?}", &value, &expected_value);
+        assert_eq!(
+            value, expected_value,
+            "{:#?}, {:#?}",
+            &value, &expected_value
+        );
     }
 }

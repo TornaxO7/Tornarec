@@ -8,12 +8,9 @@ use crate::{
             ExceptionStack,
             ExceptionVector,
         },
-        instruction::{
-            decoded::ArmDecoded,
-            executer::{
-                ArmExecuter,
-                ThumbExecuter,
-            },
+        instruction::executer::{
+            ArmExecuter,
+            ThumbExecuter,
         },
         interruption::Interruption,
         operating_mode::OperatingMode,
@@ -24,7 +21,6 @@ use crate::{
             RegisterName,
             Registers,
         },
-        InstructionMap,
     },
     ram::{
         data_types::DataTypeSize,
@@ -48,7 +44,7 @@ impl Arm7TDMI {
 
     pub fn step(&mut self, ram: &mut Ram) {
         self.fetch(ram);
-        self.decode();
+        self.decode(ram);
         self.execute(ram);
     }
 
@@ -64,9 +60,8 @@ impl Arm7TDMI {
         };
     }
 
-    pub fn decode(&mut self) {
-        let cpsr = self.registers.get_ref_cpsr();
-        self.pipeline.decode(cpsr);
+    pub fn decode(&mut self, ram: &Ram) {
+        self.pipeline.decode(&self.registers, ram);
     }
 
     pub fn execute(&mut self, ram: &mut Ram) {
