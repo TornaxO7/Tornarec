@@ -15,21 +15,31 @@ impl<'a> ShifterOperand {
         let next_instruction_val = data.next_instruction.get_value_as_u32();
 
         // decode the shifter_operand part
-        let mut rm = instruction_val & 0b1111;
-        let mut rn = (instruction_val >> 16) & 0b1111;
+        let rm = {
+            let rm = instruction_val & 0b1111;
+            if NormalizedRegister::from(rm) == RegisterName::Pc {
+                next_instruction_val
+            } else {
+                rm
+            }
+        };
 
-        if NormalizedRegister::from(rm) == RegisterName::Pc {
-            rm = next_instruction_val;
-        }
+        let rn = {
+            let rn = (instruction_val >> 16) & 0b1111;
 
-        if NormalizedRegister::from(rn) == RegisterName::Pc {
-            rn = next_instruction_val;
-        }
+            if NormalizedRegister::from(rm) == RegisterName::Pc {
+                next_instruction_val
+            } else {
+                rn
+            }
+        };
 
         let shift_imm = (instruction_val >> 7) & 5;
 
-        let cpsr = data.registers.get_ref_cpsr();
-        let c_flag = cpsr.get_condition_bit(ConditionBit::C);
+        let c_flag = {
+            let cpsr = data.registers.get_ref_cpsr();
+            cpsr.get_condition_bit(ConditionBit::C)
+        };
 
         match Shift::from(instruction_val >> 5) {
             Shift::LSL => {
@@ -46,14 +56,11 @@ impl<'a> ShifterOperand {
                 }
             },
             Shift::LSR => {
-                
-                let cpsr = data.registers.get_ref_cpsr();
-                let c_flag = cpsr.get_condition_bit(ConditionBit::C);
+                let rs_immed_8 = {
+                    let rs = (instruction_val >> 8) & 0b1111;
+                    data.registers.get_reg(RegisterName::from(rs)) & 0b1111_1111
+                };
 
-                let rs = (instruction_val >> 8) & 0b1111;
-                let rs = data.registers.get_reg(RegisterName::from(rs));
-
-                let rs_immed_8 = rs & 0b1111_1111;
                 if rs_immed_8 == 0 {
                     Self {
                         shifter_operand: rm,
