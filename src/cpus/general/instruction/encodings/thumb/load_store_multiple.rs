@@ -16,9 +16,9 @@ pub struct LoadStoreMultiple {
     register_list: RegisterList,
 }
 
-impl<'a> From<DecodeData<'a>> for LoadStoreMultiple {
-    fn from(decode_data: DecodeData<'a>) -> Self {
-        let instruction_val = decode_data.instruction.get_value_as_u32();
+impl From<DecodeData> for LoadStoreMultiple {
+    fn from(data: DecodeData) -> Self {
+        let instruction_val = data.instruction.get_value_as_u32();
 
         let l_flag = BitState::from(instruction_val >> 11);
         let rn = NormalizedRegister::from((instruction_val >> 8) & 0b111);

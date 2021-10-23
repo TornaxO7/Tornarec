@@ -14,9 +14,9 @@ pub struct AddSubtractRegister {
     rd:  NormalizedRegister,
 }
 
-impl<'a> From<DecodeData<'a>> for AddSubtractRegister {
-    fn from(decode_data: DecodeData<'a>) -> Self {
-        let instruction_val = decode_data.instruction.get_value_as_u32();
+impl From<DecodeData> for AddSubtractRegister {
+    fn from(data: DecodeData) -> Self {
+        let instruction_val = data.instruction.get_value_as_u32();
 
         let opc = BitState::from(instruction_val >> 9);
         let rm = NormalizedRegister::from((instruction_val >> 6) & 0b111);

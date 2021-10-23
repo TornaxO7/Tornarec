@@ -2,47 +2,53 @@ use crate::cpus::general::{
     bit_state::BitState,
     instruction::{
         decode::DecodeData,
-        encodings::encoding_fields::DataProcessingInstruction,
+        encodings::encoding_fields::{
+            DataProcessingInstruction,
+            RegisterOrValue,
+            ShifterOperand,
+        },
     },
-    register::NormalizedRegister,
+    register::{
+        NormalizedRegister,
+        RegisterName,
+    },
 };
 
-use std::convert::{
-    From,
-    TryFrom,
-};
+use std::convert::From;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DataProcessingImmediateShift {
     pub opcode: DataProcessingInstruction,
     pub s_flag: BitState,
-    pub rn: NormalizedRegister,
+    pub rn: RegisterOrValue,
     pub rd: NormalizedRegister,
-    pub shift_imm: u8,
-    pub shift: u8,
-    pub rm: NormalizedRegister,
+    pub shifter_operand: ShifterOperand,
 }
 
-impl<'a> From<DecodeData<'a>> for DataProcessingImmediateShift {
-    fn from(decode_data: DecodeData<'a>) -> Self {
-        let instruction_val = decode_data.instruction.get_value_as_u32();
+impl From<DecodeData> for DataProcessingImmediateShift {
+    fn from(data: DecodeData) -> Self {
+        let instruction_val = data.instruction.get_value_as_u32();
+        let next_instruction_val = data.next_instruction.get_value_as_u32();
 
         let opcode = DataProcessingInstruction::from((instruction_val >> 21) & 0b1111);
         let s_flag = BitState::from(instruction_val >> 20);
-        let rn = NormalizedRegister::from((instruction_val >> 16) & 0b1111);
+
+        let rn = (instruction_val >> 16) & 0b1111;
+        let rn = if NormalizedRegister::from(rn) == RegisterName::Pc {
+            RegisterOrValue::Value(next_instruction_val)
+        } else {
+            RegisterOrValue::Register(NormalizedRegister::from(rn))
+        };
+
         let rd = NormalizedRegister::from((instruction_val >> 12) & 0b1111);
-        let shift_amount = u8::try_from((instruction_val >> 7) & 0b1_1111).unwrap();
-        let shift = u8::try_from((instruction_val >> 5) & 0b11).unwrap();
-        let rm = NormalizedRegister::from(instruction_val & 0b1111);
+        let shifter_operand = ShifterOperand::get_immediate_shift(data);
 
         Self {
             opcode,
             s_flag,
             rn,
             rd,
-            shift_imm: shift_amount,
-            shift,
-            rm,
+            shifter_operand,
         }
     }
 }
@@ -55,13 +61,11 @@ mod tests {
         DataProcessingInstruction,
         DecodeData,
         NormalizedRegister,
+        RegisterName,
     };
 
     use crate::{
-        cpus::general::{
-            register::RegisterName,
-            Instruction,
-        },
+        cpus::general::Instruction,
         NintendoDS,
     };
 

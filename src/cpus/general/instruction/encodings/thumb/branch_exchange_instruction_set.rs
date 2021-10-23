@@ -13,9 +13,9 @@ pub struct BranchExchangeInstructionSet {
     rm: RegisterName,
 }
 
-impl<'a> From<DecodeData<'a>> for BranchExchangeInstructionSet {
-    fn from(decode_data: DecodeData<'a>) -> Self {
-        let instruction_val = decode_data.instruction.get_value_as_u32();
+impl From<DecodeData> for BranchExchangeInstructionSet {
+    fn from(data: DecodeData) -> Self {
+        let instruction_val = data.instruction.get_value_as_u32();
 
         let l_flag = BitState::from(instruction_val >> 7);
         let h2 = BitState::from(instruction_val >> 6);

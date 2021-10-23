@@ -64,9 +64,9 @@ pub enum ThumbDecode {
     SoftwareBreakpoint(SoftwareBreakpoint),
 }
 
-impl<'a> From<DecodeData<'a>> for ThumbDecode {
-    fn from(decode_data: DecodeData<'a>) -> Self {
-        match ThumbInstructionChecker::from(decode_data.instruction) {
+impl From<DecodeData> for ThumbDecode {
+    fn from(decode_data: DecodeData) -> Self {
+        match ThumbInstructionChecker::from(&decode_data.instruction) {
             ThumbInstructionChecker::ShiftByImmediate =>
                 Self::ShiftByImmediate(ShiftByImmediate::from(decode_data)),
             ThumbInstructionChecker::AddSubtractRegister =>

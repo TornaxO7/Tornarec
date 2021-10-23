@@ -16,9 +16,9 @@ pub struct AddToSpOrPc {
     immediate: u8,
 }
 
-impl<'a> From<DecodeData<'a>> for AddToSpOrPc {
-    fn from(decode_data: DecodeData<'a>) -> Self {
-        let instruction_val = decode_data.instruction.get_value_as_u32();
+impl From<DecodeData> for AddToSpOrPc {
+    fn from(data: DecodeData) -> Self {
+        let instruction_val = data.instruction.get_value_as_u32();
 
         let sp = BitState::from(instruction_val >> 11);
         let rd = NormalizedRegister::from((instruction_val >> 8) & 0b111);

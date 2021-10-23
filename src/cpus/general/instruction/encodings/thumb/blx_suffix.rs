@@ -10,9 +10,9 @@ pub struct BlxSuffix {
     offset: u16,
 }
 
-impl<'a> From<DecodeData<'a>> for BlxSuffix {
-    fn from(decode_data: DecodeData<'a>) -> Self {
-        let instruction_val = decode_data.instruction.get_value_as_u32();
+impl From<DecodeData> for BlxSuffix {
+    fn from(data: DecodeData) -> Self {
+        let instruction_val = data.instruction.get_value_as_u32();
 
         let offset = u16::try_from((instruction_val >> 1) & 0b11_1111_1111).unwrap();
         Self { offset }

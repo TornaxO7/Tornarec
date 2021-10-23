@@ -53,6 +53,15 @@ impl From<u8> for BitState {
     }
 }
 
+impl From<bool> for BitState {
+    fn from(val: bool) -> Self {
+        match val {
+            true => Self::Set,
+            false => Self::Unset,
+        }
+    }
+}
+
 impl Default for BitState {
     fn default() -> Self {
         BitState::Set

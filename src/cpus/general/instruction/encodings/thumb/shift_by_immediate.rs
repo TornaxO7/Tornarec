@@ -16,9 +16,9 @@ pub struct ShiftByImmediate {
     rd: NormalizedRegister,
 }
 
-impl<'a> From<DecodeData<'a>> for ShiftByImmediate {
-    fn from(decode_data: DecodeData<'a>) -> Self {
-        let instruction_val = decode_data.instruction.get_value_as_u32();
+impl From<DecodeData> for ShiftByImmediate {
+    fn from(data: DecodeData) -> Self {
+        let instruction_val = data.instruction.get_value_as_u32();
 
         let opcode = u8::try_from((instruction_val >> 11) & 0b11).unwrap();
         let immediate = u8::try_from((instruction_val >> 6) & 0b11111).unwrap();

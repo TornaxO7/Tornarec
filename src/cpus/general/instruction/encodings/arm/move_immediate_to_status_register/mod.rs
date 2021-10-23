@@ -20,9 +20,9 @@ pub struct MoveImmediateToStatusRegister {
     immediate: u8,
 }
 
-impl<'a> From<DecodeData<'a>> for MoveImmediateToStatusRegister {
-    fn from(decode_data: DecodeData<'a>) -> Self {
-        let instruction_val = decode_data.instruction.get_value_as_u32();
+impl From<DecodeData> for MoveImmediateToStatusRegister {
+    fn from(data: DecodeData) -> Self {
+        let instruction_val = data.instruction.get_value_as_u32();
 
         let r_flag = BitState::from(instruction_val >> 22);
         let mask = u8::try_from((instruction_val >> 16) & 0b1111).unwrap();

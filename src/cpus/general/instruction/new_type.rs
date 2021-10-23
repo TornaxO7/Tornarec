@@ -1,4 +1,4 @@
-use core::convert::From;
+use std::convert::From;
 
 use crate::{
     ram::data_types::DataType,

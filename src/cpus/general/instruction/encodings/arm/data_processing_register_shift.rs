@@ -20,9 +20,9 @@ pub struct DataProcessingRegisterShift {
     rm: NormalizedRegister,
 }
 
-impl<'a> From<DecodeData<'a>> for DataProcessingRegisterShift {
-    fn from(decode_data: DecodeData<'a>) -> Self {
-        let instruction_val = decode_data.instruction.get_value_as_u32();
+impl From<DecodeData> for DataProcessingRegisterShift {
+    fn from(data: DecodeData) -> Self {
+        let instruction_val = data.instruction.get_value_as_u32();
 
         let opcode = DataProcessingInstruction::from((instruction_val >> 21) & 0b1111);
         let s_flag = BitState::from(instruction_val >> 20);

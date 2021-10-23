@@ -17,9 +17,9 @@ pub struct Multiplies {
     rm: NormalizedRegister,
 }
 
-impl<'a> From<DecodeData<'a>> for Multiplies {
-    fn from(decode_data: DecodeData<'a>) -> Self {
-        let instruction_val = decode_data.instruction.get_value_as_u32();
+impl From<DecodeData> for Multiplies {
+    fn from(data: DecodeData) -> Self {
+        let instruction_val = data.instruction.get_value_as_u32();
 
         let op1 = u8::try_from((instruction_val >> 20) & 0b1111).unwrap();
         let rn = NormalizedRegister::from((instruction_val >> 16) & 0b1111);

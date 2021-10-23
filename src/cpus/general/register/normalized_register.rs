@@ -11,6 +11,12 @@ impl NormalizedRegister {
     }
 }
 
+impl PartialEq<RegisterName> for NormalizedRegister {
+    fn eq(&self, register: &RegisterName) -> bool {
+        self.0 == *register
+    }
+}
+
 impl From<RegisterName> for NormalizedRegister {
     fn from(register_name: RegisterName) -> Self {
 

@@ -16,9 +16,9 @@ pub struct Miscellaneous1 {
     // Line3 { r_flag: BitState, rn: u8, rd: u8, rotate_imm: u8, immed_8: u8 }
 }
 
-impl<'a> From<DecodeData<'a>> for Miscellaneous1 {
-    fn from(decode_data: DecodeData<'a>) -> Self {
-        let instruction_val = decode_data.instruction.get_value_as_u32();
+impl From<DecodeData> for Miscellaneous1 {
+    fn from(data: DecodeData) -> Self {
+        let instruction_val = data.instruction.get_value_as_u32();
 
         let rn = NormalizedRegister::from((instruction_val >> 16) & 0b1111);
         let rd = NormalizedRegister::from((instruction_val >> 12) & 0b1111);

@@ -15,9 +15,9 @@ pub struct CoprocessorDataProcessing {
     crm: u8,
 }
 
-impl<'a> From<DecodeData<'a>> for CoprocessorDataProcessing {
-    fn from(decode_data: DecodeData<'a>) -> Self {
-        let instruction_val = decode_data.instruction.get_value_as_u32();
+impl From<DecodeData> for CoprocessorDataProcessing {
+    fn from(data: DecodeData) -> Self {
+        let instruction_val = data.instruction.get_value_as_u32();
 
         let opcode1 = u8::try_from((instruction_val >> 20) & 0b1111).unwrap();
         let crn = u8::try_from((instruction_val >> 16) & 0b1111).unwrap();

@@ -8,6 +8,7 @@ pub enum InstructionMap {
     Thumb(ThumbDecode),
     Noop,
     Unpredictable,
+    Undefined,
 }
 
 impl InstructionMap {

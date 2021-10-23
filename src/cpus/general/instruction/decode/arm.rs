@@ -45,9 +45,9 @@ pub enum ArmDecode {
     SoftwareInterrupt,
 }
 
-impl<'a> From<DecodeData<'a>> for ArmDecode {
+impl From<DecodeData> for ArmDecode {
     fn from(decode_data: DecodeData) -> Self {
-        match ArmInstructionChecker::from(decode_data.instruction) {
+        match ArmInstructionChecker::from(&decode_data.instruction) {
            ArmInstructionChecker::DataProcessingImmediateShift =>
                Self::DataProcessingImmediateShift(DataProcessingImmediateShift::from(decode_data)),
            ArmInstructionChecker::Miscellaneous1 =>

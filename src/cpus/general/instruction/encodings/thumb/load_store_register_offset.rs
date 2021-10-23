@@ -16,9 +16,9 @@ pub struct LoadStoreRegisterOffset {
     rd: NormalizedRegister,
 }
 
-impl<'a> From<DecodeData<'a>> for LoadStoreRegisterOffset {
-    fn from(decode_data: DecodeData<'a>) -> Self {
-        let instruction_val = decode_data.instruction.get_value_as_u32();
+impl From<DecodeData> for LoadStoreRegisterOffset {
+    fn from(data: DecodeData) -> Self {
+        let instruction_val = data.instruction.get_value_as_u32();
 
         let opcode = u8::try_from((instruction_val >> 9) & 0b111).unwrap();
         let rm = NormalizedRegister::from((instruction_val >> 6) & 0b111);

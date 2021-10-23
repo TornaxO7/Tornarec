@@ -18,9 +18,9 @@ pub struct SpecialDataProcessing {
     rd_rn: NormalizedRegister,
 }
 
-impl<'a> From<DecodeData<'a>> for SpecialDataProcessing {
-    fn from(decode_data: DecodeData<'a>) -> Self {
-        let instruction_val = decode_data.instruction.get_value_as_u32();
+impl From<DecodeData> for SpecialDataProcessing {
+    fn from(data: DecodeData) -> Self {
+        let instruction_val = data.instruction.get_value_as_u32();
 
         let opcode = u8::try_from((instruction_val >> 8) & 0b11).unwrap();
         let h1 = BitState::from(instruction_val >> 7);

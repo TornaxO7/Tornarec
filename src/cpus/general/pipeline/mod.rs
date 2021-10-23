@@ -13,7 +13,7 @@ use crate::{
             Instruction,
             decode::DecodeData,
         },
-        register::Registers,
+        register::{Registers, RegisterName},
         OperatingState,
         InstructionMap,
     },
@@ -57,12 +57,18 @@ impl Pipeline {
     }
 
     pub fn decode(&mut self, registers: &Registers, ram: &Ram) {
+        let pc = registers.get_reg(RegisterName::Pc);
         let cpsr = registers.get_ref_cpsr();
 
         let decoded_instruction = match &self.prefetch {
             Prefetch::Success(instruction) => {
 
-                let decode_data = DecodeData::new(registers, ram, instruction);
+                let next_instruction = match DataType::get_word(&ram[pc + 8 .. pc + 12]) {
+                    Ok(word) => Instruction::from(word),
+                    Err(err) => panic!("{}", err),
+                };
+
+                let decode_data = DecodeData::new(instruction, next_instruction);
 
                 if cpsr.get_operating_state() == OperatingState::Arm {
                     if cpsr.is_condition_set(instruction.get_condition_code_flag()) {

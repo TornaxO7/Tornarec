@@ -11,9 +11,9 @@ pub struct LoadFromLiteralPool {
     pc_relative_offset: u8,
 }
 
-impl<'a> From<DecodeData<'a>> for LoadFromLiteralPool {
-    fn from(decode_data: DecodeData<'a>) -> Self {
-        let instruction_val = decode_data.instruction.get_value_as_u32();
+impl From<DecodeData> for LoadFromLiteralPool {
+    fn from(data: DecodeData) -> Self {
+        let instruction_val = data.instruction.get_value_as_u32();
 
         let rd = u8::try_from((instruction_val >> 8) & 0b111).unwrap();
         let pc_relative_offset = u8::try_from(instruction_val & 0b1111_1111).unwrap();

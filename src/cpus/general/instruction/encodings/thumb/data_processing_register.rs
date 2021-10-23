@@ -15,9 +15,9 @@ pub struct DataProcessingRegister {
     rd_rn: NormalizedRegister,
 }
 
-impl<'a> From<DecodeData<'a>> for DataProcessingRegister {
-    fn from(decode_data: DecodeData<'a>) -> Self {
-        let instruction_val = decode_data.instruction.get_value_as_u32();
+impl From<DecodeData> for DataProcessingRegister {
+    fn from(data: DecodeData) -> Self {
+        let instruction_val = data.instruction.get_value_as_u32();
 
         let opcode = u8::try_from((instruction_val >> 6) & 0b1111).unwrap();
         let rm_rs = NormalizedRegister::from((instruction_val >> 3) & 0b111);

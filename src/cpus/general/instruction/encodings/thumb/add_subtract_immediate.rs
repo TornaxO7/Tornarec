@@ -17,9 +17,9 @@ pub struct AddSubtractImmediate {
     rd: NormalizedRegister,
 }
 
-impl<'a> From<DecodeData<'a>> for AddSubtractImmediate {
-    fn from(decode_data: DecodeData<'a>) -> Self {
-        let instruction_val = decode_data.instruction.get_value_as_u32();
+impl From<DecodeData> for AddSubtractImmediate {
+    fn from(data: DecodeData) -> Self {
+        let instruction_val = data.instruction.get_value_as_u32();
 
         let opc = BitState::from(instruction_val >> 9);
         let immediate = u8::try_from((instruction_val >> 6) & 0b111).unwrap();

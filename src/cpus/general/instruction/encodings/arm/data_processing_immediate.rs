@@ -1,54 +1,73 @@
 use crate::cpus::general::{
+    bit_state::BitState,
     instruction::{
         decode::DecodeData,
-        encodings::encoding_fields::DataProcessingInstruction,
+        encodings::encoding_fields::{
+            DataProcessingInstruction,
+            RegisterOrValue,
+            ShifterOperand,
+        },
     },
-    bit_state::BitState,
-    register::NormalizedRegister,
+    register::{
+        NormalizedRegister,
+        RegisterName,
+    },
 };
 
-use std::convert::{From, TryFrom};
+use std::convert::From;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DataProcessingImmediate {
-    opcode: DataProcessingInstruction,
-    s_flag: BitState,
-    rn: NormalizedRegister,
-    rd: NormalizedRegister,
-    rotate: u8,
-    immediate: u8,
+    pub opcode: DataProcessingInstruction,
+    pub s_flag: BitState,
+    pub rn: RegisterOrValue,
+    pub rd: NormalizedRegister,
+    pub shifter_operand: ShifterOperand,
 }
 
-impl<'a> From<DecodeData<'a>> for DataProcessingImmediate {
-    fn from(decode_data: DecodeData<'a>) -> Self {
-        let instruction_val = decode_data.instruction.get_value_as_u32();
+impl From<DecodeData> for DataProcessingImmediate {
+    fn from(data: DecodeData) -> Self {
+        let instruction_val = data.instruction.get_value_as_u32();
 
         let opcode = DataProcessingInstruction::from((instruction_val >> 21) & 0b1111);
         let s_flag = BitState::from(instruction_val >> 20);
-        let rn = NormalizedRegister::from((instruction_val >> 16) & 0b1111);
+
+        let rn = (instruction_val >> 16) & 0b1111;
+        let rn = if NormalizedRegister::from(rn) == RegisterName::Pc {
+            RegisterOrValue::Value(instruction_val >> 20)
+        } else {
+            RegisterOrValue::Register(NormalizedRegister::from(rn))
+        };
+
         let rd = NormalizedRegister::from((instruction_val >> 12) & 0b1111);
-        let rotate = u8::try_from((instruction_val >> 8) & 0b1111).unwrap();
-        let immediate = u8::try_from(instruction_val & 0b1111_1111).unwrap();
-        Self{opcode, s_flag, rn, rd, rotate, immediate}
+        let shifter_operand = ShifterOperand::get_immediate(data);
+
+        Self {
+            opcode,
+            s_flag,
+            rn,
+            rd,
+            shifter_operand,
+        }
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::{
-        DataProcessingImmediate,
-        DecodeData,
         BitState,
-        NormalizedRegister,
+        DataProcessingImmediate,
         DataProcessingInstruction,
+        DecodeData,
+        NormalizedRegister,
     };
 
     use crate::{
-        NintendoDS,
         cpus::general::{
             register::RegisterName,
             Instruction,
         },
+        NintendoDS,
     };
 
     #[test]
@@ -68,6 +87,10 @@ mod tests {
             immediate: 0b0011_1011,
         };
 
-        assert_eq!(value, expected_value, "{:#?}, {:#?}", &value, &expected_value);
+        assert_eq!(
+            value, expected_value,
+            "{:#?}, {:#?}",
+            &value, &expected_value
+        );
     }
 }

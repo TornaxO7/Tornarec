@@ -22,9 +22,9 @@ pub struct CoprocessorLoadAndStoreAndDoubleRegisterTransfers {
     offset: u8,
 }
 
-impl<'a> From<DecodeData<'a>> for CoprocessorLoadAndStoreAndDoubleRegisterTransfers {
-    fn from(decode_data: DecodeData<'a>) -> Self {
-        let instruction_val = decode_data.instruction.get_value_as_u32();
+impl From<DecodeData> for CoprocessorLoadAndStoreAndDoubleRegisterTransfers {
+    fn from(data: DecodeData) -> Self {
+        let instruction_val = data.instruction.get_value_as_u32();
 
         let p_flag = BitState::from(instruction_val >> 24);
         let u_flag = BitState::from(instruction_val >> 23);
