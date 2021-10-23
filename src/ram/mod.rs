@@ -59,36 +59,13 @@ impl Ram {
     }
 }
 
-impl Index<Range<usize>> for Ram {
+impl Index<Range<Address>> for Ram {
     type Output = [u8];
 
-    fn index(&self, index: Range<usize>) -> &Self::Output {
-        &self.ram[index]
-    }
-}
-
-impl Index<Range<u32>> for Ram {
-    type Output = [u8];
-
-    fn index(&self, index: Range<u32>) -> &Self::Output {
-
+    fn index(&self, index: Range<Address>) -> &Self::Output {
         let range = Range {
-            start: usize::try_from(index.start).unwrap(),
-            end: usize::try_from(index.end).unwrap(),
-        };
-
-        &self.ram[range]
-    }
-}
-
-impl Index<Range<i32>> for Ram {
-    type Output = [u8];
-
-    fn index(&self, index: Range<i32>) -> &Self::Output {
-
-        let range = Range {
-            start: usize::try_from(index.start).unwrap(),
-            end: usize::try_from(index.end).unwrap(),
+            start: usize::try_from(index.start.get_as_u32()).unwrap(),
+            end: usize::try_from(index.end.get_as_u32()).unwrap(),
         };
 
         &self.ram[range]

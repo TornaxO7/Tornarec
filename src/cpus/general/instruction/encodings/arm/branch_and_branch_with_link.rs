@@ -7,8 +7,8 @@ use std::convert::From;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct BranchAndBranchWithLink {
-    l_flag: BitState,
-    offset: u32,
+    pub l_flag: BitState,
+    pub offset: u32,
 }
 
 impl From<DecodeData> for BranchAndBranchWithLink {

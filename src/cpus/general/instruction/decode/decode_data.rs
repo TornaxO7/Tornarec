@@ -1,16 +1,21 @@
-use crate::cpus::general::Instruction;
+use crate::cpus::general::{
+    register::Registers,
+    Instruction,
+};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct DecodeData {
+pub struct DecodeData<'a> {
     pub instruction: Instruction,
     pub next_instruction: Instruction,
+    pub registers: &'a Registers,
 }
 
-impl<'a> DecodeData {
-    pub fn new(instruction: Instruction, next_instruction: Instruction) -> Self {
+impl<'a> DecodeData<'a> {
+    pub fn new(instruction: Instruction, next_instruction: Instruction, registers: &'a Registers) -> Self {
         Self {
             instruction,
             next_instruction,
+            registers,
         }
     }
 }
