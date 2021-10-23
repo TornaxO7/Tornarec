@@ -8,7 +8,7 @@ pub enum Shift {
     LSL,
     /// Logical shift right
     LSR,
-    /// (rotate right) or () rotate right with extend
+    /// (Rotate right) or (rotate right with extend)
     ROROrRRX,
 }
 

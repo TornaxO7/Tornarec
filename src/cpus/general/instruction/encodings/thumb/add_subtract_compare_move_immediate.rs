@@ -1,24 +1,19 @@
-use crate::cpus::general::{
-    instruction::decode::DecodeData,
-    register::NormalizedRegister,
-};
+use crate::cpus::general::instruction::decode::DecodeData;
 
 use std::convert::{From, TryFrom};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AddSubtractCompareMoveImmediate {
     opcode: u8,
-    rd_rn: NormalizedRegister,
+    rd_rn: u8,
     immediate: u8,
 }
 
-impl From<DecodeData> for AddSubtractCompareMoveImmediate {
-    fn from(data: DecodeData) -> Self {
-        let instruction_val = data.instruction.get_value_as_u32();
-
-        let opcode = u8::try_from((instruction_val >> 11) & 0b11).unwrap();
-        let rd_rn = NormalizedRegister::from((instruction_val >> 8) & 0b111);
-        let immediate = u8::try_from(instruction_val & 0b1111_1111).unwrap();
+impl<'a> From<DecodeData<'a>> for AddSubtractCompareMoveImmediate {
+    fn from(data: DecodeData<'a>) -> Self {
+        let opcode = u8::try_from((data.instruction.val >> 11) & 0b11).unwrap();
+        let rd_rn = u8::try_from((data.instruction.val >> 8) & 0b111).unwrap();
+        let immediate = u8::try_from(data.instruction.val & 0b1111_1111).unwrap();
         Self {opcode, rd_rn, immediate}
     }
 }

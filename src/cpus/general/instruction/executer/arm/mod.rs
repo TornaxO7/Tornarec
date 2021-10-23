@@ -9,10 +9,7 @@ use crate::{
                 DataProcessingImmediateShift,
                 BranchAndBranchWithLink,
             },
-            encoding_fields::{
-                DataProcessingInstruction,
-                RegisterOrValue,
-            },
+            encoding_fields::DataProcessingInstruction,
         },
         register::{
             types::ConditionBit,
@@ -39,14 +36,10 @@ impl<'a> ArmExecuter<'a> {
     pub fn data_processing_immediate_shift(&mut self, data: DataProcessingImmediateShift) {
         
         let cpsr = self.registers.get_ref_cpsr();
-        let rn: u32 = match data.rn {
-            RegisterOrValue::Register(reg) => self.registers.get_reg(reg.get_reg()),
-            RegisterOrValue::Value(val) => val,
-        };
 
         match data.opcode {
             DataProcessingInstruction::AND => {
-                let rd = rn & data.shifter_operand.shifter_operand;
+                let rd = data.rn & data.shifter_operand.shifter_operand;
 
                 if data.s_flag.is_set() {
                     if NormalizedRegister::from(rd) == NormalizedRegister::from(RegisterName::R15) {
@@ -58,9 +51,7 @@ impl<'a> ArmExecuter<'a> {
 
                         cpsr.set_condition_bit(ConditionBit::N, BitState::from(rd >> 31));
                         cpsr.set_condition_bit(ConditionBit::Z, BitState::from(rd == 0));
-                        if let Some(bit_state) = data.shifter_operand.shifter_carry_out {
-                            cpsr.set_condition_bit(ConditionBit::C, bit_state);
-                        }
+                        cpsr.set_condition_bit(ConditionBit::C, data.shifter_operand.shifter_carry_out);
                     }
                 }
             }
@@ -68,7 +59,7 @@ impl<'a> ArmExecuter<'a> {
             DataProcessingInstruction::SUB => {}
             DataProcessingInstruction::RSB => {}
             DataProcessingInstruction::ADD => {
-                let rd = rn + data.shifter_operand.shifter_operand;
+                let rd = data.rn + data.shifter_operand.shifter_operand;
 
                 if data.s_flag.is_set() {
                     if NormalizedRegister::from(rd) == NormalizedRegister::from(RegisterName::R15) {
@@ -76,8 +67,8 @@ impl<'a> ArmExecuter<'a> {
                             panic!("{}", err);
                         }
                     } else {
-                        let carry = rn + data.shifter_operand.shifter_operand;
-                        let overflow: Option<u32> = rn
+                        let carry = data.rn + data.shifter_operand.shifter_operand;
+                        let overflow: Option<u32> = data.rn
                             .checked_add(data.shifter_operand.shifter_operand);
 
                         let cpsr = self.registers.get_mut_cpsr();
@@ -90,7 +81,7 @@ impl<'a> ArmExecuter<'a> {
             }
             DataProcessingInstruction::ADC => {
                 let c_flag = cpsr.get_condition_bit(ConditionBit::C);
-                let rd = rn + data.shifter_operand.shifter_operand + c_flag.get_as_u32();
+                let rd = data.rn + data.shifter_operand.shifter_operand + c_flag.get_as_u32();
 
                 if data.s_flag.is_set() {
                     if NormalizedRegister::from(rd) == NormalizedRegister::from(RegisterName::R15) {
@@ -98,8 +89,8 @@ impl<'a> ArmExecuter<'a> {
                             panic!("{}", err);
                         }
                     } else {
-                        let carry = rn + data.shifter_operand.shifter_operand + c_flag.get_as_u32();
-                        let overflow: Option<u32> = rn
+                        let carry = data.rn + data.shifter_operand.shifter_operand + c_flag.get_as_u32();
+                        let overflow: Option<u32> = data.rn
                             .checked_add(data.shifter_operand.shifter_operand)
                             .and_then(|rn| rn.checked_add(c_flag.get_as_u32()));
 
@@ -150,12 +141,12 @@ impl<'a> ArmExecuter<'a> {
 
     pub fn load_and_store_multiple(&self) {}
 
-    pub fn branch_and_branch_with_link(&self, data: BranchAndBranchWithLink) {
-        let pc = self.registers.get_reg(RegisterName::Pc);
-
-        if data.l_flag.is_set() {
-            self.registers.set_reg(RegisterName::Lr, pc - 32);
-        }
+    pub fn branch_and_branch_with_link(&self, _data: BranchAndBranchWithLink) {
+        // let pc = self.registers.get_reg(RegisterName::Pc);
+        //
+        // if data.l_flag.is_set() {
+        //     self.registers.set_reg(RegisterName::Lr, pc - 32);
+        // }
     }
 
     pub fn coprocessor_load_and_store_and_double_register_transfers(&self) {}

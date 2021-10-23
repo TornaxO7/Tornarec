@@ -1,45 +1,35 @@
-use crate::cpus::general::{
-    bit_state::BitState,
-    instruction::{
-        decode::DecodeData,
-        encodings::encoding_fields::{
-            DataProcessingInstruction,
-            RegisterOrValue,
-            ShifterOperand,
-        },
-    },
-    register::{
+use crate::{cpus::general::{bit_state::BitState, instruction::{decode::DecodeData, encodings::encoding_fields::{DataProcessingInstruction, ShifterOperand}}, register::{
         NormalizedRegister,
         RegisterName,
-    },
-};
+    }}, ram::data_types::DataTypeSize};
 
-use std::convert::From;
+use std::convert::{From, TryFrom};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DataProcessingImmediate {
     pub opcode: DataProcessingInstruction,
     pub s_flag: BitState,
-    pub rn: RegisterOrValue,
-    pub rd: NormalizedRegister,
+    pub rn: u32,
+    pub rd: u8,
     pub shifter_operand: ShifterOperand,
 }
 
-impl From<DecodeData> for DataProcessingImmediate {
-    fn from(data: DecodeData) -> Self {
-        let instruction_val = data.instruction.get_value_as_u32();
+impl<'a> From<DecodeData<'a>> for DataProcessingImmediate {
+    fn from(data: DecodeData<'a>) -> Self {
+        let opcode = DataProcessingInstruction::from((data.instruction.val >> 21) & 0b1111);
+        let s_flag = BitState::from(data.instruction.val >> 20);
 
-        let opcode = DataProcessingInstruction::from((instruction_val >> 21) & 0b1111);
-        let s_flag = BitState::from(instruction_val >> 20);
-
-        let rn = (instruction_val >> 16) & 0b1111;
-        let rn = if NormalizedRegister::from(rn) == RegisterName::Pc {
-            RegisterOrValue::Value(instruction_val >> 20)
-        } else {
-            RegisterOrValue::Register(NormalizedRegister::from(rn))
+        let rn = {
+            let rn = (data.instruction.val >> 16) & 0b1111;
+            if NormalizedRegister::from(rn) == NormalizedRegister::from(RegisterName::R15) {
+                let value = data.instruction.address + DataTypeSize::Byte;
+                value.get_as_u32()
+            } else {
+                rn
+            }
         };
-
-        let rd = NormalizedRegister::from((instruction_val >> 12) & 0b1111);
+        
+        let rd = u8::try_from((data.instruction.val >> 12) & 0b1111).unwrap();
         let shifter_operand = ShifterOperand::get_immediate(data);
 
         Self {

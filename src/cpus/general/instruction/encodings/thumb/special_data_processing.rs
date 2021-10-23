@@ -1,6 +1,5 @@
 use crate::cpus::general::{
     instruction::decode::DecodeData,
-    register::NormalizedRegister,
     BitState,
 };
 
@@ -14,19 +13,17 @@ pub struct SpecialDataProcessing {
     opcode: u8,
     h1: BitState,
     h2: BitState,
-    rm: NormalizedRegister,
-    rd_rn: NormalizedRegister,
+    rm: u8,
+    rd_rn: u8,
 }
 
-impl From<DecodeData> for SpecialDataProcessing {
-    fn from(data: DecodeData) -> Self {
-        let instruction_val = data.instruction.get_value_as_u32();
-
-        let opcode = u8::try_from((instruction_val >> 8) & 0b11).unwrap();
-        let h1 = BitState::from(instruction_val >> 7);
-        let h2 = BitState::from(instruction_val >> 6);
-        let rm = NormalizedRegister::from((instruction_val >> 3) & 0b111);
-        let rd_rn = NormalizedRegister::from(instruction_val & 0b111);
+impl<'a> From<DecodeData<'a>> for SpecialDataProcessing {
+    fn from(data: DecodeData<'a>) -> Self {
+        let opcode = u8::try_from((data.instruction.val >> 8) & 0b11).unwrap();
+        let h1 = BitState::from(data.instruction.val >> 7);
+        let h2 = BitState::from(data.instruction.val >> 6);
+        let rm = u8::try_from((data.instruction.val >> 3) & 0b111).unwrap();
+        let rd_rn = u8::try_from(data.instruction.val & 0b111).unwrap();
         Self {
             opcode,
             h1,

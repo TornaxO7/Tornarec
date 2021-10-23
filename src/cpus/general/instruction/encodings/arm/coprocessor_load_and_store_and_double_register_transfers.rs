@@ -1,6 +1,5 @@
 use crate::cpus::general::{
     instruction::decode::DecodeData,
-    register::NormalizedRegister,
     BitState,
 };
 
@@ -16,25 +15,23 @@ pub struct CoprocessorLoadAndStoreAndDoubleRegisterTransfers {
     n_flag: BitState,
     w_flag: BitState,
     l_flag: BitState,
-    rn: NormalizedRegister,
+    rn: u8,
     crd: u8,
     cp_num: u8,
     offset: u8,
 }
 
-impl From<DecodeData> for CoprocessorLoadAndStoreAndDoubleRegisterTransfers {
-    fn from(data: DecodeData) -> Self {
-        let instruction_val = data.instruction.get_value_as_u32();
-
-        let p_flag = BitState::from(instruction_val >> 24);
-        let u_flag = BitState::from(instruction_val >> 23);
-        let n_flag = BitState::from(instruction_val >> 22);
-        let w_flag = BitState::from(instruction_val >> 21);
-        let l_flag = BitState::from(instruction_val >> 20);
-        let rn = NormalizedRegister::from((instruction_val >> 16) & 0b1111);
-        let crd = u8::try_from((instruction_val >> 12) & 0b1111).unwrap();
-        let cp_num = u8::try_from((instruction_val >> 8) & 0b1111).unwrap();
-        let offset = u8::try_from(instruction_val & 0b1111_1111).unwrap();
+impl<'a> From<DecodeData<'a>> for CoprocessorLoadAndStoreAndDoubleRegisterTransfers {
+    fn from(data: DecodeData<'a>) -> Self {
+        let p_flag = BitState::from(data.instruction.val >> 24);
+        let u_flag = BitState::from(data.instruction.val >> 23);
+        let n_flag = BitState::from(data.instruction.val >> 22);
+        let w_flag = BitState::from(data.instruction.val >> 21);
+        let l_flag = BitState::from(data.instruction.val >> 20);
+        let rn = u8::try_from((data.instruction.val >> 16) & 0b1111).unwrap();
+        let crd = u8::try_from((data.instruction.val >> 12) & 0b1111).unwrap();
+        let cp_num = u8::try_from((data.instruction.val >> 8) & 0b1111).unwrap();
+        let offset = u8::try_from(data.instruction.val & 0b1111_1111).unwrap();
 
         Self {
             p_flag,

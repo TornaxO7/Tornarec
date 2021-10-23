@@ -14,12 +14,10 @@ pub struct AdjustStackPointer {
     immediate: u8,
 }
 
-impl From<DecodeData> for AdjustStackPointer {
-    fn from(data: DecodeData) -> Self {
-        let instruction_val = data.instruction.get_value_as_u32();
-
-        let opc = BitState::from(instruction_val >> 7);
-        let immediate = u8::try_from(instruction_val & 0b111_1111).unwrap();
+impl<'a> From<DecodeData<'a>> for AdjustStackPointer {
+    fn from(data: DecodeData<'a>) -> Self {
+        let opc = BitState::from(data.instruction.val >> 7);
+        let immediate = u8::try_from(data.instruction.val & 0b111_1111).unwrap();
         Self { opc, immediate }
     }
 }

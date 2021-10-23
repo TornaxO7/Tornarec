@@ -1,7 +1,14 @@
-use core::fmt;
-use core::fmt::{UpperHex, LowerHex};
-use core::ops::Add;
-use core::convert::TryFrom;
+use std::{
+    convert::TryFrom,
+    fmt::{
+        self,
+        LowerHex,
+        UpperHex,
+    },
+    ops::Add,
+};
+
+use crate::ram::data_types::DataTypeSize;
 
 #[derive(thiserror::Error, Clone, Debug, PartialEq, Eq)]
 pub enum AddressError<T: fmt::Display> {
@@ -12,7 +19,7 @@ pub enum AddressError<T: fmt::Display> {
     ConvertToUsize(T),
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Default)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
 pub struct Address(u32);
 
 impl Address {
@@ -27,7 +34,7 @@ impl Address {
     pub fn get_as_usize(&self) -> usize {
         match usize::try_from(self.0) {
             Ok(num) => num,
-            Err(_)  => panic!("{}", AddressError::ConvertToUsize(self.0)),
+            Err(_) => panic!("{}", AddressError::ConvertToUsize(self.0)),
         }
     }
 }
@@ -72,6 +79,14 @@ impl Add<Self> for Address {
     }
 }
 
+impl Add<DataTypeSize> for Address {
+    type Output = Self;
+
+    fn add(self, size: DataTypeSize) -> Self::Output {
+        Address::from(self.0 + size as u32)
+    }
+}
+
 #[cfg(test)]
 mod tests {
 
@@ -83,7 +98,7 @@ mod tests {
         let address = Address(input);
         assert_eq!(address.get_ref_as_u32(), &input);
     }
-    
+
     #[test]
     fn get_as_u32() {
         let input = 42;

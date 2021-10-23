@@ -1,49 +1,57 @@
 use crate::cpus::general::{
     bit_state::BitState,
     instruction::{
-        encodings::encoding_fields::DataProcessingInstruction,
         decode::DecodeData,
+        encodings::encoding_fields::DataProcessingInstruction,
     },
-    register::NormalizedRegister,
 };
 
-use std::convert::{From, TryFrom};
+use std::convert::{
+    From,
+    TryFrom,
+};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DataProcessingRegisterShift {
     opcode: DataProcessingInstruction,
     s_flag: BitState,
-    rn: NormalizedRegister,
-    rd: NormalizedRegister,
-    rs: NormalizedRegister,
+    rn: u8,
+    rd: u8,
+    rs: u8,
     shift: u8,
-    rm: NormalizedRegister,
+    rm: u8,
 }
 
-impl From<DecodeData> for DataProcessingRegisterShift {
-    fn from(data: DecodeData) -> Self {
-        let instruction_val = data.instruction.get_value_as_u32();
+impl<'a> From<DecodeData<'a>> for DataProcessingRegisterShift {
+    fn from(data: DecodeData<'a>) -> Self {
+        let opcode = DataProcessingInstruction::from((data.instruction.val >> 21) & 0b1111);
+        let s_flag = BitState::from(data.instruction.val >> 20);
+        let rn = u8::try_from((data.instruction.val >> 16) & 0b1111).unwrap();
+        let rd = u8::try_from((data.instruction.val >> 12) & 0b1111).unwrap();
+        let rs = u8::try_from((data.instruction.val >> 8) & 0b1111).unwrap();
+        let shift = u8::try_from((data.instruction.val >> 5) & 0b11).unwrap();
+        let rm = u8::try_from(data.instruction.val & 0b1111).unwrap();
 
-        let opcode = DataProcessingInstruction::from((instruction_val >> 21) & 0b1111);
-        let s_flag = BitState::from(instruction_val >> 20);
-        let rn = NormalizedRegister::from((instruction_val >> 16) & 0b1111);
-        let rd = NormalizedRegister::from((instruction_val >> 12) & 0b1111);
-        let rs = NormalizedRegister::from((instruction_val >> 8) & 0b1111);
-        let shift = u8::try_from((instruction_val >> 5) & 0b11).unwrap();
-        let rm = NormalizedRegister::from(instruction_val & 0b1111);
-
-        Self{opcode, s_flag, rn, rd, rs, shift, rm}
+        Self {
+            opcode,
+            s_flag,
+            rn,
+            rd,
+            rs,
+            shift,
+            rm,
+        }
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::{
+        BitState,
+        DataProcessingInstruction,
         DataProcessingRegisterShift,
         DecodeData,
-        BitState,
         NormalizedRegister,
-        DataProcessingInstruction
     };
 
     use crate::{

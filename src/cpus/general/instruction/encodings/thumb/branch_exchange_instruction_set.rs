@@ -13,13 +13,11 @@ pub struct BranchExchangeInstructionSet {
     rm: RegisterName,
 }
 
-impl From<DecodeData> for BranchExchangeInstructionSet {
-    fn from(data: DecodeData) -> Self {
-        let instruction_val = data.instruction.get_value_as_u32();
-
-        let l_flag = BitState::from(instruction_val >> 7);
-        let h2 = BitState::from(instruction_val >> 6);
-        let rm = RegisterName::from((instruction_val >> 3) & 0b111);
+impl<'a> From<DecodeData<'a>> for BranchExchangeInstructionSet {
+    fn from(data: DecodeData<'a>) -> Self {
+        let l_flag = BitState::from(data.instruction.val >> 7);
+        let h2 = BitState::from(data.instruction.val >> 6);
+        let rm = RegisterName::from((data.instruction.val >> 3) & 0b111);
         Self { l_flag, h2, rm }
     }
 }

@@ -1,7 +1,4 @@
-use crate::cpus::general::{
-    instruction::decode::DecodeData,
-    register::NormalizedRegister,
-};
+use crate::cpus::general::instruction::decode::DecodeData;
 
 use std::convert::{
     From,
@@ -11,17 +8,15 @@ use std::convert::{
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DataProcessingRegister {
     opcode: u8,
-    rm_rs: NormalizedRegister,
-    rd_rn: NormalizedRegister,
+    rm_rs: u8,
+    rd_rn: u8,
 }
 
-impl From<DecodeData> for DataProcessingRegister {
-    fn from(data: DecodeData) -> Self {
-        let instruction_val = data.instruction.get_value_as_u32();
-
-        let opcode = u8::try_from((instruction_val >> 6) & 0b1111).unwrap();
-        let rm_rs = NormalizedRegister::from((instruction_val >> 3) & 0b111);
-        let rd_rn = NormalizedRegister::from(instruction_val & 0b111);
+impl<'a> From<DecodeData<'a>> for DataProcessingRegister {
+    fn from(data: DecodeData<'a>) -> Self {
+        let opcode = u8::try_from((data.instruction.val >> 6) & 0b1111).unwrap();
+        let rm_rs = u8::try_from((data.instruction.val >> 3) & 0b111).unwrap();
+        let rd_rn = u8::try_from(data.instruction.val & 0b111).unwrap();
         Self {
             opcode,
             rm_rs,

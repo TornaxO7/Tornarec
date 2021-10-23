@@ -1,6 +1,5 @@
 use crate::cpus::general::{
     instruction::decode::DecodeData,
-    register::NormalizedRegister,
     BitState,
 };
 
@@ -12,17 +11,15 @@ use std::convert::{
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AddToSpOrPc {
     sp: BitState,
-    rd: NormalizedRegister,
+    rd: u8,
     immediate: u8,
 }
 
-impl From<DecodeData> for AddToSpOrPc {
-    fn from(data: DecodeData) -> Self {
-        let instruction_val = data.instruction.get_value_as_u32();
-
-        let sp = BitState::from(instruction_val >> 11);
-        let rd = NormalizedRegister::from((instruction_val >> 8) & 0b111);
-        let immediate = u8::try_from(instruction_val & 0b1111_1111).unwrap();
+impl<'a> From<DecodeData<'a>> for AddToSpOrPc {
+    fn from(data: DecodeData<'a>) -> Self {
+        let sp = BitState::from(data.instruction.val >> 11);
+        let rd = u8::try_from((data.instruction.val >> 8) & 0b111).unwrap();
+        let immediate = u8::try_from(data.instruction.val & 0b1111_1111).unwrap();
         Self { sp, rd, immediate }
     }
 }

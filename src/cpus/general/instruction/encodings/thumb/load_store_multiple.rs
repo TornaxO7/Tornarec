@@ -1,28 +1,28 @@
 use crate::cpus::general::{
     instruction::{
-        encodings::encoding_fields::RegisterList,
         decode::DecodeData,
+        encodings::encoding_fields::RegisterList,
     },
-    register::NormalizedRegister,
     BitState,
 };
 
-use std::convert::From;
+use std::convert::{
+    From,
+    TryFrom,
+};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct LoadStoreMultiple {
     l_flag: BitState,
-    rn: NormalizedRegister,
+    rn: u8,
     register_list: RegisterList,
 }
 
-impl From<DecodeData> for LoadStoreMultiple {
-    fn from(data: DecodeData) -> Self {
-        let instruction_val = data.instruction.get_value_as_u32();
-
-        let l_flag = BitState::from(instruction_val >> 11);
-        let rn = NormalizedRegister::from((instruction_val >> 8) & 0b111);
-        let register_list = RegisterList::from(instruction_val & 0b1111_1111);
+impl<'a> From<DecodeData<'a>> for LoadStoreMultiple {
+    fn from(data: DecodeData<'a>) -> Self {
+        let l_flag = BitState::from(data.instruction.val >> 11);
+        let rn = u8::try_from((data.instruction.val >> 8) & 0b111).unwrap();
+        let register_list = RegisterList::from(data.instruction.val & 0b1111_1111);
         Self {
             l_flag,
             rn,

@@ -1,6 +1,5 @@
 use crate::cpus::general::{
     instruction::decode::DecodeData,
-    register::NormalizedRegister,
     BitState,
 };
 
@@ -14,19 +13,17 @@ pub struct LoadStoreWordByteImmediateOffset {
     b_flag: BitState,
     l_flag: BitState,
     offset: u8,
-    rn: NormalizedRegister,
-    rd: NormalizedRegister,
+    rn: u8,
+    rd: u8,
 }
 
-impl From<DecodeData> for LoadStoreWordByteImmediateOffset {
-    fn from(data: DecodeData) -> Self {
-        let instruction_val = data.instruction.get_value_as_u32();
-
-        let b_flag = BitState::from(instruction_val >> 12);
-        let l_flag = BitState::from(instruction_val >> 11);
-        let offset = u8::try_from((instruction_val >> 6) & 0b1_1111).unwrap();
-        let rn = NormalizedRegister::from((instruction_val >> 3) & 0b111);
-        let rd = NormalizedRegister::from(instruction_val & 0b111);
+impl<'a> From<DecodeData<'a>> for LoadStoreWordByteImmediateOffset {
+    fn from(data: DecodeData<'a>) -> Self {
+        let b_flag = BitState::from(data.instruction.val >> 12);
+        let l_flag = BitState::from(data.instruction.val >> 11);
+        let offset = u8::try_from((data.instruction.val >> 6) & 0b1_1111).unwrap();
+        let rn = u8::try_from((data.instruction.val >> 3) & 0b111).unwrap();
+        let rd = u8::try_from(data.instruction.val & 0b111).unwrap();
         Self {
             b_flag,
             l_flag,

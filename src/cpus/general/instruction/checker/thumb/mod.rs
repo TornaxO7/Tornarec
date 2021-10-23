@@ -39,14 +39,12 @@ pub enum ThumbInstructionChecker {
 
 impl From<&Instruction> for ThumbInstructionChecker {
     fn from(instruction: &Instruction) -> Self {
-        let instruction_val = instruction.get_value_as_u32();
-
-        let encoding_group = (instruction_val >> 13) & 0b111;
+        let encoding_group = (instruction.val >> 13) & 0b111;
 
         match encoding_group {
             0b000 => {
-                let opcode = (instruction_val >> 11) & 0b11;
-                let bit10 = BitState::from(instruction_val >> 10);
+                let opcode = (instruction.val >> 11) & 0b11;
+                let bit10 = BitState::from(instruction.val >> 10);
 
                 if opcode == 0b11 {
                     if bit10.is_unset() {
@@ -60,10 +58,10 @@ impl From<&Instruction> for ThumbInstructionChecker {
             },
             0b001 => Self::AddSubtractCompareMoveImmediate,
             0b010 => {
-                let bit8_9 = (instruction_val >> 8) & 0b11;
-                let bit10 = BitState::from(instruction_val >> 10);
-                let bit11 = BitState::from(instruction_val >> 11);
-                let bit12 = BitState::from(instruction_val >> 12);
+                let bit8_9 = (instruction.val >> 8) & 0b11;
+                let bit10 = BitState::from(instruction.val >> 10);
+                let bit11 = BitState::from(instruction.val >> 11);
+                let bit12 = BitState::from(instruction.val >> 12);
 
                 if bit12.is_set() {
                     Self::LoadStoreRegisterOffset
@@ -79,7 +77,7 @@ impl From<&Instruction> for ThumbInstructionChecker {
             },
             0b011 => Self::LoadStoreWordByteImmediateOffset,
             0b100 => {
-                let bit12 = BitState::from(instruction_val >> 12);
+                let bit12 = BitState::from(instruction.val >> 12);
 
                 if bit12.is_unset() {
                     Self::LoadStoreHalfwordImmediateOffset
@@ -88,7 +86,7 @@ impl From<&Instruction> for ThumbInstructionChecker {
                 }
             },
             0b101 => {
-                let bit12 = BitState::from(instruction_val >> 12);
+                let bit12 = BitState::from(instruction.val >> 12);
 
                 if bit12.is_unset() {
                     Self::AddToSpOrPc
@@ -97,8 +95,8 @@ impl From<&Instruction> for ThumbInstructionChecker {
                 }
             },
             0b110 => {
-                let bit12 = BitState::from(instruction_val >> 12);
-                let bit8_11 = (instruction_val >> 8) & 0b1111;
+                let bit12 = BitState::from(instruction.val >> 12);
+                let bit8_11 = (instruction.val >> 8) & 0b1111;
 
                 if bit12.is_unset() {
                     Self::LoadStoreMultiple
@@ -111,8 +109,8 @@ impl From<&Instruction> for ThumbInstructionChecker {
                 }
             },
             0b111 => {
-                let bit11_12 = (instruction_val >> 11) & 0b11;
-                let bit0 = BitState::from(instruction_val);
+                let bit11_12 = (instruction.val >> 11) & 0b11;
+                let bit0 = BitState::from(instruction.val);
 
                 match bit11_12 {
                     0b00 => Self::UnconditionalBranch,
@@ -120,10 +118,10 @@ impl From<&Instruction> for ThumbInstructionChecker {
                     0b01 if bit0.is_set() => Self::UndefinedInstruction,
                     0b10 => Self::BlOrBlxPrefix,
                     0b11 => Self::BlSuffix,
-                    _ => unreachable!("{}", ThumbCheckerError::UnknownInstructionOfGroup(instruction_val)),
+                    _ => unreachable!("{}", ThumbCheckerError::UnknownInstructionOfGroup(instruction.val)),
                 }
             },
-            _ => unreachable!("{}", ThumbCheckerError::UnknownInstructionGroup(instruction_val)),
+            _ => unreachable!("{}", ThumbCheckerError::UnknownInstructionGroup(instruction.val)),
         }
     }
 }

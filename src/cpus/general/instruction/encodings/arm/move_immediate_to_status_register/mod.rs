@@ -20,20 +20,18 @@ pub struct MoveImmediateToStatusRegister {
     immediate: u8,
 }
 
-impl From<DecodeData> for MoveImmediateToStatusRegister {
-    fn from(data: DecodeData) -> Self {
-        let instruction_val = data.instruction.get_value_as_u32();
-
-        let r_flag = BitState::from(instruction_val >> 22);
-        let mask = u8::try_from((instruction_val >> 16) & 0b1111).unwrap();
-        let sbo = u8::try_from((instruction_val >> 12) & 0b1111).unwrap();
-        let rotate = u8::try_from((instruction_val >> 8) & 0b1111).unwrap();
-        let immediate = u8::try_from(instruction_val & 0b1111_1111).unwrap();
+impl<'a> From<DecodeData<'a>> for MoveImmediateToStatusRegister {
+    fn from(data: DecodeData<'a>) -> Self {
+        let r_flag = BitState::from(data.instruction.val >> 22);
+        let mask = u8::try_from((data.instruction.val >> 16) & 0b1111).unwrap();
+        let sbo = u8::try_from((data.instruction.val >> 12) & 0b1111).unwrap();
+        let rotate = u8::try_from((data.instruction.val >> 8) & 0b1111).unwrap();
+        let immediate = u8::try_from(data.instruction.val & 0b1111_1111).unwrap();
 
         if sbo != 0b1111 {
             unreachable!(
                 "{}",
-                MoveImmediateToStatusRegisterError::SBOConflict(instruction_val)
+                MoveImmediateToStatusRegisterError::SBOConflict(data.instruction.val)
             );
         }
 

@@ -2,12 +2,15 @@ mod error;
 
 pub use error::RegistersError;
 
-use crate::cpus::general::{
-    register::{
-        Cpsr,
-        RegisterName,
+use crate::{
+    cpus::general::{
+        register::{
+            Cpsr,
+            RegisterName,
+        },
+        OperatingMode,
     },
-    OperatingMode,
+    ram::Address,
 };
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
@@ -138,6 +141,10 @@ impl Registers {
             OperatingMode::Fiq => Some(self.get_reg(RegisterName::SpsrFiq)),
             _other => None,
         }
+    }
+
+    pub fn get_pc(&self) -> Address {
+        Address::from(self.get_reg(RegisterName::Pc))
     }
 
     pub fn move_current_spsr_to_cpsr(&mut self) -> Result<(), RegistersError> {

@@ -1,6 +1,5 @@
 use crate::cpus::general::{
     instruction::decode::DecodeData,
-    register::NormalizedRegister,
     BitState,
 };
 
@@ -13,18 +12,16 @@ use std::convert::{
 pub struct AddSubtractImmediate {
     opc: BitState,
     immediate: u8,
-    rn: NormalizedRegister,
-    rd: NormalizedRegister,
+    rn: u8,
+    rd: u8,
 }
 
-impl From<DecodeData> for AddSubtractImmediate {
-    fn from(data: DecodeData) -> Self {
-        let instruction_val = data.instruction.get_value_as_u32();
-
-        let opc = BitState::from(instruction_val >> 9);
-        let immediate = u8::try_from((instruction_val >> 6) & 0b111).unwrap();
-        let rn = NormalizedRegister::from((instruction_val >> 3) & 0b111);
-        let rd = NormalizedRegister::from(instruction_val & 0b111);
+impl<'a> From<DecodeData<'a>> for AddSubtractImmediate {
+    fn from(data: DecodeData<'a>) -> Self {
+        let opc = BitState::from(data.instruction.val >> 9);
+        let immediate = u8::try_from((data.instruction.val >> 6) & 0b111).unwrap();
+        let rn = u8::try_from((data.instruction.val >> 3) & 0b111).unwrap();
+        let rd = u8::try_from(data.instruction.val & 0b111).unwrap();
         Self {
             opc,
             immediate,

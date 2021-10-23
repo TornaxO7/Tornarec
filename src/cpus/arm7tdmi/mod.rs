@@ -24,7 +24,6 @@ use crate::{
     },
     ram::{
         data_types::DataTypeSize,
-        Address,
         Ram,
     },
 };
@@ -44,24 +43,22 @@ impl Arm7TDMI {
 
     pub fn step(&mut self, ram: &mut Ram) {
         self.fetch(ram);
-        self.decode(ram);
+        self.decode();
         self.execute(ram);
     }
 
     pub fn fetch(&mut self, ram: &Ram) {
-        let pc = self.registers.get_reg(RegisterName::Pc);
         let cpsr = self.registers.get_ref_cpsr();
-
-        let start = Address::from(pc);
+        let pc = self.registers.get_pc();
 
         match cpsr.get_operating_state() {
-            OperatingState::Arm => self.pipeline.fetch(ram, start, DataTypeSize::Word),
-            OperatingState::Thumb => self.pipeline.fetch(ram, start, DataTypeSize::Halfword),
+            OperatingState::Arm => self.pipeline.fetch(ram, pc, DataTypeSize::Word),
+            OperatingState::Thumb => self.pipeline.fetch(ram, pc, DataTypeSize::Halfword),
         };
     }
 
-    pub fn decode(&mut self, ram: &Ram) {
-        self.pipeline.decode(&self.registers, ram);
+    pub fn decode(&mut self) {
+        self.pipeline.decode(&self.registers);
     }
 
     pub fn execute(&mut self, ram: &mut Ram) {

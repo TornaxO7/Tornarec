@@ -15,13 +15,11 @@ pub struct PushPopRegisterList {
     register_list: RegisterList,
 }
 
-impl From<DecodeData> for PushPopRegisterList {
-    fn from(data: DecodeData) -> Self {
-        let instruction_val = data.instruction.get_value_as_u32();
-
-        let l_flag = BitState::from(instruction_val >> 11);
-        let r_flag = BitState::from(instruction_val >> 8);
-        let register_list = RegisterList::from(instruction_val & 0b1111_1111);
+impl<'a> From<DecodeData<'a>> for PushPopRegisterList {
+    fn from(data: DecodeData<'a>) -> Self {
+        let l_flag = BitState::from(data.instruction.val >> 11);
+        let r_flag = BitState::from(data.instruction.val >> 8);
+        let register_list = RegisterList::from(data.instruction.val & 0b1111_1111);
         Self {
             l_flag,
             r_flag,

@@ -6,15 +6,13 @@ use crate::cpus::general::{
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DecodeData<'a> {
     pub instruction: Instruction,
-    pub next_instruction: Instruction,
     pub registers: &'a Registers,
 }
 
 impl<'a> DecodeData<'a> {
-    pub fn new(instruction: Instruction, next_instruction: Instruction, registers: &'a Registers) -> Self {
+    pub fn new(instruction: Instruction, registers: &'a Registers) -> Self {
         Self {
             instruction,
-            next_instruction,
             registers,
         }
     }

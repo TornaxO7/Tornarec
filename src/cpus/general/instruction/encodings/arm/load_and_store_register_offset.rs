@@ -1,7 +1,6 @@
 use crate::cpus::general::{
     BitState,
     instruction::decode::DecodeData,
-    register::NormalizedRegister,
 };
 
 use std::convert::{From, TryFrom};
@@ -13,27 +12,25 @@ pub struct LoadAndStoreRegisterOffset {
     b_flag: BitState,
     w_flag: BitState,
     l_flag: BitState,
-    rn: NormalizedRegister,
-    rd: NormalizedRegister,
+    rn: u8,
+    rd: u8,
     shift_amount: u8,
     shift: u8,
-    rm: NormalizedRegister,
+    rm: u8,
 }
 
-impl From<DecodeData> for LoadAndStoreRegisterOffset {
-    fn from(data: DecodeData) -> Self {
-        let instruction_val = data.instruction.get_value_as_u32();
-
-        let p_flag = BitState::from(instruction_val >> 24);
-        let u_flag = BitState::from(instruction_val >> 23);
-        let b_flag = BitState::from(instruction_val >> 22);
-        let w_flag = BitState::from(instruction_val >> 21);
-        let l_flag = BitState::from(instruction_val >> 20);
-        let rn = NormalizedRegister::from((instruction_val >> 16) & 0b1111);
-        let rd = NormalizedRegister::from((instruction_val >> 12) & 0b1111);
-        let shift_amount = u8::try_from((instruction_val >> 7) & 0b1_1111).unwrap();
-        let shift = u8::try_from((instruction_val >> 5) & 0b11).unwrap();
-        let rm = NormalizedRegister::from(instruction_val & 0b1111);
+impl<'a> From<DecodeData<'a>> for LoadAndStoreRegisterOffset {
+    fn from(data: DecodeData<'a>) -> Self {
+        let p_flag = BitState::from(data.instruction.val >> 24);
+        let u_flag = BitState::from(data.instruction.val >> 23);
+        let b_flag = BitState::from(data.instruction.val >> 22);
+        let w_flag = BitState::from(data.instruction.val >> 21);
+        let l_flag = BitState::from(data.instruction.val >> 20);
+        let rn = u8::try_from((data.instruction.val >> 16) & 0b1111).unwrap();
+        let rd = u8::try_from((data.instruction.val >> 12) & 0b1111).unwrap();
+        let shift_amount = u8::try_from((data.instruction.val >> 7) & 0b1_1111).unwrap();
+        let shift = u8::try_from((data.instruction.val >> 5) & 0b11).unwrap();
+        let rm = u8::try_from(data.instruction.val & 0b1111).unwrap();
         Self{p_flag, u_flag, b_flag, w_flag, l_flag, rn, rd, shift_amount, shift, rm}
     }
 }

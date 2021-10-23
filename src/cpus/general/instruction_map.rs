@@ -1,6 +1,10 @@
 use crate::cpus::general::instruction::decode::{
-    ArmDecode, ThumbDecode, DecodeData,
+    ArmDecode,
+    DecodeData,
+    ThumbDecode,
 };
+
+use std::convert::TryFrom;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum InstructionMap {
@@ -11,12 +15,15 @@ pub enum InstructionMap {
     Undefined,
 }
 
-impl InstructionMap {
-    pub fn get_arm_instruction(decode_data: DecodeData) -> Self {
-        Self::Arm(ArmDecode::from(decode_data))
+impl<'a> InstructionMap {
+    pub fn get_arm_instruction(data: DecodeData<'a>) -> Self {
+        match ArmDecode::try_from(data) {
+            Ok(decode) => Self::Arm(decode),
+            Err(_) => Self::Undefined,
+        }
     }
 
-    pub fn get_thumb_instruction(decode_data: DecodeData) -> Self {
+    pub fn get_thumb_instruction(decode_data: DecodeData<'a>) -> Self {
         Self::Thumb(ThumbDecode::from(decode_data))
     }
 }

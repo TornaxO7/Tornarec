@@ -1,6 +1,5 @@
 use crate::cpus::general::{
     instruction::decode::DecodeData,
-    register::NormalizedRegister,
     BitState,
 };
 
@@ -12,17 +11,15 @@ use std::convert::{
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct LoadStoreToFromStack {
     l_flag: BitState,
-    rd: NormalizedRegister,
+    rd: u8,
     sp_relative_offset: u8,
 }
 
-impl From<DecodeData> for LoadStoreToFromStack {
-    fn from(data: DecodeData) -> Self {
-        let instruction_val = data.instruction.get_value_as_u32();
-
-        let l_flag = BitState::from(instruction_val >> 11);
-        let rd = NormalizedRegister::from((instruction_val >> 8) & 0b111);
-        let sp_relative_offset = u8::try_from(instruction_val & 0b1111_1111).unwrap();
+impl<'a> From<DecodeData<'a>> for LoadStoreToFromStack {
+    fn from(data: DecodeData<'a>) -> Self {
+        let l_flag = BitState::from(data.instruction.val >> 11);
+        let rd = u8::try_from((data.instruction.val >> 8) & 0b111).unwrap();
+        let sp_relative_offset = u8::try_from(data.instruction.val & 0b1111_1111).unwrap();
         Self {
             l_flag,
             rd,

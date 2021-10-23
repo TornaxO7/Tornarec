@@ -11,12 +11,10 @@ pub struct ConditionalBranch {
     offset: u8,
 }
 
-impl From<DecodeData> for ConditionalBranch {
-    fn from(data: DecodeData) -> Self {
-        let instruction_val = data.instruction.get_value_as_u32();
-
-        let cond = u8::try_from((instruction_val >> 8) & 0b1111).unwrap();
-        let offset = u8::try_from(instruction_val & 0b1111_1111).unwrap();
+impl<'a> From<DecodeData<'a>> for ConditionalBranch {
+    fn from(data: DecodeData<'a>) -> Self {
+        let cond = u8::try_from((data.instruction.val >> 8) & 0b1111).unwrap();
+        let offset = u8::try_from(data.instruction.val & 0b1111_1111).unwrap();
         Self { cond, offset }
     }
 }

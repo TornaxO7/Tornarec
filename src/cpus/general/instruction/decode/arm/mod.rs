@@ -1,3 +1,7 @@
+mod error;
+
+pub use error::ArmDecodeError;
+
 use crate::cpus::general::instruction::{
     decode::DecodeData,
     encodings::arm::{
@@ -20,7 +24,7 @@ use crate::cpus::general::instruction::{
     checker::ArmInstructionChecker,
 };
 
-use std::convert::From;
+use std::convert::TryFrom;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ArmDecode {
@@ -45,47 +49,49 @@ pub enum ArmDecode {
     SoftwareInterrupt,
 }
 
-impl From<DecodeData> for ArmDecode {
-    fn from(decode_data: DecodeData) -> Self {
+impl<'a> TryFrom<DecodeData<'a>> for ArmDecode {
+    type Error = ArmDecodeError;
+
+    fn try_from(decode_data: DecodeData<'a>) -> Result<Self, Self::Error> {
         match ArmInstructionChecker::from(&decode_data.instruction) {
            ArmInstructionChecker::DataProcessingImmediateShift =>
-               Self::DataProcessingImmediateShift(DataProcessingImmediateShift::from(decode_data)),
+               Ok(Self::DataProcessingImmediateShift(DataProcessingImmediateShift::from(decode_data))),
            ArmInstructionChecker::Miscellaneous1 =>
-               Self::Miscellaneous1(Miscellaneous1::from(decode_data)),
+               Ok(Self::Miscellaneous1(Miscellaneous1::from(decode_data))),
            ArmInstructionChecker::DataProcessingRegisterShift =>
-               Self::DataProcessingRegisterShift(DataProcessingRegisterShift::from(decode_data)),
+               Ok(Self::DataProcessingRegisterShift(DataProcessingRegisterShift::from(decode_data))),
            ArmInstructionChecker::Miscellaneous2 =>
-               Self::Miscellaneous2(Miscellaneous2::from(decode_data)),
+               Ok(Self::Miscellaneous2(Miscellaneous2::from(decode_data))),
            ArmInstructionChecker::Multiplies =>
-               Self::Multiplies(Multiplies::from(decode_data)),
+               Ok(Self::Multiplies(Multiplies::from(decode_data))),
            ArmInstructionChecker::ExtraLoadAndStores =>
-               Self::ExtraLoadAndStores(ExtraLoadAndStores::from(decode_data)),
+               Ok(Self::ExtraLoadAndStores(ExtraLoadAndStores::from(decode_data))),
            ArmInstructionChecker::DataProcessingImmediate =>
-               Self::DataProcessingImmediate(DataProcessingImmediate::from(decode_data)),
+               Ok(Self::DataProcessingImmediate(DataProcessingImmediate::from(decode_data))),
            ArmInstructionChecker::UndefinedInstruction =>
-               Self::UndefinedInstruction,
+               Ok(Self::UndefinedInstruction),
            ArmInstructionChecker::MoveImmediateToStatusRegister =>
-               Self::MoveImmediateToStatusRegister(MoveImmediateToStatusRegister::from(decode_data)),
+               Ok(Self::MoveImmediateToStatusRegister(MoveImmediateToStatusRegister::from(decode_data))),
            ArmInstructionChecker::LoadAndStoreImmediateOffset =>
-               Self::LoadAndStoreImmediateOffset(LoadAndStoreImmediateOffset::from(decode_data)),
+               Ok(Self::LoadAndStoreImmediateOffset(LoadAndStoreImmediateOffset::from(decode_data))),
            ArmInstructionChecker::LoadAndStoreRegisterOffset =>
-               Self::LoadAndStoreRegisterOffset(LoadAndStoreRegisterOffset::from(decode_data)),
+               Ok(Self::LoadAndStoreRegisterOffset(LoadAndStoreRegisterOffset::from(decode_data))),
            ArmInstructionChecker::MediaInstructions =>
-               Self::MediaInstructions,
+               Ok(Self::MediaInstructions),
            ArmInstructionChecker::ArchitecturallyUndefined =>
-               Self::ArchitecturallyUndefined,
+               Ok(Self::ArchitecturallyUndefined),
            ArmInstructionChecker::LoadAndStoreMultiple =>
-               Self::LoadAndStoreMultiple(LoadAndStoreMultiple::from(decode_data)),
+               Ok(Self::LoadAndStoreMultiple(LoadAndStoreMultiple::from(decode_data))),
            ArmInstructionChecker::BranchAndBranchWithLink =>
-               Self::BranchAndBranchWithLink(BranchAndBranchWithLink::from(decode_data)),
+               Ok(Self::BranchAndBranchWithLink(BranchAndBranchWithLink::from(decode_data))),
            ArmInstructionChecker::CoprocessorLoadAndStoreAndDoubleRegisterTransfers =>
-               Self::CoprocessorLoadAndStoreAndDoubleRegisterTransfers(CoprocessorLoadAndStoreAndDoubleRegisterTransfers::from(decode_data)),
+               Ok(Self::CoprocessorLoadAndStoreAndDoubleRegisterTransfers(CoprocessorLoadAndStoreAndDoubleRegisterTransfers::from(decode_data))),
            ArmInstructionChecker::CoprocessorDataProcessing =>
-               Self::CoprocessorDataProcessing(CoprocessorDataProcessing::from(decode_data)),
+               Ok(Self::CoprocessorDataProcessing(CoprocessorDataProcessing::from(decode_data))),
            ArmInstructionChecker::CoprocessorRegisterTransfers =>
-               Self::CoprocessorRegisterTransfers(CoprocessorRegisterTransfers::from(decode_data)),
+               Ok(Self::CoprocessorRegisterTransfers(CoprocessorRegisterTransfers::from(decode_data))),
            ArmInstructionChecker::SoftwareInterrupt =>
-               Self::SoftwareInterrupt,
+               Ok(Self::SoftwareInterrupt),
            ArmInstructionChecker::UnconditionalInstructions =>
                unreachable!("[ArmInstruction Error]: There are no unconditional instructions implemented yet for the current CPUs of the Nintendo DS"),
         }

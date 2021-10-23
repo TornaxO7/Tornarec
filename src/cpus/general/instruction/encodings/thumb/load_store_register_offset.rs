@@ -1,7 +1,4 @@
-use crate::cpus::general::{
-    instruction::decode::DecodeData,
-    register::NormalizedRegister,
-};
+use crate::cpus::general::instruction::decode::DecodeData;
 
 use std::convert::{
     From,
@@ -11,19 +8,17 @@ use std::convert::{
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct LoadStoreRegisterOffset {
     opcode: u8,
-    rm: NormalizedRegister,
-    rn: NormalizedRegister,
-    rd: NormalizedRegister,
+    rm: u8,
+    rn: u8,
+    rd: u8,
 }
 
-impl From<DecodeData> for LoadStoreRegisterOffset {
-    fn from(data: DecodeData) -> Self {
-        let instruction_val = data.instruction.get_value_as_u32();
-
-        let opcode = u8::try_from((instruction_val >> 9) & 0b111).unwrap();
-        let rm = NormalizedRegister::from((instruction_val >> 6) & 0b111);
-        let rn = NormalizedRegister::from((instruction_val >> 3) & 0b111);
-        let rd = NormalizedRegister::from(instruction_val & 0b111);
+impl<'a> From<DecodeData<'a>> for LoadStoreRegisterOffset {
+    fn from(data: DecodeData<'a>) -> Self {
+        let opcode = u8::try_from((data.instruction.val >> 9) & 0b111).unwrap();
+        let rm = u8::try_from((data.instruction.val >> 6) & 0b111).unwrap();
+        let rn = u8::try_from((data.instruction.val >> 3) & 0b111).unwrap();
+        let rd = u8::try_from(data.instruction.val & 0b111).unwrap();
         Self { opcode, rm, rn, rd }
     }
 }

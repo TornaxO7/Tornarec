@@ -1,13 +1,12 @@
 use crate::cpus::general::{
-    BitState,
     instruction::{
         decode::DecodeData,
         encodings::encoding_fields::RegisterList,
     },
-    register::NormalizedRegister,
+    BitState,
 };
 
-use std::convert::From;
+use std::convert::{From, TryFrom};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct LoadAndStoreMultiple {
@@ -16,33 +15,39 @@ pub struct LoadAndStoreMultiple {
     s_flag: BitState,
     w_flag: BitState,
     l_flag: BitState,
-    rn: NormalizedRegister,
+    rn: u8,
     register_list: RegisterList,
 }
 
-impl From<DecodeData> for LoadAndStoreMultiple {
-    fn from(data: DecodeData) -> Self {
-        let instruction_val = data.instruction.get_value_as_u32();
-
-        let p_flag = BitState::from(instruction_val >> 24);
-        let u_flag = BitState::from(instruction_val >> 23);
-        let s_flag = BitState::from(instruction_val >> 22);
-        let w_flag = BitState::from(instruction_val >> 21);
-        let l_flag = BitState::from(instruction_val >> 20);
-        let rn = NormalizedRegister::from((instruction_val >> 16) & 0b1111);
-        let register_list = RegisterList::from(instruction_val);
-        Self{p_flag, u_flag, s_flag, w_flag, l_flag, rn, register_list}
+impl<'a> From<DecodeData<'a>> for LoadAndStoreMultiple {
+    fn from(data: DecodeData<'a>) -> Self {
+        let p_flag = BitState::from(data.instruction.val >> 24);
+        let u_flag = BitState::from(data.instruction.val >> 23);
+        let s_flag = BitState::from(data.instruction.val >> 22);
+        let w_flag = BitState::from(data.instruction.val >> 21);
+        let l_flag = BitState::from(data.instruction.val >> 20);
+        let rn = u8::try_from((data.instruction.val >> 16) & 0b1111).unwrap();
+        let register_list = RegisterList::from(data.instruction.val);
+        Self {
+            p_flag,
+            u_flag,
+            s_flag,
+            w_flag,
+            l_flag,
+            rn,
+            register_list,
+        }
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::{
-        LoadAndStoreMultiple,
         BitState,
-        RegisterList,
         DecodeData,
-        NormalizedRegister
+        LoadAndStoreMultiple,
+        NormalizedRegister,
+        RegisterList,
     };
 
     use crate::{
@@ -71,6 +76,10 @@ mod tests {
             register_list: RegisterList::from(0b1110_1100_1000_0000),
         };
 
-        assert_eq!(value, expected_value, "{:#?}, {:#?}", &value, &expected_value);
+        assert_eq!(
+            value, expected_value,
+            "{:#?}, {:#?}",
+            &value, &expected_value
+        );
     }
 }

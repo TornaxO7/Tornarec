@@ -1,7 +1,6 @@
 use crate::cpus::general::{
     instruction::decode::DecodeData,
     BitState,
-    register::NormalizedRegister,
 };
 
 use std::convert::{
@@ -14,23 +13,21 @@ pub struct CoprocessorRegisterTransfers {
     opcode1: u8,
     l_flag: BitState,
     crn: u8,
-    rd: NormalizedRegister,
+    rd: u8,
     cp_num: u8,
     opcode2: u8,
     crm: u8,
 }
 
-impl From<DecodeData> for CoprocessorRegisterTransfers {
-    fn from(data: DecodeData) -> Self {
-        let instruction_val = data.instruction.get_value_as_u32();
-
-        let opcode1 = u8::try_from((instruction_val >> 21) & 0b111).unwrap();
-        let l_flag = BitState::from(instruction_val >> 20);
-        let crn = u8::try_from((instruction_val >> 16) & 0b1111).unwrap();
-        let rd = NormalizedRegister::from((instruction_val >> 12) & 0b1111);
-        let cp_num = u8::try_from((instruction_val >> 8) & 0b1111).unwrap();
-        let opcode2 = u8::try_from((instruction_val >> 5) & 0b111).unwrap();
-        let crm = u8::try_from(instruction_val & 0b1111).unwrap();
+impl<'a> From<DecodeData<'a>> for CoprocessorRegisterTransfers {
+    fn from(data: DecodeData<'a>) -> Self {
+        let opcode1 = u8::try_from((data.instruction.val >> 21) & 0b111).unwrap();
+        let l_flag = BitState::from(data.instruction.val >> 20);
+        let crn = u8::try_from((data.instruction.val >> 16) & 0b1111).unwrap();
+        let rd = u8::try_from((data.instruction.val >> 12) & 0b1111).unwrap();
+        let cp_num = u8::try_from((data.instruction.val >> 8) & 0b1111).unwrap();
+        let opcode2 = u8::try_from((data.instruction.val >> 5) & 0b111).unwrap();
+        let crm = u8::try_from(data.instruction.val & 0b1111).unwrap();
         Self {
             opcode1,
             l_flag,

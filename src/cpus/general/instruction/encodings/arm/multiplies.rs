@@ -1,7 +1,4 @@
-use crate::cpus::general::{
-    instruction::decode::DecodeData,
-    register::NormalizedRegister,
-};
+use crate::cpus::general::instruction::decode::DecodeData;
 
 use std::convert::{
     From,
@@ -11,21 +8,19 @@ use std::convert::{
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Multiplies {
     op1: u8,
-    rn: NormalizedRegister,
-    rd: NormalizedRegister,
-    rs: NormalizedRegister,
-    rm: NormalizedRegister,
+    rn: u8,
+    rd: u8,
+    rs: u8,
+    rm: u8,
 }
 
-impl From<DecodeData> for Multiplies {
-    fn from(data: DecodeData) -> Self {
-        let instruction_val = data.instruction.get_value_as_u32();
-
-        let op1 = u8::try_from((instruction_val >> 20) & 0b1111).unwrap();
-        let rn = NormalizedRegister::from((instruction_val >> 16) & 0b1111);
-        let rd = NormalizedRegister::from((instruction_val >> 12) & 0b1111);
-        let rs = NormalizedRegister::from((instruction_val >> 8) & 0b1111);
-        let rm = NormalizedRegister::from(instruction_val & 0b1111);
+impl<'a> From<DecodeData<'a>> for Multiplies {
+    fn from(data: DecodeData<'a>) -> Self {
+        let op1 = u8::try_from((data.instruction.val >> 20) & 0b1111).unwrap();
+        let rn = u8::try_from((data.instruction.val >> 16) & 0b1111).unwrap();
+        let rd = u8::try_from((data.instruction.val >> 12) & 0b1111).unwrap();
+        let rs = u8::try_from((data.instruction.val >> 8) & 0b1111).unwrap();
+        let rm = u8::try_from(data.instruction.val & 0b1111).unwrap();
         Self {
             op1,
             rn,

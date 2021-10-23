@@ -10,11 +10,9 @@ pub struct SoftwareInterrupt {
     immediate: u8,
 }
 
-impl From<DecodeData> for SoftwareInterrupt {
-    fn from(data: DecodeData) -> Self {
-        let instruction_val = data.instruction.get_value_as_u32();
-
-        let immediate = u8::try_from(instruction_val & 0b1111_1111).unwrap();
+impl<'a> From<DecodeData<'a>> for SoftwareInterrupt {
+    fn from(data: DecodeData<'a>) -> Self {
+        let immediate = u8::try_from(data.instruction.val & 0b1111_1111).unwrap();
         Self { immediate }
     }
 }

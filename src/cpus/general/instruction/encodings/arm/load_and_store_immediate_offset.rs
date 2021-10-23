@@ -1,10 +1,12 @@
 use crate::cpus::general::{
     instruction::decode::DecodeData,
     BitState,
-    register::NormalizedRegister,
 };
 
-use std::convert::{From, TryFrom};
+use std::convert::{
+    From,
+    TryFrom,
+};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct LoadAndStoreImmediateOffset {
@@ -13,24 +15,31 @@ pub struct LoadAndStoreImmediateOffset {
     b_flag: BitState,
     w_flag: BitState,
     l_flag: BitState,
-    rn: NormalizedRegister,
-    rd: NormalizedRegister,
+    rn: u8,
+    rd: u8,
     immediate: u16,
 }
 
-impl From<DecodeData> for LoadAndStoreImmediateOffset {
-    fn from(data: DecodeData) -> Self {
-        let instruction_val = data.instruction.get_value_as_u32();
-
-        let p_flag = BitState::from(instruction_val >> 24);
-        let u_flag = BitState::from(instruction_val >> 23);
-        let b_flag = BitState::from(instruction_val >> 22);
-        let w_flag = BitState::from(instruction_val >> 21);
-        let l_flag = BitState::from(instruction_val >> 20);
-        let rn = NormalizedRegister::from((instruction_val >> 16) & 0b1111);
-        let rd = NormalizedRegister::from((instruction_val >> 12) & 0b1111);
-        let immediate = u16::try_from(instruction_val & 0b1111_1111_1111).unwrap();
-        Self { p_flag, u_flag, b_flag, w_flag, l_flag, rn, rd, immediate }
+impl<'a> From<DecodeData<'a>> for LoadAndStoreImmediateOffset {
+    fn from(data: DecodeData<'a>) -> Self {
+        let p_flag = BitState::from(data.instruction.val >> 24);
+        let u_flag = BitState::from(data.instruction.val >> 23);
+        let b_flag = BitState::from(data.instruction.val >> 22);
+        let w_flag = BitState::from(data.instruction.val >> 21);
+        let l_flag = BitState::from(data.instruction.val >> 20);
+        let rn = u8::try_from((data.instruction.val >> 16) & 0b1111).unwrap();
+        let rd = u8::try_from((data.instruction.val >> 12) & 0b1111).unwrap();
+        let immediate = u16::try_from(data.instruction.val & 0b1111_1111_1111).unwrap();
+        Self {
+            p_flag,
+            u_flag,
+            b_flag,
+            w_flag,
+            l_flag,
+            rn,
+            rd,
+            immediate,
+        }
     }
 }
 
@@ -38,9 +47,9 @@ impl From<DecodeData> for LoadAndStoreImmediateOffset {
 mod tests {
     use super::{
         BitState,
+        DecodeData,
         LoadAndStoreImmediateOffset,
         NormalizedRegister,
-        DecodeData,
     };
 
     use crate::{
@@ -70,6 +79,10 @@ mod tests {
             immediate: 0b1110_1100_1000,
         };
 
-        assert_eq!(value, expected_value, "{:#?}, {:#?}", &value, &expected_value);
+        assert_eq!(
+            value, expected_value,
+            "{:#?}, {:#?}",
+            &value, &expected_value
+        );
     }
 }

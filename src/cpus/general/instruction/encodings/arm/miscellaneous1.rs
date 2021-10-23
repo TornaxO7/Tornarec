@@ -1,41 +1,46 @@
-use crate::cpus::general::{
-    instruction::decode::DecodeData,
-    register::NormalizedRegister,
-};
+use crate::cpus::general::instruction::decode::DecodeData;
 
-use std::convert::{From, TryFrom};
+use std::convert::{
+    From,
+    TryFrom,
+};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Miscellaneous1 {
     op1: u8,
-    rn: NormalizedRegister,
-    rd: NormalizedRegister,
-    rs: NormalizedRegister,
+    rn: u8,
+    rd: u8,
+    rs: u8,
     op2: u8,
-    rm: NormalizedRegister,
+    rm: u8,
     // Line3 { r_flag: BitState, rn: u8, rd: u8, rotate_imm: u8, immed_8: u8 }
 }
 
-impl From<DecodeData> for Miscellaneous1 {
-    fn from(data: DecodeData) -> Self {
-        let instruction_val = data.instruction.get_value_as_u32();
-
-        let rn = NormalizedRegister::from((instruction_val >> 16) & 0b1111);
-        let rd = NormalizedRegister::from((instruction_val >> 12) & 0b1111);
-        let rs = NormalizedRegister::from((instruction_val >> 8) & 0b1111);
-        let op1 = u8::try_from((instruction_val >> 21) & 0b11).unwrap();
-        let op2 = u8::try_from((instruction_val >> 5) & 0b111).unwrap();
-        let rm = NormalizedRegister::from(instruction_val & 0b1111);
-        Self{op1, rn, rd, rs, op2, rm}
+impl<'a> From<DecodeData<'a>> for Miscellaneous1 {
+    fn from(data: DecodeData<'a>) -> Self {
+        let rn = u8::try_from((data.instruction.val >> 16) & 0b1111).unwrap();
+        let rd = u8::try_from((data.instruction.val >> 12) & 0b1111).unwrap();
+        let rs = u8::try_from((data.instruction.val >> 8) & 0b1111).unwrap();
+        let op1 = u8::try_from((data.instruction.val >> 21) & 0b11).unwrap();
+        let op2 = u8::try_from((data.instruction.val >> 5) & 0b111).unwrap();
+        let rm = u8::try_from(data.instruction.val & 0b1111).unwrap();
+        Self {
+            op1,
+            rn,
+            rd,
+            rs,
+            op2,
+            rm,
+        }
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::{
+        DecodeData,
         Miscellaneous1,
         NormalizedRegister,
-        DecodeData,
     };
 
     use crate::{
@@ -63,6 +68,10 @@ mod tests {
             rm: NormalizedRegister::from(RegisterName::R6),
         };
 
-        assert_eq!(value, expected_value, "{:#?}, {:#?}", &value, &expected_value);
+        assert_eq!(
+            value, expected_value,
+            "{:#?}, {:#?}",
+            &value, &expected_value
+        );
     }
 }
