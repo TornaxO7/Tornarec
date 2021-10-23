@@ -32,8 +32,11 @@ mod tests {
     #[test]
     fn from() {
         let nds = NintendoDS::default();
-        let instruction = Instruction::from(0b11110_100_1010_0101);
-        let data = DecodeData::new(&nds.arm7tdmi.registers, &nds.ram, &instruction);
+        let instruction = Instruction {
+            val: 0b11110_100_1010_0101,
+            .. Instruction::default()
+        };
+        let data = DecodeData::new(instruction, &nds.arm7tdmi.registers);
 
         let value = BlOrBlxPrefix::from(data);
 

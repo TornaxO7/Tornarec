@@ -1,19 +1,25 @@
-use crate::{cpus::general::{
-    bit_state::BitState,
-    instruction::{
-        decode::DecodeData,
-        encodings::encoding_fields::{
-            DataProcessingInstruction,
-            ShifterOperand,
+use crate::{
+    cpus::general::{
+        bit_state::BitState,
+        instruction::{
+            decode::DecodeData,
+            encodings::encoding_fields::{
+                DataProcessingInstruction,
+                ShifterOperand,
+            },
+        },
+        register::{
+            NormalizedRegister,
+            RegisterName,
         },
     },
-    register::{
-        NormalizedRegister,
-        RegisterName,
-    },
-}, ram::data_types::DataTypeSize};
+    ram::data_types::DataTypeSize,
+};
 
-use std::convert::{From, TryFrom};
+use std::convert::{
+    From,
+    TryFrom,
+};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DataProcessingImmediateShift {
@@ -60,31 +66,33 @@ mod tests {
         DataProcessingImmediateShift,
         DataProcessingInstruction,
         DecodeData,
-        NormalizedRegister,
-        RegisterName,
     };
 
     use crate::{
-        cpus::general::Instruction,
+        cpus::general::{
+            instruction::encodings::encoding_fields::ShifterOperand,
+            Instruction,
+        },
         NintendoDS,
     };
 
     #[test]
     fn test_from() {
         let nds = NintendoDS::default();
-        let instruction = Instruction::from(0b0000_000_1010_1_1010_0101_11100_10_0_1001);
-        let data = DecodeData::new(&nds.arm7tdmi.registers, &nds.ram, &instruction);
+        let instruction = Instruction {
+            val: 0b0000_000_1010_1_1010_0101_11100_10_0_1001,
+            ..Instruction::default()
+        };
+        let data = DecodeData::new(instruction, &nds.arm7tdmi.registers);
 
-        let value = DataProcessingImmediateShift::from(data);
+        let value = DataProcessingImmediateShift::from(data.clone());
 
         let expected_value = DataProcessingImmediateShift {
             opcode: DataProcessingInstruction::CMP,
             s_flag: BitState::Set,
-            rn: NormalizedRegister::from(RegisterName::R10),
-            rd: NormalizedRegister::from(RegisterName::R5),
-            shift_imm: 0b11100,
-            shift: 0b10,
-            rm: NormalizedRegister::from(RegisterName::R9),
+            rn: 0b1010,
+            rd: 0b0101,
+            shifter_operand: ShifterOperand::get_immediate_shift(data),
         };
 
         assert_eq!(

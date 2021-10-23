@@ -42,15 +42,19 @@ mod tests {
     };
 
     use crate::{
-        NintendoDS,
         cpus::general::Instruction,
+        ram::Address,
+        NintendoDS,
     };
 
     #[test]
     fn from() {
         let nds = NintendoDS::default();
-        let instruction = Instruction::from(0b0000_1110_1111_1110_1100_1000_111_0_1111);
-        let data = DecodeData::new(&nds.arm7tdmi.registers, &nds.ram, &instruction);
+        let instruction = Instruction {
+            address: Address::default(),
+            val: 0b0000_1110_1111_1110_1100_1000_111_0_1111,
+        };
+        let data = DecodeData::new(instruction, &nds.arm7tdmi.registers);
 
         let value = CoprocessorDataProcessing::from(data);
 

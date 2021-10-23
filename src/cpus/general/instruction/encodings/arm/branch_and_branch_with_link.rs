@@ -29,15 +29,19 @@ mod tests {
     };
 
     use crate::{
-        NintendoDS,
         cpus::general::Instruction,
+        ram::Address,
+        NintendoDS,
     };
 
     #[test]
     fn from_branch() {
         let nds = NintendoDS::default();
-        let branch_instruction = Instruction::from(0b0000_101_0_1111_1111_1111_1111_0000_0000);
-        let data = DecodeData::new(&nds.arm7tdmi.registers, &nds.ram, &branch_instruction);
+        let branch_instruction = Instruction {
+            address: Address::default(),
+            val: 0b0000_101_0_1111_1111_1111_1111_0000_0000,
+        };
+        let data = DecodeData::new(branch_instruction, &nds.arm7tdmi.registers);
 
         let value = BranchAndBranchWithLink::from(data);
 
@@ -56,8 +60,11 @@ mod tests {
     #[test]
     fn from_branch_with_link() {
         let nds = NintendoDS::default();
-        let branch_with_link = Instruction::from(0b0000_101_1_1111_1111_1111_1111_0000_0000);
-        let data = DecodeData::new(&nds.arm7tdmi.registers, &nds.ram, &branch_with_link);
+        let branch_with_link = Instruction {
+            address: Address::default(),
+            val: 0b0000_101_1_1111_1111_1111_1111_0000_0000
+        };
+        let data = DecodeData::new(branch_with_link, &nds.arm7tdmi.registers);
 
         let value = BranchAndBranchWithLink::from(data);
 

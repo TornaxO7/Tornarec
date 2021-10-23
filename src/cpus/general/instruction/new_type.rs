@@ -34,32 +34,72 @@ impl Instruction {
 #[cfg(test)]
 mod tests {
 
-    use super::Instruction;
-    use crate::cpus::general::condition_code_flag::ConditionCodeFlag;
-
-    #[test]
-    fn get_value_as_u32() {
-        let instruction = Instruction::from(42);
-
-        assert_eq!(instruction.get_val(), 42);
-    }
+    use crate::{
+        cpus::general::{
+            Instruction,
+            condition_code_flag::ConditionCodeFlag,
+        },
+        ram::Address,
+    };
 
     #[test]
     fn get_condition_code_flag() {
-        let instruction1 = Instruction::from(0b0000_0000_0000_0000_0000_0000_0000_0000);
-        let instruction2 = Instruction::from(0b0001_0000_0000_0000_0000_0000_0000_0000);
-        let instruction3 = Instruction::from(0b0010_0000_0000_0000_0000_0000_0000_0000);
-        let instruction4 = Instruction::from(0b0011_0000_0000_0000_0000_0000_0000_0000);
-        let instruction5 = Instruction::from(0b0100_0000_0000_0000_0000_0000_0000_0000);
-        let instruction6 = Instruction::from(0b0101_0000_0000_0000_0000_0000_0000_0000);
-        let instruction7 = Instruction::from(0b0110_0000_0000_0000_0000_0000_0000_0000);
-        let instruction8 = Instruction::from(0b0111_0000_0000_0000_0000_0000_0000_0000);
-        let instruction9 = Instruction::from(0b1001_0000_0000_0000_0000_0000_0000_0000);
-        let instruction10 = Instruction::from(0b1010_0000_0000_0000_0000_0000_0000_0000);
-        let instruction11 = Instruction::from(0b1011_0000_0000_0000_0000_0000_0000_0000);
-        let instruction12 = Instruction::from(0b1100_0000_0000_0000_0000_0000_0000_0000);
-        let instruction13 = Instruction::from(0b1101_0000_0000_0000_0000_0000_0000_0000);
-        let instruction14 = Instruction::from(0b1110_0000_0000_0000_0000_0000_0000_0000);
+        let instruction1 = Instruction {
+            address: Address::from(0),
+            val: 0b0000_0000_0000_0000_0000_0000_0000_0000,
+        };
+        let instruction2 = Instruction {
+            address: Address::from(0),
+            val: 0b0001_0000_0000_0000_0000_0000_0000_0000,
+        };
+        let instruction3 = Instruction {
+            address: Address::from(0),
+            val: 0b0010_0000_0000_0000_0000_0000_0000_0000,
+        };
+        let instruction4 = Instruction {
+            address: Address::from(0),
+            val: 0b0011_0000_0000_0000_0000_0000_0000_0000,
+        };
+        let instruction5 = Instruction {
+            address: Address::from(0),
+            val: 0b0100_0000_0000_0000_0000_0000_0000_0000,
+        };
+        let instruction6 = Instruction {
+            address: Address::from(0),
+            val: 0b0101_0000_0000_0000_0000_0000_0000_0000,
+        };
+        let instruction7 = Instruction {
+            address: Address::from(0),
+            val: 0b0110_0000_0000_0000_0000_0000_0000_0000,
+        };
+        let instruction8 = Instruction {
+            address: Address::from(0),
+            val: 0b0111_0000_0000_0000_0000_0000_0000_0000,
+        };
+        let instruction9 = Instruction {
+            address: Address::from(0),
+            val: 0b1001_0000_0000_0000_0000_0000_0000_0000,
+        };
+        let instruction10 = Instruction {
+            address: Address::from(0),
+            val: 0b1010_0000_0000_0000_0000_0000_0000_0000,
+        };
+        let instruction11 = Instruction {
+            address: Address::from(0),
+            val: 0b1011_0000_0000_0000_0000_0000_0000_0000,
+        };
+        let instruction12 = Instruction {
+            address: Address::from(0),
+            val: 0b1100_0000_0000_0000_0000_0000_0000_0000,
+        };
+        let instruction13 = Instruction {
+            address: Address::from(0),
+            val: 0b1101_0000_0000_0000_0000_0000_0000_0000,
+        };
+        let instruction14 = Instruction {
+            address: Address::from(0),
+            val: 0b1110_0000_0000_0000_0000_0000_0000_0000,
+        };
 
         assert_eq!(
             instruction1.get_condition_code_flag(),

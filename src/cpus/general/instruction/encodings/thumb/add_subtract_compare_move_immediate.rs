@@ -23,28 +23,27 @@ mod tests {
     use super::{
         AddSubtractCompareMoveImmediate,
         DecodeData,
-        NormalizedRegister
     };
 
     use crate::{
-        cpus::general::{
-            register::RegisterName,
-            Instruction,
-        },
+        cpus::general::Instruction,
         NintendoDS,
     };
 
     #[test]
     fn from() {
         let nds = NintendoDS::default();
-        let instruction = Instruction::from(0b001_11_110_1010_0101);
-        let data = DecodeData::new(&nds.arm7tdmi.registers, &nds.ram, &instruction);
+        let instruction = Instruction {
+            val: 0b001_11_110_1010_0101,
+            .. Instruction::default()
+        };
+        let data = DecodeData::new(instruction, &nds.arm7tdmi.registers);
 
         let value = AddSubtractCompareMoveImmediate::from(data);
 
         let expected_value = AddSubtractCompareMoveImmediate {
             opcode: 0b11,
-            rd_rn: NormalizedRegister::from(RegisterName::R6),
+            rd_rn: 0b0110,
             immediate: 0b1010_0101,
         };
 

@@ -37,30 +37,29 @@ mod tests {
         BitState,
         DecodeData,
         LoadStoreHalfwordImmediateOffset,
-        NormalizedRegister,
     };
 
     use crate::{
-        cpus::general::{
-            register::RegisterName,
-            Instruction,
-        },
+        cpus::general::Instruction,
         NintendoDS,
     };
 
     #[test]
     fn from() {
         let nds = NintendoDS::default();
-        let instruction = Instruction::from(0b1000_1_10101_110_100);
-        let data = DecodeData::new(&nds.arm7tdmi.registers, &nds.ram, &instruction);
+        let instruction = Instruction {
+            val: 0b1000_1_10101_110_100,
+            .. Instruction::default()
+        };
+        let data = DecodeData::new(instruction, &nds.arm7tdmi.registers);
 
         let value = LoadStoreHalfwordImmediateOffset::from(data);
 
         let expected_value = LoadStoreHalfwordImmediateOffset {
             l_flag: BitState::Set,
             offset: 0b10101,
-            rn: NormalizedRegister::from(RegisterName::R6),
-            rd: NormalizedRegister::from(RegisterName::R4),
+            rn: 0b0110,
+            rd: 0b0100,
         };
 
         assert_eq!(

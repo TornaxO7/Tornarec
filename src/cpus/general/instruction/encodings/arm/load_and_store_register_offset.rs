@@ -1,9 +1,12 @@
 use crate::cpus::general::{
-    BitState,
     instruction::decode::DecodeData,
+    BitState,
 };
 
-use std::convert::{From, TryFrom};
+use std::convert::{
+    From,
+    TryFrom,
+};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct LoadAndStoreRegisterOffset {
@@ -31,32 +34,42 @@ impl<'a> From<DecodeData<'a>> for LoadAndStoreRegisterOffset {
         let shift_amount = u8::try_from((data.instruction.val >> 7) & 0b1_1111).unwrap();
         let shift = u8::try_from((data.instruction.val >> 5) & 0b11).unwrap();
         let rm = u8::try_from(data.instruction.val & 0b1111).unwrap();
-        Self{p_flag, u_flag, b_flag, w_flag, l_flag, rn, rd, shift_amount, shift, rm}
+        Self {
+            p_flag,
+            u_flag,
+            b_flag,
+            w_flag,
+            l_flag,
+            rn,
+            rd,
+            shift_amount,
+            shift,
+            rm,
+        }
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::{
-        LoadAndStoreRegisterOffset,
         BitState,
-        NormalizedRegister,
-            DecodeData,
+        DecodeData,
+        LoadAndStoreRegisterOffset,
     };
 
     use crate::{
-        cpus::general::{
-            register::RegisterName,
-            Instruction,
-        },
+        cpus::general::Instruction,
         NintendoDS,
     };
 
     #[test]
     fn from() {
         let nds = NintendoDS::default();
-        let instruction = Instruction::from(0b0000_011_1_0_1_0_1_1100_0011_11100_01_0_1010);
-        let data = DecodeData::new(&nds.arm7tdmi.registers, &nds.ram, &instruction);
+        let instruction = Instruction {
+            val: 0b0000_011_1_0_1_0_1_1100_0011_11100_01_0_1010,
+            .. Instruction::default()
+        };
+        let data = DecodeData::new(instruction, &nds.arm7tdmi.registers);
 
         let value = LoadAndStoreRegisterOffset::from(data);
 
@@ -66,13 +79,17 @@ mod tests {
             b_flag: BitState::Set,
             w_flag: BitState::Unset,
             l_flag: BitState::Set,
-            rn: NormalizedRegister::from(RegisterName::R12),
-            rd: NormalizedRegister::from(RegisterName::R3),
+            rn: 0b1100,
+            rd: 0b0011,
             shift_amount: 0b11100,
             shift: 0b01,
-            rm: NormalizedRegister::from(RegisterName::R10),
+            rm: 0b1010,
         };
 
-        assert_eq!(value, expected_value, "{:#?}, {:#?}", &value, &expected_value);
+        assert_eq!(
+            value, expected_value,
+            "{:#?}, {:#?}",
+            &value, &expected_value
+        );
     }
 }

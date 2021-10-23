@@ -46,23 +46,22 @@ mod tests {
         BitState,
         DecodeData,
         LoadAndStoreMultiple,
-        NormalizedRegister,
         RegisterList,
     };
 
     use crate::{
-        cpus::general::{
-            register::RegisterName,
-            Instruction,
-        },
+        cpus::general::Instruction,
         NintendoDS,
     };
 
     #[test]
     fn from() {
         let nds = NintendoDS::default();
-        let instruction = Instruction::from(0b0000_100_1_0_1_0_1_1111_1110_1100_1000_0000);
-        let data = DecodeData::new(&nds.arm7tdmi.registers, &nds.ram, &instruction);
+        let instruction = Instruction{
+            val: 0b0000_100_1_0_1_0_1_1111_1110_1100_1000_0000,
+            .. Instruction::default()
+        };
+        let data = DecodeData::new(instruction, &nds.arm7tdmi.registers);
 
         let value = LoadAndStoreMultiple::from(data);
 
@@ -72,7 +71,7 @@ mod tests {
             s_flag: BitState::Set,
             w_flag: BitState::Unset,
             l_flag: BitState::Set,
-            rn: NormalizedRegister::from(RegisterName::R15),
+            rn: 0b1111,
             register_list: RegisterList::from(0b1110_1100_1000_0000),
         };
 

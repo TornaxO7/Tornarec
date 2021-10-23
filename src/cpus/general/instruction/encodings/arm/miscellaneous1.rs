@@ -40,32 +40,31 @@ mod tests {
     use super::{
         DecodeData,
         Miscellaneous1,
-        NormalizedRegister,
     };
 
     use crate::{
-        cpus::general::{
-            register::RegisterName,
-            Instruction,
-        },
+        cpus::general::Instruction,
         NintendoDS,
     };
 
     #[test]
     fn from() {
         let nds = NintendoDS::default();
-        let instruction = Instruction::from(0b0000_00010_11_0_1010_0101_1001_000_0_0110);
-        let data = DecodeData::new(&nds.arm7tdmi.registers, &nds.ram, &instruction);
+        let instruction = Instruction {
+            val: 0b0000_00010_11_0_1010_0101_1001_000_0_0110,
+            .. Instruction::default()
+        };
+        let data = DecodeData::new(instruction, &nds.arm7tdmi.registers);
 
         let value = Miscellaneous1::from(data);
 
         let expected_value = Miscellaneous1 {
             op1: 0b11,
-            rn: NormalizedRegister::from(RegisterName::R10),
-            rd: NormalizedRegister::from(RegisterName::R5),
-            rs: NormalizedRegister::from(RegisterName::R9),
+            rn: 0b1010,
+            rd: 0b0101,
+            rs: 0b1001,
             op2: 0b000,
-            rm: NormalizedRegister::from(RegisterName::R6),
+            rm: 0b0110,
         };
 
         assert_eq!(

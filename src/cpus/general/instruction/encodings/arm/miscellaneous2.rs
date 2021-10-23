@@ -28,33 +28,32 @@ impl<'a> From<DecodeData<'a>> for Miscellaneous2 {
 mod tests {
     use super::{
         Miscellaneous2,
-        NormalizedRegister,
         DecodeData,
     };
 
     use crate::{
-        cpus::general::{
-            register::RegisterName,
-            Instruction,
-        },
+        cpus::general::Instruction,
         NintendoDS,
     };
 
     #[test]
     fn test_from() {
         let nds = NintendoDS::default();
-        let instruction = Instruction::from(0b0000_00010_11_0_1010_0101_1001_0_11_1_1111);
-        let data = DecodeData::new(&nds.arm7tdmi.registers, &nds.ram, &instruction);
+        let instruction = Instruction {
+            val: 0b0000_00010_11_0_1010_0101_1001_0_11_1_1111,
+            .. Instruction::default()
+        };
+        let data = DecodeData::new(instruction, &nds.arm7tdmi.registers);
 
         let value = Miscellaneous2::from(data);
 
         let expected_value = Miscellaneous2 {
             op1: 0b11,
-            rn: NormalizedRegister::from(RegisterName::R10),
-            rd: NormalizedRegister::from(RegisterName::R5),
-            rs: NormalizedRegister::from(RegisterName::R9),
+            rn: 0b1010,
+            rd: 0b0101,
+            rs: 0b1001,
             op2: 0b11,
-            rm: NormalizedRegister::from(RegisterName::R15),
+            rm: 0b1111,
         };
 
         assert_eq!(value, expected_value);

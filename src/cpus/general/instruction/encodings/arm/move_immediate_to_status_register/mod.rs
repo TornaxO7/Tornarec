@@ -60,8 +60,11 @@ mod tests {
     #[test]
     fn from() {
         let nds = NintendoDS::default();
-        let instruction = Instruction::from(0b0000_00110_1_10_1010_1111_1001_1111_0000);
-        let data = DecodeData::new(&nds.arm7tdmi.registers, &nds.ram, &instruction);
+        let instruction = Instruction {
+            val: 0b0000_00110_1_10_1010_1111_1001_1111_0000,
+            .. Instruction::default()
+        };
+        let data = DecodeData::new(instruction, &nds.arm7tdmi.registers);
 
         let value = MoveImmediateToStatusRegister::from(data);
 
@@ -83,8 +86,11 @@ mod tests {
     #[should_panic]
     fn from_invalid_sbo() {
         let nds = NintendoDS::default();
-        let instruction = Instruction::from(0b0000_00110_1_10_1010_0110_1001_1111_0000);
-        let data = DecodeData::new(&nds.arm7tdmi.registers, &nds.ram, &instruction);
+        let instruction = Instruction {
+            val: 0b0000_00110_1_10_1010_0110_1001_1111_0000,
+            .. Instruction::default()
+        };
+        let data = DecodeData::new(instruction, &nds.arm7tdmi.registers);
 
         MoveImmediateToStatusRegister::from(data);
     }

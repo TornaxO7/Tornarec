@@ -32,31 +32,30 @@ impl<'a> From<DecodeData<'a>> for ShiftByImmediate {
 mod tests {
     use super::{
         DecodeData,
-        NormalizedRegister,
         ShiftByImmediate,
     };
 
     use crate::{
-        cpus::general::{
-            register::RegisterName,
-            Instruction,
-        },
+        cpus::general::Instruction,
         NintendoDS,
     };
 
     #[test]
     fn from() {
         let nds = NintendoDS::default();
-        let instruction = Instruction::from(0b000_11_10101_101_010);
-        let data = DecodeData::new(&nds.arm7tdmi.registers, &nds.ram, &instruction);
+        let instruction = Instruction {
+            val: 0b000_11_10101_101_010,
+            .. Instruction::default()
+        };
+        let data = DecodeData::new(instruction, &nds.arm7tdmi.registers);
 
         let value = ShiftByImmediate::from(data);
 
         let expected_value = ShiftByImmediate {
             opcode: 0b11,
             immediate: 0b10101,
-            rm: NormalizedRegister::from(RegisterName::R5),
-            rd: NormalizedRegister::from(RegisterName::R2),
+            rm: 0b0101,
+            rd: 0b0010,
         };
 
         assert_eq!(

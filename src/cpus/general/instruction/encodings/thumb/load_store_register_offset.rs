@@ -28,30 +28,29 @@ mod tests {
     use super::{
         DecodeData,
         LoadStoreRegisterOffset,
-        NormalizedRegister,
     };
 
     use crate::{
-        cpus::general::{
-            register::RegisterName,
-            Instruction,
-        },
+        cpus::general::Instruction,
         NintendoDS,
     };
 
     #[test]
     fn from() {
         let nds = NintendoDS::default();
-        let instruction = Instruction::from(0b0101_111_110_100_101);
-        let data = DecodeData::new(&nds.arm7tdmi.registers, &nds.ram, &instruction);
+        let instruction = Instruction {
+            val: 0b0101_111_110_100_101,
+            .. Instruction::default()
+        };
+        let data = DecodeData::new(instruction, &nds.arm7tdmi.registers);
 
         let value = LoadStoreRegisterOffset::from(data);
 
         let expected_value = LoadStoreRegisterOffset {
             opcode: 0b111,
-            rm: NormalizedRegister::from(RegisterName::R6),
-            rn: NormalizedRegister::from(RegisterName::R4),
-            rd: NormalizedRegister::from(RegisterName::R5),
+            rm: 0b0110,
+            rn: 0b0100,
+            rd: 0b0101,
         };
 
         assert_eq!(

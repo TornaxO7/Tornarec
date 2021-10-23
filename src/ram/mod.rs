@@ -130,6 +130,9 @@ mod tests {
 
         let expected_output: [u8; 2] = [0x2, 0x3];
 
-        assert_eq!(ram[1..3], expected_output);
+        let start = Address::from(1);
+        let end = Address::from(3);
+
+        assert_eq!(ram[start..end], expected_output);
     }
 }

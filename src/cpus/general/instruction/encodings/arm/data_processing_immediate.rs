@@ -1,9 +1,25 @@
-use crate::{cpus::general::{bit_state::BitState, instruction::{decode::DecodeData, encodings::encoding_fields::{DataProcessingInstruction, ShifterOperand}}, register::{
-        NormalizedRegister,
-        RegisterName,
-    }}, ram::data_types::DataTypeSize};
+use crate::{
+    cpus::general::{
+        bit_state::BitState,
+        instruction::{
+            decode::DecodeData,
+            encodings::encoding_fields::{
+                DataProcessingInstruction,
+                ShifterOperand,
+            },
+        },
+        register::{
+            NormalizedRegister,
+            RegisterName,
+        },
+    },
+    ram::data_types::DataTypeSize,
+};
 
-use std::convert::{From, TryFrom};
+use std::convert::{
+    From,
+    TryFrom,
+};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DataProcessingImmediate {
@@ -28,7 +44,7 @@ impl<'a> From<DecodeData<'a>> for DataProcessingImmediate {
                 rn
             }
         };
-        
+
         let rd = u8::try_from((data.instruction.val >> 12) & 0b1111).unwrap();
         let shifter_operand = ShifterOperand::get_immediate(data);
 
@@ -49,12 +65,11 @@ mod tests {
         DataProcessingImmediate,
         DataProcessingInstruction,
         DecodeData,
-        NormalizedRegister,
     };
 
     use crate::{
         cpus::general::{
-            register::RegisterName,
+            instruction::encodings::encoding_fields::ShifterOperand,
             Instruction,
         },
         NintendoDS,
@@ -63,18 +78,20 @@ mod tests {
     #[test]
     fn from() {
         let nds = NintendoDS::default();
-        let instruction = Instruction::from(0b0000_001_1111_1_1100_0011_1010_0011_1011);
-        let data = DecodeData::new(&nds.arm7tdmi.registers, &nds.ram, &instruction);
+        let instruction = Instruction {
+            val: 0b0000_001_1111_1_1100_0011_1010_0011_1011,
+            ..Instruction::default()
+        };
+        let data = DecodeData::new(instruction, &nds.arm7tdmi.registers);
 
-        let value = DataProcessingImmediate::from(data);
+        let value = DataProcessingImmediate::from(data.clone());
 
         let expected_value = DataProcessingImmediate {
             opcode: DataProcessingInstruction::MVN,
             s_flag: BitState::Set,
-            rn: NormalizedRegister::from(RegisterName::R12),
-            rd: NormalizedRegister::from(RegisterName::R3),
-            rotate: 0b1010,
-            immediate: 0b0011_1011,
+            rn: 0b1100,
+            rd: 0b0011,
+            shifter_operand: ShifterOperand::get_immediate(data),
         };
 
         assert_eq!(

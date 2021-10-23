@@ -51,33 +51,32 @@ mod tests {
         DataProcessingInstruction,
         DataProcessingRegisterShift,
         DecodeData,
-        NormalizedRegister,
     };
 
     use crate::{
-        cpus::general::{
-            register::RegisterName,
-            Instruction,
-        },
+        cpus::general::Instruction,
         NintendoDS,
     };
 
     #[test]
     fn test_from() {
         let nds = NintendoDS::default();
-        let instruction = Instruction::from(0b0000_000_1111_1_1010_0101_0110_0_11_1_1001);
-        let data = DecodeData::new(&nds.arm7tdmi.registers, &nds.ram, &instruction);
+        let instruction = Instruction{
+            val: 0b0000_000_1111_1_1010_0101_0110_0_11_1_1001,
+            .. Instruction::default()
+        };
+        let data = DecodeData::new(instruction, &nds.arm7tdmi.registers);
 
         let value = DataProcessingRegisterShift::from(data);
 
         let expected_value = DataProcessingRegisterShift {
             opcode: DataProcessingInstruction::MVN,
             s_flag: BitState::Set,
-            rn: NormalizedRegister::from(RegisterName::R10),
-            rd: NormalizedRegister::from(RegisterName::R5),
-            rs: NormalizedRegister::from(RegisterName::R6),
+            rn: 0b1010,
+            rd: 0b0101,
+            rs: 0b0110,
             shift: 0b11,
-            rm: NormalizedRegister::from(RegisterName::R9),
+            rm: 0b1001,
         };
 
         assert_eq!(value, expected_value);

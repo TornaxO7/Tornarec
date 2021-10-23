@@ -56,8 +56,11 @@ mod tests {
     #[test]
     fn from() {
         let nds = NintendoDS::default();
-        let instruction = Instruction::from(0b0000_1110_111_1_1110_1100_1000_101_1_0101);
-        let data = DecodeData::new(&nds.arm7tdmi.registers, &nds.ram, &instruction);
+        let instruction = Instruction{
+            val: 0b0000_1110_111_1_1110_1100_1000_101_1_0101,
+            .. Instruction::default()
+        };
+        let data = DecodeData::new(instruction, &nds.arm7tdmi.registers);
 
         let value = CoprocessorRegisterTransfers::from(data);
 

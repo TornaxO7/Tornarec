@@ -135,121 +135,181 @@ mod tests {
 
     #[test]
     fn data_processing_immediate_shift() {
-        let instruction = Instruction::from(0b0000_000_1110_0_0000_0000_10101_11_0_1111);
+        let instruction = Instruction {
+            val: 0b0000_000_1110_0_0000_0000_10101_11_0_1111,
+            .. Instruction::default()
+        };
         assert_eq!(ArmInstructionChecker::from(&instruction), ArmInstructionChecker::DataProcessingImmediateShift);
     }
 
     #[test]
     fn miscellaneous1() {
-        let instruction = Instruction::from(0b0000_000_1000_0_0000_0000_00000_00_0_0000);
+        let instruction = Instruction {
+            val: 0b0000_000_1000_0_0000_0000_00000_00_0_0000,
+            .. Instruction::default()
+        };
         assert_eq!(ArmInstructionChecker::from(&instruction), ArmInstructionChecker::Miscellaneous1);
     }
 
     #[test]
     fn data_processing_register_shift() {
-        let instruction = Instruction::from(0b0000_000_0000_0_0000_0000_0000_0_00_1_0000);
+        let instruction = Instruction {
+            val: 0b0000_000_0000_0_0000_0000_0000_0_00_1_0000,
+            .. Instruction::default()
+        };
         assert_eq!(ArmInstructionChecker::from(&instruction), ArmInstructionChecker::DataProcessingRegisterShift);
     }
     
     #[test]
     fn miscellaneous2() {
-        let instruction = Instruction::from(0b0000_1010_0_0000_0000_0000_0_00_1_0000);
+        let instruction = Instruction {
+            val: 0b0000_1010_0_0000_0000_0000_0_00_1_0000,
+            .. Instruction::default()
+        };
         assert_eq!(ArmInstructionChecker::from(&instruction), ArmInstructionChecker::Miscellaneous2);
     }
 
     #[test]
     fn multiplies() {
-        let instruction = Instruction::from(0b0000_0000_0000_0000_0000_0000_1001_0000);
+        let instruction = Instruction {
+            val: 0b0000_0000_0000_0000_0000_0000_1001_0000,
+            .. Instruction::default()
+        };
         assert_eq!(ArmInstructionChecker::from(&instruction), ArmInstructionChecker::Multiplies);
     }
 
     #[test]
     fn extra_load_stores() {
-        let instruction = Instruction::from(0b0000_000_00000_0000_00000_0000_1101_0000);
+        let instruction = Instruction {
+            val: 0b0000_000_00000_0000_00000_0000_1101_0000,
+            .. Instruction::default()
+        };
         assert_eq!(ArmInstructionChecker::from(&instruction), ArmInstructionChecker::ExtraLoadAndStores);
     }
 
     #[test]
     fn data_processing_immediate() {
-        let instruction = Instruction::from(0b0000_001_0000_0_0000_0000_0000_0000_0000);
+        let instruction = Instruction {
+            val: 0b0000_001_0000_0_0000_0000_0000_0000_0000,
+            .. Instruction::default()
+        };
         assert_eq!(ArmInstructionChecker::from(&instruction), ArmInstructionChecker::DataProcessingImmediate);
     }
 
     #[test]
     fn undefined_instruction() {
-        let instruction = Instruction::from(0b0000_001_10_0_00_0000_0000_0000_0000_0000);
+        let instruction = Instruction {
+            val: 0b0000_001_10_0_00_0000_0000_0000_0000_0000,
+            .. Instruction::default()
+        };
         assert_eq!(ArmInstructionChecker::from(&instruction), ArmInstructionChecker::UndefinedInstruction);
     }
 
     #[test]
     fn move_immediate_to_status_register() {
-        let instruction = Instruction::from(0b0000_001_10_0_10_0000_1111_0000_0000_0000);
+        let instruction = Instruction {
+            val: 0b0000_001_10_0_10_0000_1111_0000_0000_0000,
+            .. Instruction::default()
+        };
         assert_eq!(ArmInstructionChecker::from(&instruction), ArmInstructionChecker::MoveImmediateToStatusRegister);
     }
     
     #[test]
     fn load_store_immediate_offset() {
-        let instruction = Instruction::from(0b0000_010_00000_0000_0000_0000_0000_0000);
+        let instruction = Instruction {
+            val: 0b0000_010_00000_0000_0000_0000_0000_0000,
+            .. Instruction::default()
+        };
         assert_eq!(ArmInstructionChecker::from(&instruction), ArmInstructionChecker::LoadAndStoreImmediateOffset);
     }
 
     #[test]
     fn load_and_store_register_offset() {
-        let instruction = Instruction::from(0b0000_011_00000_0000_0000_00000_00_0_0000);
+        let instruction = Instruction {
+            val: 0b0000_011_00000_0000_0000_00000_00_0_0000,
+            .. Instruction::default()
+        };
         assert_eq!(ArmInstructionChecker::from(&instruction), ArmInstructionChecker::LoadAndStoreRegisterOffset);
     }
 
     #[test]
     fn media_instructions() {
-        let instruction = Instruction::from(0b0000_011_00000_0000_0000_0000_000_1_0000);
+        let instruction = Instruction {
+            val: 0b0000_011_00000_0000_0000_0000_000_1_0000,
+            .. Instruction::default()
+        };
         assert_eq!(ArmInstructionChecker::from(&instruction), ArmInstructionChecker::MediaInstructions);
     }
 
     #[test]
     fn architecturally_undefined() {
-        let instruction = Instruction::from(0b0000_011_11111_0000_0000_0000_1111_0000);
+        let instruction = Instruction {
+            val: 0b0000_011_11111_0000_0000_0000_1111_0000,
+            .. Instruction::default()
+        };
         assert_eq!(ArmInstructionChecker::from(&instruction), ArmInstructionChecker::ArchitecturallyUndefined);
     }
 
     #[test]
     fn load_and_store_multiple() {
-        let instruction = Instruction::from(0b0000_100_00000_0000_0000_0000_0000_0000);
+        let instruction = Instruction {
+            val: 0b0000_100_00000_0000_0000_0000_0000_0000,
+            .. Instruction::default()
+        };
         assert_eq!(ArmInstructionChecker::from(&instruction), ArmInstructionChecker::LoadAndStoreMultiple);
     }
 
     #[test]
     fn branch_and_branch_with_link() {
-        let instruction = Instruction::from(0b0000_101_0_0000_0000_0000_0000_0000_0000);
+        let instruction = Instruction {
+            val: 0b0000_101_0_0000_0000_0000_0000_0000_0000,
+            .. Instruction::default()
+        };
         assert_eq!(ArmInstructionChecker::from(&instruction), ArmInstructionChecker::BranchAndBranchWithLink);
     }
 
     #[test]
     fn coprocessor_load_and_store_and_double_register_transfers() {
-        let instruction = Instruction::from(0b0000_110_00000_0000_0000_0000_0000_0000);
+        let instruction = Instruction {
+            val: 0b0000_110_00000_0000_0000_0000_0000_0000,
+            .. Instruction::default()
+        };
         assert_eq!(ArmInstructionChecker::from(&instruction), ArmInstructionChecker::CoprocessorLoadAndStoreAndDoubleRegisterTransfers);
     }
 
     #[test]
     fn coprocessor_data_processing() {
-        let instruction = Instruction::from(0b0000_1110_0000_0000_0000_0000_000_0_0000);
+        let instruction = Instruction {
+            val: 0b0000_1110_0000_0000_0000_0000_000_0_0000,
+            .. Instruction::default()
+        };
         assert_eq!(ArmInstructionChecker::from(&instruction), ArmInstructionChecker::CoprocessorDataProcessing);
     }
 
     #[test]
     fn coprocessor_register_transfers() {
-        let instruction = Instruction::from(0b0000_1110_000_0_0000_0000_0000_000_1_0000);
+        let instruction = Instruction {
+            val: 0b0000_1110_000_0_0000_0000_0000_000_1_0000,
+            .. Instruction::default()
+        };
         assert_eq!(ArmInstructionChecker::from(&instruction), ArmInstructionChecker::CoprocessorRegisterTransfers);
     }
 
     #[test]
     fn software_interrupt() {
-        let instruction = Instruction::from(0b0000_1111_0000_0000_0000_0000_0000_0000);
+        let instruction = Instruction {
+            val: 0b0000_1111_0000_0000_0000_0000_0000_0000,
+            .. Instruction::default()
+        };
         assert_eq!(ArmInstructionChecker::from(&instruction), ArmInstructionChecker::SoftwareInterrupt);
     }
 
     #[test]
     fn unconditional_instructions() {
-        let instruction = Instruction::from(0b1111_0000_0000_0000_0000_0000_0000_0000);
+        let instruction = Instruction {
+            val: 0b1111_0000_0000_0000_0000_0000_0000_0000,
+            .. Instruction::default()
+        };
         assert_eq!(ArmInstructionChecker::from(&instruction), ArmInstructionChecker::UnconditionalInstructions);
     }
 }

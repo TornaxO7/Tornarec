@@ -36,31 +36,30 @@ mod tests {
     use super::{
         AddSubtractImmediate,
         BitState,
-        NormalizedRegister,
         DecodeData,
     };
 
     use crate::{
         NintendoDS,
-        cpus::general::{
-            Instruction,
-            register::RegisterName,
-        },
+        cpus::general::Instruction,
     };
 
     #[test]
     fn from() {
         let nds = NintendoDS::default();
-        let instruction = Instruction::from(0b000_111_1_111_110_100);
-        let data = DecodeData::new(&nds.arm7tdmi.registers, &nds.ram, &instruction);
+        let instruction = Instruction {
+            val: 0b000_111_1_111_110_100,
+            .. Instruction::default()
+        };
+        let data = DecodeData::new(instruction, &nds.arm7tdmi.registers);
 
         let value = AddSubtractImmediate::from(data);
 
         let expected_value = AddSubtractImmediate {
             opc: BitState::Set,
             immediate: 0b111,
-            rn: NormalizedRegister::from(RegisterName::R6),
-            rd: NormalizedRegister::from(RegisterName::R4),
+            rn: 0b0110,
+            rd: 0b0100,
         };
 
         assert_eq!(

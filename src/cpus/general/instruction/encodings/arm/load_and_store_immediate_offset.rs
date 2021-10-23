@@ -49,22 +49,21 @@ mod tests {
         BitState,
         DecodeData,
         LoadAndStoreImmediateOffset,
-        NormalizedRegister,
     };
 
     use crate::{
-        cpus::general::{
-            register::RegisterName,
-            Instruction,
-        },
+        cpus::general::Instruction,
         NintendoDS,
     };
 
     #[test]
     fn from() {
         let nds = NintendoDS::default();
-        let instruction = Instruction::from(0b0000_010_1_0_1_0_1_1100_0011_1110_1100_1000);
-        let data = DecodeData::new(&nds.arm7tdmi.registers, &nds.ram, &instruction);
+        let instruction = Instruction{
+            val: 0b0000_010_1_0_1_0_1_1100_0011_1110_1100_1000,
+            .. Instruction::default()
+        };
+        let data = DecodeData::new(instruction, &nds.arm7tdmi.registers);
 
         let value = LoadAndStoreImmediateOffset::from(data);
 
@@ -74,8 +73,8 @@ mod tests {
             b_flag: BitState::Set,
             w_flag: BitState::Unset,
             l_flag: BitState::Set,
-            rn: NormalizedRegister::from(RegisterName::R12),
-            rd: NormalizedRegister::from(RegisterName::R3),
+            rn: 0b1100,
+            rd: 0b0011,
             immediate: 0b1110_1100_1000,
         };
 
