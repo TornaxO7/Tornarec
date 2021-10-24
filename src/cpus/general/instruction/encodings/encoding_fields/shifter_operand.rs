@@ -30,7 +30,7 @@ impl<'a> ShifterOperand {
         let rm = {
             let rm = data.instruction.val & 0b1111;
             if RegisterName::from(rm) == RegisterName::Pc {
-                let value = data.instruction.address.clone() + DataTypeSize::Byte;
+                let value = data.instruction.address + DataTypeSize::Byte;
                 value.get_as_u32()
             } else {
                 data.registers.get_reg(RegisterName::from(rm))
