@@ -8,10 +8,7 @@ use crate::{
                 ShifterOperand,
             },
         },
-        register::{
-            NormalizedRegister,
-            RegisterName,
-        },
+        register::RegisterName,
     },
     ram::data_types::DataTypeSize,
 };
@@ -37,7 +34,7 @@ impl<'a> From<DecodeData<'a>> for DataProcessingImmediate {
 
         let rn = {
             let rn = (data.instruction.val >> 16) & 0b1111;
-            if NormalizedRegister::from(rn) == NormalizedRegister::from(RegisterName::R15) {
+            if RegisterName::from(rn) == RegisterName::R15 {
                 let value = data.instruction.address + DataTypeSize::Byte;
                 value.get_as_u32()
             } else {

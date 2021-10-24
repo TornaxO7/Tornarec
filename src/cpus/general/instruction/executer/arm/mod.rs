@@ -13,7 +13,6 @@ use crate::{
         },
         register::{
             types::ConditionBit,
-            NormalizedRegister,
             RegisterName,
             Registers,
         },
@@ -41,7 +40,7 @@ impl<'a> ArmExecuter<'a> {
                 let rd = data.rn & data.shifter_operand.val;
 
                 if data.s_flag.is_set() {
-                    if NormalizedRegister::from(rd) == NormalizedRegister::from(RegisterName::R15) {
+                    if RegisterName::from(rd) == RegisterName::R15 {
                         if let Err(err) = self.registers.move_current_spsr_to_cpsr() {
                             panic!("{}", err);
                         }
@@ -64,7 +63,7 @@ impl<'a> ArmExecuter<'a> {
                 let rd = data.rn + data.shifter_operand.val;
 
                 if data.s_flag.is_set() {
-                    if NormalizedRegister::from(rd) == NormalizedRegister::from(RegisterName::R15) {
+                    if RegisterName::from(rd) == RegisterName::R15 {
                         if let Err(err) = self.registers.move_current_spsr_to_cpsr() {
                             panic!("{}", err);
                         }
@@ -86,7 +85,7 @@ impl<'a> ArmExecuter<'a> {
                 let rd = data.rn + data.shifter_operand.val + c_flag.get_as_u32();
 
                 if data.s_flag.is_set() {
-                    if NormalizedRegister::from(rd) == NormalizedRegister::from(RegisterName::R15) {
+                    if RegisterName::from(rd) == RegisterName::R15 {
                         if let Err(err) = self.registers.move_current_spsr_to_cpsr() {
                             panic!("{}", err);
                         }

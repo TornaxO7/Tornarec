@@ -1,4 +1,4 @@
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, Eq)]
 #[rustfmt::skip]
 pub enum RegisterName {
     // general purpose registers
@@ -74,6 +74,27 @@ impl RegisterName {
             _other => unreachable!("[Register Name error]: CPSR and co shouldn't be have a binary representation. Register was: '{:?}'.", _other),
         }
     }
+
+    fn normalize(reg: &RegisterName) -> RegisterName {
+        match reg {
+            RegisterName::Sp => RegisterName::R13,
+            RegisterName::SpSvc => RegisterName::R13Svc,
+            RegisterName::SpAbt => RegisterName::R13Abt,
+            RegisterName::SpUnd => RegisterName::R13Und,
+            RegisterName::SpIrq => RegisterName::R13Irq,
+            RegisterName::SpFiq => RegisterName::R13Fiq,
+
+            RegisterName::Lr => RegisterName::R14,
+            RegisterName::LrSvc => RegisterName::R14Svc,
+            RegisterName::LrAbt => RegisterName::R14Abt,
+            RegisterName::LrUnd => RegisterName::R14Und,
+            RegisterName::LrIrq => RegisterName::R14Irq,
+            RegisterName::LrFiq => RegisterName::R14Fiq,
+
+            RegisterName::Pc => RegisterName::R15,
+            other => *other,
+        }
+    }
 }
 
 impl From<u32> for RegisterName {
@@ -95,10 +116,44 @@ impl From<u32> for RegisterName {
             0b1101 => Self::R13,
             0b1110 => Self::R14,
             0b1111 => Self::R15,
-            _other => unreachable!(
+            other => unreachable!(
                 "[Register Name Error]: '{:b}' is an unknown register.",
-                _other
+                other
             ),
         }
+    }
+}
+
+impl PartialEq for RegisterName {
+    fn eq(&self, other: &Self) -> bool {
+        let self_normalized = Self::normalize(self);
+        let other_normalized = Self::normalize(other);
+
+        self_normalized as u32 == other_normalized as u32
+    }
+}
+
+#[cfg(test)]
+mod tests {
+
+    use super::RegisterName;
+
+    #[test]
+    fn compare() {
+        assert!(RegisterName::R13 == RegisterName::Sp);
+        assert!(RegisterName::R13Svc == RegisterName::SpSvc);
+        assert!(RegisterName::R13Abt == RegisterName::SpAbt);
+        assert!(RegisterName::R13Und == RegisterName::SpUnd);
+        assert!(RegisterName::R13Irq == RegisterName::SpIrq);
+        assert!(RegisterName::R13Fiq == RegisterName::SpFiq);
+
+        assert!(RegisterName::R14 == RegisterName::Lr);
+        assert!(RegisterName::R14Svc == RegisterName::LrSvc);
+        assert!(RegisterName::R14Abt == RegisterName::LrAbt);
+        assert!(RegisterName::R14Und == RegisterName::LrUnd);
+        assert!(RegisterName::R14Irq == RegisterName::LrIrq);
+        assert!(RegisterName::R14Fiq == RegisterName::LrFiq);
+
+        assert!(RegisterName::R15 == RegisterName::Pc);
     }
 }

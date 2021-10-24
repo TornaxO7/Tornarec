@@ -3,7 +3,6 @@ use crate::{
         instruction::decode::DecodeData,
         register::{
             types::ConditionBit,
-            NormalizedRegister,
             RegisterName,
         },
         BitState,
@@ -30,11 +29,11 @@ impl<'a> ShifterOperand {
         // decode the shifter_operand part
         let rm = {
             let rm = data.instruction.val & 0b1111;
-            if NormalizedRegister::from(rm) == NormalizedRegister::from(RegisterName::Pc) {
+            if RegisterName::from(rm) == RegisterName::Pc {
                 let value = data.instruction.address.clone() + DataTypeSize::Byte;
                 value.get_as_u32()
             } else {
-                data.registers.get_reg(NormalizedRegister::from(rm).get_reg())
+                data.registers.get_reg(RegisterName::from(rm))
             }
         };
 
