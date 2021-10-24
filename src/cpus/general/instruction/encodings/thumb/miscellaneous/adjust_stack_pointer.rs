@@ -29,10 +29,10 @@ mod tests {
         BitState,
         DecodeData,
     };
-    
+
     use crate::{
-        NintendoDS,
         cpus::general::Instruction,
+        NintendoDS,
     };
 
     #[test]
@@ -40,7 +40,7 @@ mod tests {
         let nds = NintendoDS::default();
         let instruction = Instruction {
             val: 0b1011_0000_1_100_1000,
-            .. Instruction::default()
+            ..Instruction::default()
         };
         let data = DecodeData::new(instruction, &nds.arm7tdmi.registers);
 

@@ -40,9 +40,9 @@ mod tests {
     #[test]
     fn from() {
         let nds = NintendoDS::default();
-        let instruction = Instruction{
+        let instruction = Instruction {
             val: 0b010000_1111_101_010,
-            .. Instruction::default()
+            ..Instruction::default()
         };
         let data = DecodeData::new(instruction, &nds.arm7tdmi.registers);
 
@@ -50,8 +50,8 @@ mod tests {
 
         let expected_value = DataProcessingRegister {
             opcode: 0b1111,
-             rm_rs: 0b0101,
-             rd_rn: 0b0010,
+            rm_rs: 0b0101,
+            rd_rn: 0b0010,
         };
 
         assert_eq!(

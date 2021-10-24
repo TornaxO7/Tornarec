@@ -19,10 +19,10 @@ impl Exception {
     pub fn get_priority(&self) -> u8 {
         match self {
             Exception::Reset => 1,
-            Exception::Dabt  => 2,
-            Exception::Fiq   => 3,
-            Exception::Irq   => 4,
-            Exception::Pabt  => 5,
+            Exception::Dabt => 2,
+            Exception::Fiq => 3,
+            Exception::Irq => 4,
+            Exception::Pabt => 5,
             Exception::Udef | Exception::Swi => 6,
         }
     }

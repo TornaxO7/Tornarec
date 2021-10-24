@@ -63,7 +63,7 @@ impl Arm7TDMI {
 
     pub fn execute(&mut self, ram: &mut Ram) {
         let _decoded_instruction = self.pipeline.get_decoded_instruction();
-        
+
         let _arm = ArmExecuter::new(&mut self.registers, ram);
         let _thumb = ThumbExecuter::new();
 

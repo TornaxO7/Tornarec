@@ -6,8 +6,8 @@ use crate::{
     cpus::general::{
         instruction::encodings::{
             arm::{
-                DataProcessingImmediateShift,
                 BranchAndBranchWithLink,
+                DataProcessingImmediateShift,
             },
             encoding_fields::DataProcessingInstruction,
         },
@@ -34,7 +34,6 @@ impl<'a> ArmExecuter<'a> {
     }
 
     pub fn data_processing_immediate_shift(&mut self, data: DataProcessingImmediateShift) {
-        
         let cpsr = self.registers.get_ref_cpsr();
 
         match data.opcode {
@@ -51,7 +50,10 @@ impl<'a> ArmExecuter<'a> {
 
                         cpsr.set_condition_bit(ConditionBit::N, BitState::from(rd >> 31));
                         cpsr.set_condition_bit(ConditionBit::Z, BitState::from(rd == 0));
-                        cpsr.set_condition_bit(ConditionBit::C, data.shifter_operand.shifter_carry_out);
+                        cpsr.set_condition_bit(
+                            ConditionBit::C,
+                            data.shifter_operand.shifter_carry_out,
+                        );
                     }
                 }
             }
@@ -68,8 +70,8 @@ impl<'a> ArmExecuter<'a> {
                         }
                     } else {
                         let carry = data.rn + data.shifter_operand.shifter_operand;
-                        let overflow: Option<u32> = data.rn
-                            .checked_add(data.shifter_operand.shifter_operand);
+                        let overflow: Option<u32> =
+                            data.rn.checked_add(data.shifter_operand.shifter_operand);
 
                         let cpsr = self.registers.get_mut_cpsr();
                         cpsr.set_condition_bit(ConditionBit::N, BitState::from(rd >> 31));
@@ -89,8 +91,10 @@ impl<'a> ArmExecuter<'a> {
                             panic!("{}", err);
                         }
                     } else {
-                        let carry = data.rn + data.shifter_operand.shifter_operand + c_flag.get_as_u32();
-                        let overflow: Option<u32> = data.rn
+                        let carry =
+                            data.rn + data.shifter_operand.shifter_operand + c_flag.get_as_u32();
+                        let overflow: Option<u32> = data
+                            .rn
                             .checked_add(data.shifter_operand.shifter_operand)
                             .and_then(|rn| rn.checked_add(c_flag.get_as_u32()));
 
@@ -101,7 +105,7 @@ impl<'a> ArmExecuter<'a> {
                         cpsr.set_condition_bit(ConditionBit::V, BitState::from(overflow.is_none()));
                     }
                 }
-            },
+            }
             DataProcessingInstruction::SBC => {}
             DataProcessingInstruction::RSC => {}
             DataProcessingInstruction::TST => {}

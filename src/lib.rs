@@ -1,10 +1,12 @@
+pub mod cpus;
 pub mod ram;
 pub mod rom_reader;
-pub mod cpus;
 
-use crate::ram::Ram;
-use crate::rom_reader::RomReader;
-use crate::cpus::Arm7TDMI;
+use crate::{
+    cpus::Arm7TDMI,
+    ram::Ram,
+    rom_reader::RomReader,
+};
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct NintendoDS {

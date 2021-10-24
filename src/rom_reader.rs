@@ -19,7 +19,7 @@ pub enum RomError {}
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct RomReader {
     rom_content: Vec<u8>,
-    parser:      NDSParser,
+    parser: NDSParser,
 }
 
 impl RomReader {

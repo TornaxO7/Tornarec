@@ -1,6 +1,6 @@
 use crate::cpus::general::{
-    Instruction,
     BitState,
+    Instruction,
 };
 
 use super::ThumbCheckerError;
@@ -25,7 +25,10 @@ impl From<&Instruction> for MiscellaneousInstruction {
             0b00 if bit8.is_unset() && bit11.is_unset() => Self::AdjustStackPointer,
             0b10 => Self::PushPopRegisterList,
             0b11 if bit8.is_unset() && bit11.is_set() => Self::SoftwareBreakpoint,
-            _ => unreachable!("{}", ThumbCheckerError::SuccessorInstruction(instruction.val)),
+            _ => unreachable!(
+                "{}",
+                ThumbCheckerError::SuccessorInstruction(instruction.val)
+            ),
         }
     }
 }

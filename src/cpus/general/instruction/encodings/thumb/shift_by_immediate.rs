@@ -45,7 +45,7 @@ mod tests {
         let nds = NintendoDS::default();
         let instruction = Instruction {
             val: 0b000_11_10101_101_010,
-            .. Instruction::default()
+            ..Instruction::default()
         };
         let data = DecodeData::new(instruction, &nds.arm7tdmi.registers);
 

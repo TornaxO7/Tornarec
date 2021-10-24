@@ -3,14 +3,17 @@ use crate::cpus::general::{
     BitState,
 };
 
-use std::convert::{From, TryFrom};
+use std::convert::{
+    From,
+    TryFrom,
+};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct AddSubtractRegister {
     opc: BitState,
-    rm:  u8,
-    rn:  u8,
-    rd:  u8,
+    rm: u8,
+    rn: u8,
+    rd: u8,
 }
 
 impl<'a> From<DecodeData<'a>> for AddSubtractRegister {
@@ -41,7 +44,7 @@ mod tests {
         let nds = NintendoDS::default();
         let instruction = Instruction {
             val: 0b000_11_0_1_111_110_100,
-            .. Instruction::default()
+            ..Instruction::default()
         };
         let data = DecodeData::new(instruction, &nds.arm7tdmi.registers);
 
@@ -49,9 +52,9 @@ mod tests {
 
         let expected_value = AddSubtractRegister {
             opc: BitState::Set,
-            rm:  0b0111,
-            rn:  0b0110,
-            rd:  0b0100,
+            rm: 0b0111,
+            rn: 0b0110,
+            rd: 0b0100,
         };
 
         assert_eq!(

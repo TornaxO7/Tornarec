@@ -15,7 +15,7 @@ use crate::{
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct Registers {
-    // register from r0 to r7
+    // register from r0 to r12 (unbanked)
     unbanked_registers: [u32; 13],
 
     /// The banked registers from r8 to r12
@@ -129,7 +129,7 @@ impl Registers {
             RegisterName::SpsrUnd => self.spsr[2].set(new_val),
             RegisterName::SpsrIrq => self.spsr[3].set(new_val),
             RegisterName::SpsrFiq => self.spsr[4].set(new_val),
-        }
+        };
     }
 
     pub fn get_spsr(&self, operating_mode: OperatingMode) -> Option<u32> {

@@ -1,18 +1,23 @@
-pub mod data_block;
 pub mod address;
+pub mod data_block;
 pub mod data_types;
 
 pub use address::Address;
 pub use data_block::DataBlock;
 
 use std::{
-    ops::{Index, Range},
     convert::TryFrom,
+    ops::{
+        Index,
+        Range,
+    },
 };
 
 #[derive(thiserror::Error, Debug, Clone, PartialEq, Eq)]
 pub enum RamError {
-    #[error("[RAM ERROR]: Address `{0:X}` can't be accessed, because it's beyond the max size: {1:X}")]
+    #[error(
+        "[RAM ERROR]: Address `{0:X}` can't be accessed, because it's beyond the max size: {1:X}"
+    )]
     RamIndexOverflow(Address, Address),
 
     #[error("[RAM ERROR]: Ram is too large: '{0}' bits long.")]
@@ -30,7 +35,11 @@ impl Ram {
         Self::default()
     }
 
-    pub fn load_data(&mut self, data: DataBlock, starting_address: Address) -> Result<(), RamError>{
+    pub fn load_data(
+        &mut self,
+        data: DataBlock,
+        starting_address: Address,
+    ) -> Result<(), RamError> {
         let last_address = starting_address.get_as_u32() + data.size();
 
         if self.size() < last_address {
@@ -39,11 +48,15 @@ impl Ram {
 
         if let Some(max_size) = self.max_address {
             if self.size() > max_size {
-                return Err(RamError::RamIndexOverflow(Address::from(last_address), Address::from(max_size)));
+                return Err(RamError::RamIndexOverflow(
+                    Address::from(last_address),
+                    Address::from(max_size),
+                ));
             }
         }
 
-        self.ram[usize::try_from(starting_address.get_as_u32()).unwrap()..].copy_from_slice(data.get_ref());
+        self.ram[usize::try_from(starting_address.get_as_u32()).unwrap()..]
+            .copy_from_slice(data.get_ref());
         Ok(())
     }
 
@@ -75,9 +88,15 @@ impl Index<Range<Address>> for Ram {
 #[cfg(test)]
 mod tests {
 
-    use super::{Ram, RamError};
-    use crate::ram::{Address, DataBlock};
-    
+    use super::{
+        Ram,
+        RamError,
+    };
+    use crate::ram::{
+        Address,
+        DataBlock,
+    };
+
     #[test]
     fn new() {
         let expected_ram = Ram {
@@ -95,11 +114,11 @@ mod tests {
         let expected_ram = Ram {
             ram: vec![
                 // 10 padding, because starting address is 0x10
-                0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 
-                0x1, 0x2, 0x3, 0x4],
-            .. Ram::default()
+                0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x1, 0x2, 0x3, 0x4,
+            ],
+            ..Ram::default()
         };
-        
+
         let data = DataBlock::from(vec![0x1, 0x2, 0x3, 0x4]);
         let start = Address::from(10);
 
@@ -117,7 +136,10 @@ mod tests {
 
         assert_eq!(
             result,
-            Err(RamError::RamIndexOverflow(Address::from(7), Address::from(5)))
+            Err(RamError::RamIndexOverflow(
+                Address::from(7),
+                Address::from(5)
+            ))
         );
     }
 
@@ -125,7 +147,7 @@ mod tests {
     fn get_range_of_ram() {
         let ram = Ram {
             ram: vec![0x1, 0x2, 0x3, 0x4],
-            .. Ram::default()
+            ..Ram::default()
         };
 
         let expected_output: [u8; 2] = [0x2, 0x3];

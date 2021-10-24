@@ -1,7 +1,7 @@
 mod arm;
-mod thumb;
 mod decode_data;
+mod thumb;
 
 pub use arm::ArmDecode;
-pub use thumb::ThumbDecode;
 pub use decode_data::DecodeData;
+pub use thumb::ThumbDecode;

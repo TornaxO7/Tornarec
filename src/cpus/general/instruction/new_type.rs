@@ -36,8 +36,8 @@ mod tests {
 
     use crate::{
         cpus::general::{
-            Instruction,
             condition_code_flag::ConditionCodeFlag,
+            Instruction,
         },
         ram::Address,
     };

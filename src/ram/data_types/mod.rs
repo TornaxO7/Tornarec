@@ -1,8 +1,8 @@
-mod size;
 mod error;
+mod size;
 
-pub use size::DataTypeSize;
 pub use error::DataTypeError;
+pub use size::DataTypeSize;
 
 use core::convert::TryInto;
 
@@ -14,7 +14,6 @@ pub enum DataType {
 }
 
 impl DataType {
-
     pub fn get_byte(slice: &[u8]) -> Result<Self, DataTypeError> {
         match slice.try_into() {
             Ok(array) => Ok(Self::Byte(u8::from_le_bytes(array))),

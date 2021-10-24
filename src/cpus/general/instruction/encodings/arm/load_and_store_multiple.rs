@@ -6,7 +6,10 @@ use crate::cpus::general::{
     BitState,
 };
 
-use std::convert::{From, TryFrom};
+use std::convert::{
+    From,
+    TryFrom,
+};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct LoadAndStoreMultiple {
@@ -57,9 +60,9 @@ mod tests {
     #[test]
     fn from() {
         let nds = NintendoDS::default();
-        let instruction = Instruction{
+        let instruction = Instruction {
             val: 0b0000_100_1_0_1_0_1_1111_1110_1100_1000_0000,
-            .. Instruction::default()
+            ..Instruction::default()
         };
         let data = DecodeData::new(instruction, &nds.arm7tdmi.registers);
 

@@ -1,9 +1,26 @@
-use std::convert::{From, TryFrom};
+use std::convert::{
+    From,
+    TryFrom,
+};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum DataProcessingInstruction {
-    AND, EOR, SUB, RSB, ADD, ADC, SBC, RSC, TST,
-    TEQ, CMP, CMN, ORR, MOV, BIC, MVN,
+    AND,
+    EOR,
+    SUB,
+    RSB,
+    ADD,
+    ADC,
+    SBC,
+    RSC,
+    TST,
+    TEQ,
+    CMP,
+    CMN,
+    ORR,
+    MOV,
+    BIC,
+    MVN,
 }
 
 impl From<u8> for DataProcessingInstruction {

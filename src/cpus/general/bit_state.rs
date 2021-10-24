@@ -1,7 +1,10 @@
 use std::ops::Deref;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub enum BitState {Set, Unset}
+pub enum BitState {
+    Set,
+    Unset,
+}
 
 impl BitState {
     pub fn is_set(&self) -> bool {

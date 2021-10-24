@@ -62,7 +62,7 @@ mod tests {
         let nds = NintendoDS::default();
         let branch_with_link = Instruction {
             address: Address::default(),
-            val: 0b0000_101_1_1111_1111_1111_1111_0000_0000
+            val: 0b0000_101_1_1111_1111_1111_1111_0000_0000,
         };
         let data = DecodeData::new(branch_with_link, &nds.arm7tdmi.registers);
 

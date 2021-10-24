@@ -1,10 +1,13 @@
-use crate::cpus::general:: {
+use crate::cpus::general::{
     bit_state::BitState,
+    condition_code_flag::ConditionCodeFlag,
+    interruption::Interruption,
     operating_mode::OperatingMode,
     operating_state::OperatingState,
-    interruption::Interruption,
-    condition_code_flag::ConditionCodeFlag,
-    register::types::{ConditionBits, ConditionBit},
+    register::types::{
+        ConditionBit,
+        ConditionBits,
+    },
 };
 
 use core::convert::From;
@@ -19,14 +22,11 @@ pub enum CpsrError {
 pub struct Cpsr(u32);
 
 impl Cpsr {
-
     pub fn current_mode_has_spsr(&self) -> bool {
-        ![OperatingMode::Usr, OperatingMode::Sys]
-            .contains(&self.get_operating_mode().unwrap())
+        ![OperatingMode::Usr, OperatingMode::Sys].contains(&self.get_operating_mode().unwrap())
     }
 
     pub fn is_condition_set(&self, condition: ConditionCodeFlag) -> bool {
-
         let cb = self.get_condition_bits();
 
         match condition {
@@ -56,12 +56,12 @@ impl Cpsr {
         match interrupt {
             Interruption::Irq => match state {
                 BitState::Unset => self.0 &= !(1 << 7),
-                BitState::Set   => self.0 |= 1 << 7,
+                BitState::Set => self.0 |= 1 << 7,
             },
             Interruption::Fiq => match state {
                 BitState::Unset => self.0 &= !(1 << 6),
-                BitState::Set   => self.0 |= 1 << 6,
-            }
+                BitState::Set => self.0 |= 1 << 6,
+            },
         }
     }
 
@@ -73,14 +73,14 @@ impl Cpsr {
                 } else {
                     BitState::Unset
                 }
-            },
+            }
             Interruption::Fiq => {
                 if (self.0 >> 6) & 1 == 1 {
                     BitState::Set
                 } else {
                     BitState::Unset
                 }
-            },
+            }
         }
     }
 
@@ -111,7 +111,7 @@ impl Cpsr {
             OperatingMode::Und => self.0 |= 0b11111,
         };
     }
-    
+
     pub fn get_operating_mode(&self) -> Result<OperatingMode, CpsrError> {
         match self.0 & 0b11111 {
             0b10000 => Ok(OperatingMode::Usr),
@@ -131,7 +131,7 @@ impl Cpsr {
             ConditionBit::Z => self.0 = (self.0 & !(1 << 30)) | (state.get_as_u32() << 30),
             ConditionBit::C => self.0 = (self.0 & !(1 << 29)) | (state.get_as_u32() << 29),
             ConditionBit::V => self.0 = (self.0 & !(1 << 28)) | (state.get_as_u32() << 28),
-        }
+        };
     }
 
     pub fn get_condition_bit(&self, condition_bit: ConditionBit) -> BitState {
@@ -161,7 +161,16 @@ impl From<u32> for Cpsr {
 #[cfg(test)]
 mod tests {
 
-    use super::{Cpsr, ConditionCodeFlag, OperatingMode, CpsrError, OperatingState, ConditionBit, BitState, Interruption};
+    use super::{
+        BitState,
+        ConditionBit,
+        ConditionCodeFlag,
+        Cpsr,
+        CpsrError,
+        Interruption,
+        OperatingMode,
+        OperatingState,
+    };
 
     #[test]
     fn get_condition() {
@@ -210,11 +219,23 @@ mod tests {
         let cpsr_irq_unset = Cpsr::from(0b1111_1111_1111_1111_1111_1111_0111_1111);
         let cpsr_fiq_unset = Cpsr::from(0b1111_1111_1111_1111_1111_1111_1011_1111);
 
-        assert_eq!(cpsr_irq_set.get_interrrupt_bit_state(Interruption::Irq), BitState::Set);
-        assert_eq!(cpsr_fiq_set.get_interrrupt_bit_state(Interruption::Fiq), BitState::Set);
+        assert_eq!(
+            cpsr_irq_set.get_interrrupt_bit_state(Interruption::Irq),
+            BitState::Set
+        );
+        assert_eq!(
+            cpsr_fiq_set.get_interrrupt_bit_state(Interruption::Fiq),
+            BitState::Set
+        );
 
-        assert_eq!(cpsr_irq_unset.get_interrrupt_bit_state(Interruption::Irq), BitState::Unset);
-        assert_eq!(cpsr_fiq_unset.get_interrrupt_bit_state(Interruption::Fiq), BitState::Unset);
+        assert_eq!(
+            cpsr_irq_unset.get_interrrupt_bit_state(Interruption::Irq),
+            BitState::Unset
+        );
+        assert_eq!(
+            cpsr_fiq_unset.get_interrrupt_bit_state(Interruption::Fiq),
+            BitState::Unset
+        );
     }
 
     #[test]
@@ -238,11 +259,10 @@ mod tests {
         assert_eq!(cpsr_thumb.get_operating_state(), OperatingState::Thumb);
     }
 
-
     #[test]
     fn set_operating_mode() {
-        // it shouldn't matter which previous it had, so we're setting the mode with some random
-        // bits
+        // it shouldn't matter which previous it had, so we're setting the mode with
+        // some random bits
         let mut cpsr_usr = Cpsr::from(0);
         let mut cpsr_fiq = Cpsr::from(0b11111);
         let mut cpsr_irq = Cpsr::from(0b10101);
@@ -286,7 +306,10 @@ mod tests {
         assert_eq!(cpsr_abt.get_operating_mode(), Ok(OperatingMode::Abt));
         assert_eq!(cpsr_und.get_operating_mode(), Ok(OperatingMode::Und));
         assert_eq!(cpsr_sys.get_operating_mode(), Ok(OperatingMode::Sys));
-        assert_eq!(cpsr_unknown.get_operating_mode(), Err(CpsrError::UnknownOperatingMode(0b10101)));
+        assert_eq!(
+            cpsr_unknown.get_operating_mode(),
+            Err(CpsrError::UnknownOperatingMode(0b10101))
+        );
     }
 
     #[test]
@@ -295,11 +318,19 @@ mod tests {
         cpsr.set_condition_bit(ConditionBit::N, BitState::Set);
 
         let expected_result = Cpsr::from(0b10000_00_0_0000_0000_000000_00000_00000);
-        assert_eq!(cpsr, expected_result, "{:#?}, {:#?}", &cpsr, &expected_result);
+        assert_eq!(
+            cpsr, expected_result,
+            "{:#?}, {:#?}",
+            &cpsr, &expected_result
+        );
 
         cpsr.set_condition_bit(ConditionBit::N, BitState::Unset);
         let expected_result = Cpsr::from(0b00000_00_0_0000_0000_000000_00000_00000);
-        assert_eq!(cpsr, expected_result, "{:#?}, {:#?}", &cpsr, &expected_result);
+        assert_eq!(
+            cpsr, expected_result,
+            "{:#?}, {:#?}",
+            &cpsr, &expected_result
+        );
     }
 
     #[test]
@@ -308,11 +339,19 @@ mod tests {
         cpsr.set_condition_bit(ConditionBit::Z, BitState::Set);
 
         let expected_result = Cpsr::from(0b01000_00_0_0000_0000_000000_00000_00000);
-        assert_eq!(cpsr, expected_result, "{:#?}, {:#?}", &cpsr, &expected_result);
+        assert_eq!(
+            cpsr, expected_result,
+            "{:#?}, {:#?}",
+            &cpsr, &expected_result
+        );
 
         cpsr.set_condition_bit(ConditionBit::Z, BitState::Unset);
         let expected_result = Cpsr::from(0b00000_00_0_0000_0000_000000_00000_00000);
-        assert_eq!(cpsr, expected_result, "{:#?}, {:#?}", &cpsr, &expected_result);
+        assert_eq!(
+            cpsr, expected_result,
+            "{:#?}, {:#?}",
+            &cpsr, &expected_result
+        );
     }
 
     #[test]
@@ -321,11 +360,19 @@ mod tests {
         cpsr.set_condition_bit(ConditionBit::C, BitState::Set);
 
         let expected_result = Cpsr::from(0b00100_00_0_0000_0000_000000_00000_00000);
-        assert_eq!(cpsr, expected_result, "{:#?}, {:#?}", &cpsr, &expected_result);
+        assert_eq!(
+            cpsr, expected_result,
+            "{:#?}, {:#?}",
+            &cpsr, &expected_result
+        );
 
         cpsr.set_condition_bit(ConditionBit::C, BitState::Unset);
         let expected_result = Cpsr::from(0b00000_00_0_0000_0000_000000_00000_00000);
-        assert_eq!(cpsr, expected_result, "{:#?}, {:#?}", &cpsr, &expected_result);
+        assert_eq!(
+            cpsr, expected_result,
+            "{:#?}, {:#?}",
+            &cpsr, &expected_result
+        );
     }
 
     #[test]
@@ -334,10 +381,18 @@ mod tests {
         cpsr.set_condition_bit(ConditionBit::V, BitState::Set);
 
         let expected_result = Cpsr::from(0b00010_00_0_0000_0000_000000_00000_00000);
-        assert_eq!(cpsr, expected_result, "{:#?}, {:#?}", &cpsr, &expected_result);
+        assert_eq!(
+            cpsr, expected_result,
+            "{:#?}, {:#?}",
+            &cpsr, &expected_result
+        );
 
         cpsr.set_condition_bit(ConditionBit::V, BitState::Unset);
         let expected_result = Cpsr::from(0b00000_00_0_0000_0000_000000_00000_00000);
-        assert_eq!(cpsr, expected_result, "{:#?}, {:#?}", &cpsr, &expected_result);
+        assert_eq!(
+            cpsr, expected_result,
+            "{:#?}, {:#?}",
+            &cpsr, &expected_result
+        );
     }
 }

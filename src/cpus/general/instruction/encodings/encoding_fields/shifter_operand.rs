@@ -32,7 +32,7 @@ impl<'a> ShifterOperand {
             }
         };
 
-        let shift_imm = (data.instruction.val >> 7) & 5;
+        let shift_imm = (data.instruction.val >> 7) & 0b1111;
 
         let c_flag = {
             let cpsr = data.registers.get_ref_cpsr();
@@ -142,5 +142,74 @@ impl<'a> ShifterOperand {
                 shifter_carry_out: BitState::from(shifter_operand >> 31),
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+
+    use crate::{
+        cpus::general::{
+            register::{
+                types::ConditionBit,
+                RegisterName,
+            },
+            BitState,
+            Instruction,
+        },
+        NintendoDS,
+    };
+
+    use super::{
+        DecodeData,
+        ShifterOperand,
+    };
+
+    #[test]
+    fn immediate_shift_lsl() {
+        let mut nds = NintendoDS::default();
+        nds.arm7tdmi.registers.set_reg(RegisterName::R0, 1);
+        {
+            let cpsr = nds.arm7tdmi.registers.get_mut_cpsr();
+            cpsr.set_condition_bit(ConditionBit::C, BitState::Set);
+        }
+
+        let instruction = Instruction {
+            val: 0b0000_000_0000_0_0000_0000_0000_000_0001,
+            ..Instruction::default()
+        };
+        let data = DecodeData::new(instruction, &nds.arm7tdmi.registers);
+
+        let value = ShifterOperand::get_immediate_shift(data);
+        let expected_value = ShifterOperand {
+            shifter_operand: 0b1,
+            shifter_carry_out: BitState::Set,
+        };
+
+        // LSL1 test (if branch)
+        assert_eq!(
+            value, expected_value,
+            "{:#?} {:#?}",
+            &value, &expected_value
+        );
+
+        // LSl2 test (else branch)
+        let instruction = Instruction {
+            val: 0b0000_000_0000_0_0000_0000_0001_000_0001,
+            .. Instruction::default()
+        };
+        let data = DecodeData::new(instruction, &nds.arm7tdmi.registers);
+
+        let value = ShifterOperand::get_immediate_shift(data);
+        let expected_value = ShifterOperand {
+            shifter_operand: 0b10,
+            shifter_carry_out: BitState::Unset,
+        };
+
+        assert_eq!(
+            value, expected_value,
+            "{:#?} {:#?}",
+            &value, &expected_value
+        );
     }
 }

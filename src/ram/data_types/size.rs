@@ -3,9 +3,9 @@ use std::ops::Mul;
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[repr(u32)]
 pub enum DataTypeSize {
-    Byte = 8,
+    Byte     = 8,
     Halfword = 16,
-    Word = 32,
+    Word     = 32,
 }
 
 impl Mul<u32> for DataTypeSize {

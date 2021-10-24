@@ -17,10 +17,10 @@ impl DataBlock {
     pub fn size(&self) -> u32 {
         match u32::try_from(self.0.len()) {
             Ok(num) => num,
-            Err(_)  => {
+            Err(_) => {
                 println!("{}", DataBlockError::OverflowBlock(self.0.len()));
                 panic!();
-            },
+            }
         }
     }
 }
@@ -45,7 +45,7 @@ mod tests {
     #[test]
     fn get() {
         let data_block = DataBlock(vec![1]);
-        
+
         assert_eq!(data_block.get_ref(), &vec![1]);
     }
 

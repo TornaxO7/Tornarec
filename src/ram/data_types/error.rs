@@ -9,4 +9,3 @@ pub enum DataTypeError {
     #[error("[WORD-ERROR]: Couldn't parse the given array into a wordbyte: {0:?}")]
     WordError(Vec<u8>),
 }
-

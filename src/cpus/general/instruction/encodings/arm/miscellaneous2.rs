@@ -1,6 +1,9 @@
 use crate::cpus::general::instruction::decode::DecodeData;
 
-use std::convert::{From, TryFrom};
+use std::convert::{
+    From,
+    TryFrom,
+};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Miscellaneous2 {
@@ -20,15 +23,22 @@ impl<'a> From<DecodeData<'a>> for Miscellaneous2 {
         let rs = u8::try_from((data.instruction.val >> 8) & 0b1111).unwrap();
         let op2 = u8::try_from((data.instruction.val >> 5) & 0b11).unwrap();
         let rm = u8::try_from(data.instruction.val & 0b1111).unwrap();
-        Self{op1, rn, rd, rs, op2, rm}
+        Self {
+            op1,
+            rn,
+            rd,
+            rs,
+            op2,
+            rm,
+        }
     }
 }
 
 #[cfg(test)]
 mod tests {
     use super::{
-        Miscellaneous2,
         DecodeData,
+        Miscellaneous2,
     };
 
     use crate::{
@@ -41,7 +51,7 @@ mod tests {
         let nds = NintendoDS::default();
         let instruction = Instruction {
             val: 0b0000_00010_11_0_1010_0101_1001_0_11_1_1111,
-            .. Instruction::default()
+            ..Instruction::default()
         };
         let data = DecodeData::new(instruction, &nds.arm7tdmi.registers);
 

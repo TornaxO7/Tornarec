@@ -3,5 +3,5 @@ pub enum ConditionFlag {
     N,
     Z,
     C,
-    V
+    V,
 }

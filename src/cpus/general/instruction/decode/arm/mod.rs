@@ -3,25 +3,25 @@ mod error;
 pub use error::ArmDecodeError;
 
 use crate::cpus::general::instruction::{
+    checker::ArmInstructionChecker,
     decode::DecodeData,
     encodings::arm::{
-        DataProcessingImmediateShift,
-        Miscellaneous1,
-        DataProcessingRegisterShift,
-        Miscellaneous2,
-        Multiplies,
-        ExtraLoadAndStores,
-        DataProcessingImmediate,
-        MoveImmediateToStatusRegister,
-        LoadAndStoreImmediateOffset,
-        LoadAndStoreRegisterOffset,
-        LoadAndStoreMultiple,
         BranchAndBranchWithLink,
-        CoprocessorLoadAndStoreAndDoubleRegisterTransfers,
         CoprocessorDataProcessing,
+        CoprocessorLoadAndStoreAndDoubleRegisterTransfers,
         CoprocessorRegisterTransfers,
+        DataProcessingImmediate,
+        DataProcessingImmediateShift,
+        DataProcessingRegisterShift,
+        ExtraLoadAndStores,
+        LoadAndStoreImmediateOffset,
+        LoadAndStoreMultiple,
+        LoadAndStoreRegisterOffset,
+        Miscellaneous1,
+        Miscellaneous2,
+        MoveImmediateToStatusRegister,
+        Multiplies,
     },
-    checker::ArmInstructionChecker,
 };
 
 use std::convert::TryFrom;
@@ -43,7 +43,9 @@ pub enum ArmDecode {
     ArchitecturallyUndefined,
     LoadAndStoreMultiple(LoadAndStoreMultiple),
     BranchAndBranchWithLink(BranchAndBranchWithLink),
-    CoprocessorLoadAndStoreAndDoubleRegisterTransfers(CoprocessorLoadAndStoreAndDoubleRegisterTransfers),
+    CoprocessorLoadAndStoreAndDoubleRegisterTransfers(
+        CoprocessorLoadAndStoreAndDoubleRegisterTransfers,
+    ),
     CoprocessorDataProcessing(CoprocessorDataProcessing),
     CoprocessorRegisterTransfers(CoprocessorRegisterTransfers),
     SoftwareInterrupt,
@@ -95,6 +97,5 @@ impl<'a> TryFrom<DecodeData<'a>> for ArmDecode {
            ArmInstructionChecker::UnconditionalInstructions =>
                unreachable!("[ArmInstruction Error]: There are no unconditional instructions implemented yet for the current CPUs of the Nintendo DS"),
         }
-       
     }
 }

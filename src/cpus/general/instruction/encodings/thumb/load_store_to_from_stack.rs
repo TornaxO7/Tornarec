@@ -46,10 +46,10 @@ mod tests {
         let nds = NintendoDS::default();
         let instruction = Instruction {
             val: 0b1001_1_101_1100_0011,
-            .. Instruction::default()
+            ..Instruction::default()
         };
         let data = DecodeData::new(instruction, &nds.arm7tdmi.registers);
-        
+
         let value = LoadStoreToFromStack::from(data);
 
         let expected_value = LoadStoreToFromStack {

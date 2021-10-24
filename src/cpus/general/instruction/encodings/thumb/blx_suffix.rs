@@ -25,8 +25,8 @@ mod tests {
     };
 
     use crate::{
-        NintendoDS,
         cpus::general::Instruction,
+        NintendoDS,
     };
 
     #[test]
@@ -34,10 +34,10 @@ mod tests {
         let nds = NintendoDS::default();
         let instruction = Instruction {
             val: 0b11101_10_1010_1010_0,
-            .. Instruction::default()
+            ..Instruction::default()
         };
         let data = DecodeData::new(instruction, &nds.arm7tdmi.registers);
-        
+
         let value = BlxSuffix::from(data);
 
         let expected_value = BlxSuffix {
