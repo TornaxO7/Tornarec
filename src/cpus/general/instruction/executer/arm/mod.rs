@@ -38,7 +38,7 @@ impl<'a> ArmExecuter<'a> {
 
         match data.opcode {
             DataProcessingInstruction::AND => {
-                let rd = data.rn & data.shifter_operand.shifter_operand;
+                let rd = data.rn & data.shifter_operand.val;
 
                 if data.s_flag.is_set() {
                     if NormalizedRegister::from(rd) == NormalizedRegister::from(RegisterName::R15) {
@@ -61,7 +61,7 @@ impl<'a> ArmExecuter<'a> {
             DataProcessingInstruction::SUB => {}
             DataProcessingInstruction::RSB => {}
             DataProcessingInstruction::ADD => {
-                let rd = data.rn + data.shifter_operand.shifter_operand;
+                let rd = data.rn + data.shifter_operand.val;
 
                 if data.s_flag.is_set() {
                     if NormalizedRegister::from(rd) == NormalizedRegister::from(RegisterName::R15) {
@@ -69,9 +69,9 @@ impl<'a> ArmExecuter<'a> {
                             panic!("{}", err);
                         }
                     } else {
-                        let carry = data.rn + data.shifter_operand.shifter_operand;
+                        let carry = data.rn + data.shifter_operand.val;
                         let overflow: Option<u32> =
-                            data.rn.checked_add(data.shifter_operand.shifter_operand);
+                            data.rn.checked_add(data.shifter_operand.val);
 
                         let cpsr = self.registers.get_mut_cpsr();
                         cpsr.set_condition_bit(ConditionBit::N, BitState::from(rd >> 31));
@@ -83,7 +83,7 @@ impl<'a> ArmExecuter<'a> {
             }
             DataProcessingInstruction::ADC => {
                 let c_flag = cpsr.get_condition_bit(ConditionBit::C);
-                let rd = data.rn + data.shifter_operand.shifter_operand + c_flag.get_as_u32();
+                let rd = data.rn + data.shifter_operand.val + c_flag.get_as_u32();
 
                 if data.s_flag.is_set() {
                     if NormalizedRegister::from(rd) == NormalizedRegister::from(RegisterName::R15) {
@@ -92,10 +92,10 @@ impl<'a> ArmExecuter<'a> {
                         }
                     } else {
                         let carry =
-                            data.rn + data.shifter_operand.shifter_operand + c_flag.get_as_u32();
+                            data.rn + data.shifter_operand.val + c_flag.get_as_u32();
                         let overflow: Option<u32> = data
                             .rn
-                            .checked_add(data.shifter_operand.shifter_operand)
+                            .checked_add(data.shifter_operand.val)
                             .and_then(|rn| rn.checked_add(c_flag.get_as_u32()));
 
                         let cpsr = self.registers.get_mut_cpsr();

@@ -15,7 +15,8 @@ use super::Shift;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ShifterOperand {
-    pub shifter_operand: u32,
+    /// The actual value of the shifter operand
+    pub val: u32,
     pub shifter_carry_out: BitState,
 }
 
@@ -48,12 +49,12 @@ impl<'a> ShifterOperand {
             Shift::LSL => {
                 if shift_imm == 0 {
                     Self {
-                        shifter_operand: rm,
+                        val: rm,
                         shifter_carry_out: c_flag,
                     }
                 } else {
                     Self {
-                        shifter_operand: rm << shift_imm,
+                        val: rm << shift_imm,
                         shifter_carry_out: BitState::from(rm >> (32 - shift_imm)),
                     }
                 }
@@ -61,12 +62,12 @@ impl<'a> ShifterOperand {
             Shift::LSR => {
                 if shift_imm == 0 {
                     Self {
-                        shifter_operand: 0,
+                        val: 0,
                         shifter_carry_out: BitState::from(rm >> 31),
                     }
                 } else {
                     Self {
-                        shifter_operand: rm >> shift_imm,
+                        val: rm >> shift_imm,
                         shifter_carry_out: BitState::from(rm >> (shift_imm - 1)),
                     }
                 }
@@ -75,18 +76,18 @@ impl<'a> ShifterOperand {
                 if shift_imm == 0 {
                     if (rm >> 31) & 0b1 == 0b0 {
                         Self {
-                            shifter_operand: 0,
+                            val: 0,
                             shifter_carry_out: BitState::from(rm >> 31),
                         }
                     } else {
                         Self {
-                            shifter_operand: 0xFFFF_FFFF,
+                            val: 0xFFFF_FFFF,
                             shifter_carry_out: BitState::from(rm >> 31),
                         }
                     }
                 } else {
                     Self {
-                        shifter_operand: rm.rotate_right(shift_imm),
+                        val: rm.rotate_right(shift_imm),
                         shifter_carry_out: BitState::from(rm >> (shift_imm - 1)),
                     }
                 }
@@ -95,14 +96,14 @@ impl<'a> ShifterOperand {
                 // it's RRX
                 if shift_imm == 0 {
                     Self {
-                        shifter_operand: (c_flag.get_as_u32() << 31) | (rm >> 1),
+                        val: (c_flag.get_as_u32() << 31) | (rm >> 1),
                         shifter_carry_out: BitState::from(rm),
                     }
                 }
                 // no it's actually ROR
                 else {
                     Self {
-                        shifter_operand: rm >> shift_imm,
+                        val: rm >> shift_imm,
                         shifter_carry_out: BitState::from(rm >> (shift_imm - 1)),
                     }
                 }
@@ -150,7 +151,7 @@ mod tests {
         let value = ShifterOperand::get_immediate(data);
         let expected_value = ShifterOperand {
             // remember: If (rm == PC) => Pc + 8
-            shifter_operand: 0x8,
+            val: 0x8,
             shifter_carry_out: BitState::Set,
         };
 
@@ -176,7 +177,7 @@ mod tests {
 
         let value = ShifterOperand::get_immediate_shift(data);
         let expected_value = ShifterOperand {
-            shifter_operand: 0b1,
+            val: 0b1,
             shifter_carry_out: BitState::Set,
         };
 
@@ -198,7 +199,7 @@ mod tests {
 
         let value = ShifterOperand::get_immediate_shift(data);
         let expected_value = ShifterOperand {
-            shifter_operand: 0b10,
+            val: 0b10,
             shifter_carry_out: BitState::Unset,
         };
 
@@ -220,7 +221,7 @@ mod tests {
 
         let value = ShifterOperand::get_immediate_shift(data);
         let expected_value = ShifterOperand {
-            shifter_operand: 0,
+            val: 0,
             shifter_carry_out: BitState::Set,
         };
 
@@ -242,7 +243,7 @@ mod tests {
         
         let value = ShifterOperand::get_immediate_shift(data);
         let expected_value = ShifterOperand {
-            shifter_operand: 0b0100_0000_0000_0000__0000_0000_0000_0000,
+            val: 0b0100_0000_0000_0000__0000_0000_0000_0000,
             shifter_carry_out: BitState::Unset,
         };
 
@@ -264,7 +265,7 @@ mod tests {
 
         let value = ShifterOperand::get_immediate_shift(data);
         let expected_value = ShifterOperand {
-            shifter_operand: 0,
+            val: 0,
             shifter_carry_out: BitState::Unset,
         };
 
@@ -286,7 +287,7 @@ mod tests {
 
         let value = ShifterOperand::get_immediate_shift(data);
         let expected_value = ShifterOperand {
-            shifter_operand: 0xFFFF_FFFF,
+            val: 0xFFFF_FFFF,
             shifter_carry_out: BitState::Set,
         };
 
@@ -308,7 +309,7 @@ mod tests {
         
         let value = ShifterOperand::get_immediate_shift(data);
         let expected_value = ShifterOperand {
-            shifter_operand: 0b1000_0000_0000_0000__0000_0000_0000_0000,
+            val: 0b1000_0000_0000_0000__0000_0000_0000_0000,
             shifter_carry_out: BitState::Set,
         };
 
@@ -334,7 +335,7 @@ mod tests {
 
         let value = ShifterOperand::get_immediate_shift(data);
         let expected_value = ShifterOperand {
-            shifter_operand: 0b1000_0000_0000_0000__0000_0000_0000_0001,
+            val: 0b1000_0000_0000_0000__0000_0000_0000_0001,
             shifter_carry_out: BitState::Unset,
         };
 
@@ -356,7 +357,7 @@ mod tests {
 
         let value = ShifterOperand::get_immediate_shift(data);
         let expected_value = ShifterOperand {
-            shifter_operand: 0b0,
+            val: 0b0,
             shifter_carry_out: BitState::Set,
         };
 
