@@ -37,9 +37,9 @@ impl DataType {
 
     pub fn get_value_as_u32(&self) -> u32 {
         match self {
-            Self::Byte(val) => u32::from(val.clone()),
-            Self::Halfword(val) => u32::from(val.clone()),
-            Self::Word(val) => u32::from(val.clone()),
+            Self::Byte(val) => u32::from(*val),
+            Self::Halfword(val) => u32::from(*val),
+            Self::Word(val) => *val,
         }
     }
 }

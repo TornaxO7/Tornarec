@@ -2,12 +2,12 @@ use super::RegisterName;
 
 use std::convert::From;
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct NormalizedRegister(RegisterName);
 
 impl NormalizedRegister {
     pub fn get_reg(&self) -> RegisterName {
-        self.0.clone()
+        self.0
     }
 }
 
@@ -35,7 +35,7 @@ impl From<RegisterName> for NormalizedRegister {
             RegisterName::LrFiq => RegisterName::R14Fiq,
 
             RegisterName::Pc => RegisterName::R15,
-            _other => _other.clone(),
+            other => other,
         };
 
         Self(register_name)

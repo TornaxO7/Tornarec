@@ -151,7 +151,10 @@ impl Registers {
         let cpsr = self.get_ref_cpsr();
         let operating_mode = cpsr.get_operating_mode().unwrap();
         match self.get_spsr(operating_mode) {
-            Some(spsr) => Ok(self.set_reg(RegisterName::Cpsr, spsr)),
+            Some(spsr) => {
+                self.set_reg(RegisterName::Cpsr, spsr);
+                Ok(())
+            },
             None => Err(RegistersError::NoSpsr(operating_mode)),
         }
     }

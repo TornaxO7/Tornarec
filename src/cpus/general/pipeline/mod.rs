@@ -28,7 +28,7 @@ pub enum PipelineError {
     InvalidInstructionSize(DataTypeSize),
 }
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct Pipeline {
     prefetch: Prefetch,
     decoded_instruction: InstructionMap,
@@ -93,14 +93,5 @@ impl<'a> Pipeline {
 
     pub fn get_decoded_instruction(&self) -> InstructionMap {
         self.decoded_instruction.clone()
-    }
-}
-
-impl Default for Pipeline {
-    fn default() -> Self {
-        Self {
-            prefetch: Prefetch::default(),
-            decoded_instruction: InstructionMap::default(),
-        }
     }
 }

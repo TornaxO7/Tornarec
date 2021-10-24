@@ -11,7 +11,7 @@ pub struct Instruction {
 
 impl Instruction {
     pub fn get_condition_code_flag(&self) -> ConditionCodeFlag {
-        match (self.val.clone() >> 28) & 0b1111 {
+        match (self.val >> 28) & 0b1111 {
             0b0000 => ConditionCodeFlag::EQ,
             0b0001 => ConditionCodeFlag::NE,
             0b0010 => ConditionCodeFlag::CS,

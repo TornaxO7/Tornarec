@@ -57,22 +57,20 @@ impl From<&Instruction> for ArmInstructionChecker {
                     } else {
                         Self::DataProcessingImmediateShift
                     }
-                } else {
-                    if bit7.is_unset() && bit20.is_unset() && bit24_23 == 0b10 {
+                } else if bit7.is_unset() && bit20.is_unset() && bit24_23 == 0b10 {
                         Self::Miscellaneous2
-                    } else if bit7.is_set() {
-                        let bit4_7 = (instruction.val >> 4) & 0b1111;
-                        let bit24_27 = (instruction.val >> 24) & 0b1111;
+                } else if bit7.is_set() {
+                    let bit4_7 = (instruction.val >> 4) & 0b1111;
+                    let bit24_27 = (instruction.val >> 24) & 0b1111;
 
-                        // Differ between Multiplies and ExtraLoadStores
-                        if bit4_7 == 0b1001 && bit24_27 == 0b0000 {
-                            Self::Multiplies
-                        } else {
-                            Self::ExtraLoadAndStores
-                        }
+                    // Differ between Multiplies and ExtraLoadStores
+                    if bit4_7 == 0b1001 && bit24_27 == 0b0000 {
+                        Self::Multiplies
                     } else {
-                        Self::DataProcessingRegisterShift
-                    }
+                        Self::ExtraLoadAndStores
+                    } 
+                } else {
+                    Self::DataProcessingRegisterShift
                 }
             }
             0b001 => {
