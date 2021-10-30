@@ -118,7 +118,7 @@ impl<'a> ArmExecuter<'a> {
                 }
             }
             DataProcessingInstruction::ADD => {
-                let rd_val = rn_val + data.shifter_operand.val;
+                let (rd_val, overflowed) = rn_val.overflowing_add(data.shifter_operand.val);
                 self.registers.set_reg(rd_reg, rd_val);
 
                 if data.s_flag.is_set() {
@@ -132,13 +132,7 @@ impl<'a> ArmExecuter<'a> {
                             ConditionBit::C,
                             Helper::carry_from(vec![rn_val, data.shifter_operand.val]),
                         );
-                        cpsr.set_condition_bit(
-                            ConditionBit::N,
-                            Helper::overflow_from(vec![
-                                rn_val as i32,
-                                data.shifter_operand.val as i32,
-                            ]),
-                        );
+                        cpsr.set_condition_bit(ConditionBit::V, BitState::from(overflowed));
                     }
                 }
             }
@@ -174,7 +168,11 @@ impl<'a> ArmExecuter<'a> {
             }
             DataProcessingInstruction::SBC => {
                 let c_flag = cpsr.get_condition_bit(ConditionBit::C);
-                let rd_val = rn_val - data.shifter_operand.val - (!c_flag).get_as_u32();
+                let (rd_val, overflowed) = {
+                    let (rd_val, overflowed1) = rn_val.overflowing_sub(data.shifter_operand.val);
+                    let (rd_val, overflowed2) = rd_val.overflowing_sub((!c_flag).get_as_u32());
+                    (rd_val, overflowed1 || overflowed2)
+                };
                 self.registers.set_reg(rd_reg, rd_val);
 
                 if data.s_flag.is_set() {
@@ -193,14 +191,7 @@ impl<'a> ArmExecuter<'a> {
                                 (!c_flag).get_as_u32(),
                             ]),
                         );
-                        cpsr.set_condition_bit(
-                            ConditionBit::N,
-                            Helper::overflow_from(vec![
-                                rn_val as i32,
-                                data.shifter_operand.val as i32,
-                                (!c_flag).get_as_i32(),
-                            ]),
-                        );
+                        cpsr.set_condition_bit(ConditionBit::V, BitState::from(overflowed));
                     }
                 }
             }
