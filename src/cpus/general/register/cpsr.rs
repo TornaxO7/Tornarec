@@ -52,6 +52,13 @@ impl Cpsr {
         ConditionBits::from(self.0)
     }
 
+    pub fn set_condition_bits(&mut self, condition_bits: ConditionBits) {
+        self.set_condition_bit(ConditionBit::N, condition_bits.n);
+        self.set_condition_bit(ConditionBit::Z, condition_bits.z);
+        self.set_condition_bit(ConditionBit::C, condition_bits.c);
+        self.set_condition_bit(ConditionBit::V, condition_bits.v);
+    }
+
     pub fn set_interrupt_bit(&mut self, interrupt: Interruption, state: BitState) {
         match interrupt {
             Interruption::Irq => match state {

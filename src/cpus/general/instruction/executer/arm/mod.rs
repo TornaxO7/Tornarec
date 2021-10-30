@@ -4,34 +4,30 @@ mod helper;
 pub use error::ArmExecuterError;
 use helper::Helper;
 
-use crate::{
-    cpus::general::{
-        instruction::encodings::{
-            arm::{
-                BranchAndBranchWithLink,
-                DataProcessingImmediateShift,
-            },
-            encoding_fields::DataProcessingInstruction,
+use crate::cpus::general::{
+    instruction::encodings::{
+        arm::{
+            BranchAndBranchWithLink,
+            DataProcessingImmediateShift,
         },
-        register::{
-            types::ConditionBit,
-            RegisterName,
-            Registers,
-        },
-        BitState,
+        encoding_fields::DataProcessingInstruction,
     },
-    ram::Ram,
+    register::{
+        types::ConditionBit,
+        RegisterName,
+        Registers,
+    },
+    BitState,
 };
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct ArmExecuter<'a> {
     registers: &'a mut Registers,
-    ram: &'a Ram,
 }
 
 impl<'a> ArmExecuter<'a> {
-    pub fn new(registers: &'a mut Registers, ram: &'a Ram) -> Self {
-        Self { registers, ram }
+    pub fn new(registers: &'a mut Registers) -> Self {
+        Self { registers }
     }
 
     pub fn data_processing_immediate_shift(&mut self, data: DataProcessingImmediateShift) {
@@ -352,13 +348,7 @@ impl<'a> ArmExecuter<'a> {
 
     pub fn load_and_store_multiple(&self) {}
 
-    pub fn branch_and_branch_with_link(&self, _data: BranchAndBranchWithLink) {
-        // let pc = self.registers.get_reg(RegisterName::Pc);
-        //
-        // if data.l_flag.is_set() {
-        //     self.registers.set_reg(RegisterName::Lr, pc - 32);
-        // }
-    }
+    pub fn branch_and_branch_with_link(&self, _data: BranchAndBranchWithLink) {}
 
     pub fn coprocessor_load_and_store_and_double_register_transfers(&self) {}
 
@@ -369,4 +359,69 @@ impl<'a> ArmExecuter<'a> {
     pub fn software_interrupt(&self) {}
 
     pub fn unconditional_instructions(&self) {}
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{
+        ArmExecuter,
+        BitState,
+        ConditionBit,
+        DataProcessingImmediateShift,
+        DataProcessingInstruction,
+        RegisterName,
+        Registers,
+    };
+
+    mod data_processing_immediate_shift {
+        use crate::cpus::general::{
+            instruction::encodings::encoding_fields::ShifterOperand,
+            register::types::ConditionBits,
+        };
+
+        use super::{
+            ArmExecuter,
+            BitState,
+            ConditionBit,
+            DataProcessingImmediateShift,
+            DataProcessingInstruction,
+            RegisterName,
+            Registers,
+        };
+
+        #[test]
+        fn and() {
+            let mut registers = Registers::default();
+            registers.set_reg(RegisterName::R1, 0b1001);
+            let mut arm_executer = ArmExecuter::new(&mut registers);
+
+            let data = DataProcessingImmediateShift {
+                opcode: DataProcessingInstruction::AND,
+                s_flag: BitState::Set,
+                rn: 0b1,
+                rd: 0b10,
+                shifter_operand: ShifterOperand {
+                    val: 0b1111,
+                    shifter_carry_out: BitState::Set,
+                },
+            };
+
+            arm_executer.data_processing_immediate_shift(data);
+
+            let mut expected_registers = Registers::default();
+            expected_registers.set_reg(RegisterName::R1, 0b1001);
+            expected_registers.set_reg(RegisterName::R2, 0b1001);
+            {
+                let cpsr = expected_registers.get_mut_cpsr();
+                cpsr.set_condition_bits(ConditionBits {
+                    n: BitState::Unset,
+                    z: BitState::Unset,
+                    c: BitState::Set,
+                    v: BitState::Unset,
+                });
+            }
+
+            assert_eq!(expected_registers, registers, "{:#?}, {:#?}", &expected_registers, &registers);
+        }
+    }
 }
