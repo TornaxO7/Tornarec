@@ -1,10 +1,4 @@
-use crate::cpus::general::{
-    bit_state::BitState,
-    instruction::{
-        decode::DecodeData,
-        encodings::encoding_fields::DataProcessingInstruction,
-    },
-};
+use crate::cpus::general::{bit_state::BitState, instruction::{decode::DecodeData, encodings::encoding_fields::{DataProcessingInstruction, ShifterOperand}}};
 
 use std::convert::{
     From,
@@ -13,13 +7,11 @@ use std::convert::{
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DataProcessingRegisterShift {
-    opcode: DataProcessingInstruction,
-    s_flag: BitState,
-    rn: u8,
-    rd: u8,
-    rs: u8,
-    shift: u8,
-    rm: u8,
+    pub opcode: DataProcessingInstruction,
+    pub s_flag: BitState,
+    pub rn: u8,
+    pub rd: u8,
+    pub shifter_operand: ShifterOperand,
 }
 
 impl<'a> From<DecodeData<'a>> for DataProcessingRegisterShift {

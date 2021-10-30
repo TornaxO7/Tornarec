@@ -99,7 +99,7 @@ impl RegisterName {
 
 impl From<u32> for RegisterName {
     fn from(num: u32) -> Self {
-        match num {
+        match num & 0b1111 {
             0b0000 => Self::R0,
             0b0001 => Self::R1,
             0b0010 => Self::R2,

@@ -109,6 +109,116 @@ impl<'a> ShifterOperand {
             }
         }
     }
+
+    pub fn get_register_shift(data: DecodeData) -> Self {
+        // UNPREDICTABLE: Handle it!
+        let rs_reg = RegisterName::from(data.instruction.val >> 8);
+        let rm_reg = RegisterName::from(data.instruction.val);
+
+        let rs_val = data.registers.get_reg(rs_reg);
+        let rm_val = data.registers.get_reg(rm_reg);
+
+        let rs_immed_8 = rs_val & 0b1111_1111;
+
+        let c_flag = {
+            let cpsr = data.registers.get_ref_cpsr();
+            cpsr.get_condition_bit(ConditionBit::C)
+        };
+
+        match Shift::from(data.instruction.val >> 5) {
+            Shift::LSL => {
+                if rs_immed_8 == 0 {
+                    Self {
+                        val: rm_val,
+                        shifter_carry_out: c_flag,
+                    }
+                } else if rs_immed_8 < 32 {
+                    Self {
+                        val: rm_val << rs_immed_8,
+                        shifter_carry_out: BitState::from(rm_val >> (32 - rs_immed_8)),
+                    }
+                } else if rs_immed_8 == 32 {
+                    Self {
+                        val: 0,
+                        shifter_carry_out: BitState::from(rm_val),
+                    }
+                } else {
+                    Self {
+                        val: 0,
+                        shifter_carry_out: BitState::Unset,
+                    }
+                }
+            },
+            Shift::ASR => {
+                if rs_immed_8 == 0 {
+                    Self {
+                        val: rm_val,
+                        shifter_carry_out: c_flag,
+                    }
+                } else if rs_immed_8 < 32 {
+                    Self {
+                        val: rm_val >> rs_immed_8,
+                        shifter_carry_out: BitState::from(rm_val >> (rs_immed_8 - 1)),
+                    }
+                } else {
+                    match BitState::from(rm_val >> 31) {
+                        BitState::Unset => Self {
+                            val: 0,
+                            shifter_carry_out: BitState::from(rm_val >> 31),
+                        },
+                        BitState::Set => Self {
+                            val: 0xFFFF_FFFF,
+                            shifter_carry_out: BitState::from(rm_val >> 31),
+                        }
+                    }
+                }
+            },
+            Shift::LSR => {
+                if rs_immed_8 == 0 {
+                    Self {
+                        val: rm_val,
+                        shifter_carry_out: c_flag,
+                    }
+                } else if rs_immed_8 < 32 {
+                    Self {
+                        val: rm_val >> rs_immed_8,
+                        shifter_carry_out: BitState::from(rm_val >> (rs_immed_8 - 1)),
+
+                    }
+                } else if rs_immed_8 == 32 {
+                    Self {
+                        val: 0,
+                        shifter_carry_out: BitState::from(rm_val >> 31),
+                    }
+                } else {
+                    Self {
+                        val: 0,
+                        shifter_carry_out: BitState::Unset,
+                    }
+                }
+            },
+            Shift:: ROROrRRX => {
+                let rs_immed_5 = rs_val & 0b1_1111;
+
+                if rs_immed_8 == 0 {
+                    Self {
+                        val: rm_val,
+                        shifter_carry_out: c_flag,
+                    }
+                } else if rs_immed_5 == 0 {
+                    Self {
+                        val: rm_val,
+                        shifter_carry_out: BitState::from(rm_val >> 31),
+                    }
+                } else {
+                    Self {
+                        val: rm_val >> rs_immed_5,
+                        shifter_carry_out: BitState::from(rm_val >> (rs_immed_5 - 1)),
+                    }
+                }
+            },
+        }
+    }
 }
 
 #[cfg(test)]
