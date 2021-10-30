@@ -60,6 +60,36 @@ fn and() {
 }
 
 #[test]
+fn eor() {
+    let mut registers = Registers::default();
+    registers.set_reg(RegisterName::R2, 0b0111);
+    let mut arm_executer = ArmExecuter::new(&mut registers);
+
+    let data = DataProcessingImmediateShift {
+        opcode: DataProcessingInstruction::EOR,
+        s_flag: BitState::Set,
+        rn: 0b0010,
+        rd: 0b0100,
+        shifter_operand: ShifterOperand {
+            val: 0b1100,
+            shifter_carry_out: BitState::Unset,
+        },
+    };
+
+    arm_executer.data_processing_immediate_shift(data);
+
+    let mut expected_registers = Registers::default();
+    expected_registers.set_reg(RegisterName::R2, 0b0111);
+    expected_registers.set_reg(RegisterName::R4, 0b1011);
+
+    assert_eq!(
+        expected_registers, registers,
+        "{:#?} {:#?}",
+        &expected_registers, &registers
+    );
+}
+
+#[test]
 fn adc() {
     let mut registers = Registers::default();
     registers.set_reg(RegisterName::R3, 0xFFFF_FF01);
