@@ -41,9 +41,6 @@ impl<'a> ArmExecuter<'a> {
         let rn_reg = RegisterName::from(data.rn);
         let rn_val = self.registers.get_reg(rn_reg);
 
-        // NOTE: Look if the Z and N flag are always set in each instrution, if the
-        // RegisterName isn't R15
-
         match data.opcode {
             DataProcessingInstruction::AND => {
                 let rd_val = rn_val & data.shifter_operand.val;
