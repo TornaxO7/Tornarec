@@ -161,6 +161,37 @@ fn rsb() {
 }
 
 #[test]
+fn add() {
+    let mut registers = Registers::default();
+    registers.set_reg(RegisterName::R7, 10);
+
+    let mut arm_executer = ArmExecuter::new(&mut registers);
+
+    let data = DataProcessingImmediateShift {
+        opcode: DataProcessingInstruction::ADD,
+        s_flag: BitState::Set,
+        rn: 0b0111,
+        rd: 0b11,
+        shifter_operand: ShifterOperand {
+            val: 32,
+            shifter_carry_out: BitState::Set,
+        },
+    };
+
+    arm_executer.data_processing_immediate_shift(data);
+
+    let mut expected_registers = Registers::default();
+    expected_registers.set_reg(RegisterName::R7, 10);
+    expected_registers.set_reg(RegisterName::R3, 42);
+
+    assert_eq!(
+        expected_registers, registers,
+        "{:#?} {:#?}",
+        &expected_registers, &registers
+    );
+}
+
+#[test]
 fn adc() {
     let mut registers = Registers::default();
     registers.set_reg(RegisterName::R3, 0xFFFF_FF01);
