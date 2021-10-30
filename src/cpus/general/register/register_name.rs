@@ -124,6 +124,12 @@ impl From<u32> for RegisterName {
     }
 }
 
+impl From<u8> for RegisterName {
+    fn from(num: u8) -> Self {
+        Self::from(u32::from(num))
+    }
+}
+
 impl PartialEq for RegisterName {
     fn eq(&self, other: &Self) -> bool {
         let self_normalized = Self::normalize(self);
