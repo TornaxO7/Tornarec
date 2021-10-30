@@ -305,3 +305,38 @@ fn rsc() {
         &expected_registers, &registers
     );
 }
+
+#[test]
+fn tst() {
+    let mut registers = Registers::default();
+    registers.set_reg(RegisterName::R1, 0b1111_1111_1111_1111__1111_1111_1111_1111);
+
+    let mut arm_executer = ArmExecuter::new(&mut registers);
+
+    let data = DataProcessingImmediateShift {
+        opcode: DataProcessingInstruction::TST,
+        s_flag: BitState::Set,
+        rn: 0b1,
+        rd: 0b0,
+        shifter_operand: ShifterOperand {
+            val: 1 << 31,
+            shifter_carry_out: BitState::Set,
+        },
+    };
+
+    arm_executer.data_processing_immediate_shift(data);
+
+    let mut expected_registers = Registers::default();
+    expected_registers.set_reg(RegisterName::R1, u32::MAX);
+    {
+        let cpsr = expected_registers.get_mut_cpsr();
+        cpsr.set_condition_bit(ConditionBit::N, BitState::Set);
+        cpsr.set_condition_bit(ConditionBit::C, BitState::Set);
+    }
+
+    assert_eq!(
+        expected_registers, registers,
+        "{:#?} {:#?}",
+        &expected_registers, &registers
+    );
+}
