@@ -259,12 +259,44 @@ fn sbc() {
     expected_registers.set_reg(RegisterName::R2, u32::MAX);
     {
         let cpsr = expected_registers.get_mut_cpsr();
-        cpsr.set_condition_bits(ConditionBits {
-            n: BitState::Set,
-            z: BitState::Unset,
-            c: BitState::Set,
-            v: BitState::Set,
-        });
+        cpsr.set_condition_bit(ConditionBit::N, BitState::Set);
+        cpsr.set_condition_bit(ConditionBit::V, BitState::Set);
+    }
+
+    assert_eq!(
+        expected_registers, registers,
+        "{:#?} {:#?}",
+        &expected_registers, &registers
+    );
+}
+
+#[test]
+fn rsc() {
+    let mut registers = Registers::default();
+    registers.set_reg(RegisterName::R3, 18);
+
+    let mut arm_executer = ArmExecuter::new(&mut registers);
+
+    let data = DataProcessingImmediateShift {
+        opcode: DataProcessingInstruction::RSC,
+        s_flag: BitState::Set,
+        rn: 0b11,
+        rd: 0b1,
+        shifter_operand: ShifterOperand {
+            val: 8,
+            shifter_carry_out: BitState::Set,
+        },
+    };
+
+    arm_executer.data_processing_immediate_shift(data);
+
+    let mut expected_registers = Registers::default();
+    expected_registers.set_reg(RegisterName::R3, 18);
+    expected_registers.set_reg(RegisterName::R1, u32::MAX - 10);
+    {
+        let cpsr = expected_registers.get_mut_cpsr();
+        cpsr.set_condition_bit(ConditionBit::N, BitState::Set);
+        cpsr.set_condition_bit(ConditionBit::V, BitState::Set);
     }
 
     assert_eq!(

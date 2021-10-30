@@ -176,7 +176,7 @@ impl<'a> ArmExecuter<'a> {
                 self.registers.set_reg(rd_reg, rd_val);
 
                 if data.s_flag.is_set() {
-                    if RegisterName::from(rd_val) == RegisterName::R15 {
+                    if rd_reg == RegisterName::R15 {
                         self.registers.move_current_spsr_to_cpsr();
                     } else {
                         let cpsr = self.registers.get_mut_cpsr();
@@ -197,11 +197,15 @@ impl<'a> ArmExecuter<'a> {
             }
             DataProcessingInstruction::RSC => {
                 let c_flag = cpsr.get_condition_bit(ConditionBit::C);
-                let rd_val = data.shifter_operand.val - rn_val - (!c_flag).get_as_u32();
+                let (rd_val, overflowed) = {
+                    let (rd_val, overflowed1) = data.shifter_operand.val.overflowing_sub(rn_val);
+                    let (rd_val, overflowed2) = rd_val.overflowing_sub((!c_flag).get_as_u32());
+                    (rd_val, overflowed1 || overflowed2)
+                };
                 self.registers.set_reg(rd_reg, rd_val);
 
                 if data.s_flag.is_set() {
-                    if RegisterName::from(rd_val) == RegisterName::R15 {
+                    if rd_reg == RegisterName::R15 {
                         self.registers.move_current_spsr_to_cpsr();
                     } else {
                         let cpsr = self.registers.get_mut_cpsr();
@@ -216,14 +220,7 @@ impl<'a> ArmExecuter<'a> {
                                 (!c_flag).get_as_u32(),
                             ]),
                         );
-                        cpsr.set_condition_bit(
-                            ConditionBit::N,
-                            Helper::overflow_from(vec![
-                                data.shifter_operand.val as i32,
-                                -(rn_val as i32),
-                                -(!c_flag).get_as_i32(),
-                            ]),
-                        );
+                        cpsr.set_condition_bit(ConditionBit::V, BitState::from(overflowed));
                     }
                 }
             }
