@@ -125,6 +125,42 @@ fn sub() {
 }
 
 #[test]
+fn rsb() {
+    let mut registers = Registers::default();
+    registers.set_reg(RegisterName::R5, 12);
+
+    let mut arm_executer = ArmExecuter::new(&mut registers);
+
+    let data = DataProcessingImmediateShift {
+        opcode: DataProcessingInstruction::RSB,
+        s_flag: BitState::Set,
+        rn: 0b0101,
+        rd: 0b1,
+        shifter_operand: ShifterOperand {
+            val: 2,
+            shifter_carry_out: BitState::Set,
+        },
+    };
+
+    arm_executer.data_processing_immediate_shift(data);
+
+    let mut expected_registers = Registers::default();
+    expected_registers.set_reg(RegisterName::R5, 12);
+    expected_registers.set_reg(RegisterName::R1, u32::MAX - 9);
+    {
+        let cpsr = expected_registers.get_mut_cpsr();
+        cpsr.set_condition_bit(ConditionBit::N, BitState::Set);
+        cpsr.set_condition_bit(ConditionBit::V, BitState::Set);
+    }
+
+    assert_eq!(
+        expected_registers, registers,
+        "{:#?} {:#?}",
+        &expected_registers, &registers
+    );
+}
+
+#[test]
 fn adc() {
     let mut registers = Registers::default();
     registers.set_reg(RegisterName::R3, 0xFFFF_FF01);
