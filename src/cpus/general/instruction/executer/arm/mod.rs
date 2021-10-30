@@ -31,6 +31,7 @@ impl<'a> ArmExecuter<'a> {
     }
 
     pub fn data_processing_immediate_shift(&mut self, data: DataProcessingImmediateShift) {
+        // some general values which are needed during this process
         let cpsr = self.registers.get_ref_cpsr();
         let rd_reg = RegisterName::from(data.rd);
 
@@ -156,7 +157,12 @@ impl<'a> ArmExecuter<'a> {
             DataProcessingInstruction::ADC => {
                 let c_flag = cpsr.get_condition_bit(ConditionBit::C);
 
-                let rd_val = rn_val + data.shifter_operand.val + c_flag.get_as_u32();
+                let (rd_val, overflowed) = {
+                    let (rd_val, overflowed1) = rn_val.overflowing_add(data.shifter_operand.val);
+                    let (rd_val, overflowed2) = rd_val.overflowing_add(c_flag.get_as_u32());
+
+                    (rd_val, overflowed1 || overflowed2)
+                };
                 self.registers.set_reg(rd_reg, rd_val);
 
                 if data.s_flag.is_set() {
@@ -174,14 +180,7 @@ impl<'a> ArmExecuter<'a> {
                                 c_flag.get_as_u32(),
                             ]),
                         );
-                        cpsr.set_condition_bit(
-                            ConditionBit::V,
-                            Helper::overflow_from(vec![
-                                rn_val as i32,
-                                data.shifter_operand.val as i32,
-                                c_flag.get_as_i32(),
-                            ]),
-                        );
+                        cpsr.set_condition_bit(ConditionBit::V, BitState::from(overflowed));
                     }
                 }
             }
@@ -362,66 +361,4 @@ impl<'a> ArmExecuter<'a> {
 }
 
 #[cfg(test)]
-mod tests {
-    use super::{
-        ArmExecuter,
-        BitState,
-        ConditionBit,
-        DataProcessingImmediateShift,
-        DataProcessingInstruction,
-        RegisterName,
-        Registers,
-    };
-
-    mod data_processing_immediate_shift {
-        use crate::cpus::general::{
-            instruction::encodings::encoding_fields::ShifterOperand,
-            register::types::ConditionBits,
-        };
-
-        use super::{
-            ArmExecuter,
-            BitState,
-            ConditionBit,
-            DataProcessingImmediateShift,
-            DataProcessingInstruction,
-            RegisterName,
-            Registers,
-        };
-
-        #[test]
-        fn and() {
-            let mut registers = Registers::default();
-            registers.set_reg(RegisterName::R1, 0b1001);
-            let mut arm_executer = ArmExecuter::new(&mut registers);
-
-            let data = DataProcessingImmediateShift {
-                opcode: DataProcessingInstruction::AND,
-                s_flag: BitState::Set,
-                rn: 0b1,
-                rd: 0b10,
-                shifter_operand: ShifterOperand {
-                    val: 0b1111,
-                    shifter_carry_out: BitState::Set,
-                },
-            };
-
-            arm_executer.data_processing_immediate_shift(data);
-
-            let mut expected_registers = Registers::default();
-            expected_registers.set_reg(RegisterName::R1, 0b1001);
-            expected_registers.set_reg(RegisterName::R2, 0b1001);
-            {
-                let cpsr = expected_registers.get_mut_cpsr();
-                cpsr.set_condition_bits(ConditionBits {
-                    n: BitState::Unset,
-                    z: BitState::Unset,
-                    c: BitState::Set,
-                    v: BitState::Unset,
-                });
-            }
-
-            assert_eq!(expected_registers, registers, "{:#?}, {:#?}", &expected_registers, &registers);
-        }
-    }
-}
+mod tests;
