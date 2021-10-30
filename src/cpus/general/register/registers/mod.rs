@@ -147,15 +147,12 @@ impl Registers {
         Address::from(self.get_reg(RegisterName::Pc))
     }
 
-    pub fn move_current_spsr_to_cpsr(&mut self) -> Result<(), RegistersError> {
+    pub fn move_current_spsr_to_cpsr(&mut self) {
         let cpsr = self.get_ref_cpsr();
         let operating_mode = cpsr.get_operating_mode().unwrap();
         match self.get_spsr(operating_mode) {
-            Some(spsr) => {
-                self.set_reg(RegisterName::Cpsr, spsr);
-                Ok(())
-            },
-            None => Err(RegistersError::NoSpsr(operating_mode)),
+            Some(spsr) => self.set_reg(RegisterName::Cpsr, spsr),
+            None => panic!("{}", RegistersError::NoSpsr(operating_mode)),
         }
     }
 

@@ -1,4 +1,4 @@
-use std::ops::Deref;
+use std::ops::{Deref, Not};
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum BitState {
@@ -19,6 +19,13 @@ impl BitState {
     }
 
     pub fn get_as_u32(&self) -> u32 {
+        match self {
+            BitState::Set => 1,
+            BitState::Unset => 0,
+        }
+    }
+
+    pub fn get_as_i32(&self) -> i32 {
         match self {
             BitState::Set => 1,
             BitState::Unset => 0,
@@ -78,6 +85,17 @@ impl Deref for BitState {
         match self {
             BitState::Set => &1,
             BitState::Unset => &0,
+        }
+    }
+}
+
+impl Not for BitState {
+    type Output = Self;
+
+    fn not(self) -> Self::Output {
+        match self {
+            Self::Set => Self::Unset,
+            Self::Unset => Self::Set,
         }
     }
 }
