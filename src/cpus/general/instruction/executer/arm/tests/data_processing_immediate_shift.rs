@@ -445,3 +445,39 @@ fn cmn() {
         &expected_registers, &registers
     );
 }
+
+#[test]
+fn orr() {
+    let mut registers = Registers::default();
+    registers.set_reg(RegisterName::R1, 0b1);
+
+    let mut arm_executer = ArmExecuter::new(&mut registers);
+
+    let data = DataProcessingImmediateShift {
+        opcode: DataProcessingInstruction::ORR,
+        s_flag: BitState::Set,
+        rn: 0b1,
+        rd: 0b10,
+        shifter_operand: ShifterOperand {
+            val: u32::MAX,
+            shifter_carry_out: BitState::Set,
+        },
+    };
+
+    arm_executer.data_processing_immediate_shift(data);
+
+    let mut expected_registers = Registers::default();
+    expected_registers.set_reg(RegisterName::R1, 1);
+    expected_registers.set_reg(RegisterName::R2, u32::MAX);
+    {
+        let cpsr = expected_registers.get_mut_cpsr();
+        cpsr.set_condition_bit(ConditionBit::N, BitState::Set);
+        cpsr.set_condition_bit(ConditionBit::C, BitState::Set);
+    }
+
+    assert_eq!(
+        expected_registers, registers,
+        "{:#?} {:#?}",
+        &expected_registers, &registers
+    );
+}
