@@ -1,4 +1,13 @@
-use crate::cpus::general::{bit_state::BitState, instruction::{decode::DecodeData, encodings::encoding_fields::{DataProcessingInstruction, ShifterOperand}}};
+use crate::cpus::general::{
+    bit_state::BitState,
+    instruction::{
+        decode::DecodeData,
+        encodings::encoding_fields::{
+            DataProcessingInstruction,
+            ShifterOperand,
+        },
+    },
+};
 
 use std::convert::{
     From,
@@ -20,18 +29,14 @@ impl<'a> From<DecodeData<'a>> for DataProcessingRegisterShift {
         let s_flag = BitState::from(data.instruction.val >> 20);
         let rn = u8::try_from((data.instruction.val >> 16) & 0b1111).unwrap();
         let rd = u8::try_from((data.instruction.val >> 12) & 0b1111).unwrap();
-        let rs = u8::try_from((data.instruction.val >> 8) & 0b1111).unwrap();
-        let shift = u8::try_from((data.instruction.val >> 5) & 0b11).unwrap();
-        let rm = u8::try_from(data.instruction.val & 0b1111).unwrap();
+        let shifter_operand = ShifterOperand::get_register_shift(data);
 
         Self {
             opcode,
             s_flag,
             rn,
             rd,
-            rs,
-            shift,
-            rm,
+            shifter_operand,
         }
     }
 }
@@ -46,18 +51,23 @@ mod tests {
     };
 
     use crate::{
-        cpus::general::Instruction,
+        cpus::general::{
+            instruction::encodings::encoding_fields::ShifterOperand,
+            Instruction,
+        },
         NintendoDS,
     };
 
     #[test]
     fn test_from() {
         let nds = NintendoDS::default();
-        let instruction = Instruction {
-            val: 0b0000_000_1111_1_1010_0101_0110_0_11_1_1001,
-            ..Instruction::default()
+        let data = {
+            let instruction = Instruction {
+                val: 0b0000_000_1111_1_1010_0101_0010_0_11_1_1001,
+                ..Instruction::default()
+            };
+            DecodeData::new(instruction, &nds.arm7tdmi.registers)
         };
-        let data = DecodeData::new(instruction, &nds.arm7tdmi.registers);
 
         let value = DataProcessingRegisterShift::from(data);
 
@@ -66,9 +76,10 @@ mod tests {
             s_flag: BitState::Set,
             rn: 0b1010,
             rd: 0b0101,
-            rs: 0b0110,
-            shift: 0b11,
-            rm: 0b1001,
+            shifter_operand: ShifterOperand {
+                val: 0,
+                shifter_carry_out: BitState::Unset,
+            },
         };
 
         assert_eq!(value, expected_value);

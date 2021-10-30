@@ -4,11 +4,21 @@ mod helper;
 pub use error::ArmExecuterError;
 use helper::Helper;
 
-use crate::cpus::general::{BitState, instruction::encodings::{arm::{BranchAndBranchWithLink, DataProcessingImmediateShift, DataProcessingRegisterShift, Miscellaneous1}, encoding_fields::DataProcessingInstruction}, register::{
+use crate::cpus::general::{
+    instruction::encodings::{
+        arm::{
+            DataProcessingImmediateShift,
+            DataProcessingRegisterShift,
+        },
+        encoding_fields::DataProcessingInstruction,
+    },
+    register::{
         types::ConditionBit,
         RegisterName,
         Registers,
-    }};
+    },
+    BitState,
+};
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct ArmExecuter<'a> {
@@ -283,28 +293,28 @@ impl<'a> ArmExecuter<'a> {
 
     pub fn miscellaneous_1(&self) {}
 
-    pub fn data_processing_register_shift(&self, data: DataProcessingRegisterShift) {
-        let cpsr = self.registers.get_ref_cpsr();
-        let rn_reg = RegisterName::from(data.rn);
-        let rd_reg = RegisterName::from(data.rd);
+    pub fn data_processing_register_shift(&self, _data: DataProcessingRegisterShift) {
+        let _cpsr = self.registers.get_ref_cpsr();
+        let _rn_reg = RegisterName::from(_data.rn);
+        let _rd_reg = RegisterName::from(_data.rd);
 
-        match data.opcode {
-            DataProcessingInstruction::AND => {},
-            DataProcessingInstruction::EOR => {},
-            DataProcessingInstruction::SUB => {},
-            DataProcessingInstruction::RSB => {},
-            DataProcessingInstruction::ADD => {},
-            DataProcessingInstruction::ADC => {},
-            DataProcessingInstruction::SBC => {},
-            DataProcessingInstruction::RSC => {},
-            DataProcessingInstruction::TST => {},
-            DataProcessingInstruction::TEQ => {},
-            DataProcessingInstruction::CMP => {},
-            DataProcessingInstruction::CMN => {},
-            DataProcessingInstruction::ORR => {},
-            DataProcessingInstruction::MOV => {},
-            DataProcessingInstruction::BIC => {},
-            DataProcessingInstruction::MVN => {},
+        match _data.opcode {
+            DataProcessingInstruction::AND => {}
+            DataProcessingInstruction::EOR => {}
+            DataProcessingInstruction::SUB => {}
+            DataProcessingInstruction::RSB => {}
+            DataProcessingInstruction::ADD => {}
+            DataProcessingInstruction::ADC => {}
+            DataProcessingInstruction::SBC => {}
+            DataProcessingInstruction::RSC => {}
+            DataProcessingInstruction::TST => {}
+            DataProcessingInstruction::TEQ => {}
+            DataProcessingInstruction::CMP => {}
+            DataProcessingInstruction::CMN => {}
+            DataProcessingInstruction::ORR => {}
+            DataProcessingInstruction::MOV => {}
+            DataProcessingInstruction::BIC => {}
+            DataProcessingInstruction::MVN => {}
         }
     }
 
