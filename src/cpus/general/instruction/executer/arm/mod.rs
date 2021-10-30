@@ -38,12 +38,15 @@ impl<'a> ArmExecuter<'a> {
         let cpsr = self.registers.get_ref_cpsr();
         let rd_reg = RegisterName::from(data.rd);
 
+        let rn_reg = RegisterName::from(data.rn);
+        let rn_val = self.registers.get_reg(rn_reg);
+
         // NOTE: Look if the Z and N flag are always set in each instrution, if the
         // RegisterName isn't R15
 
         match data.opcode {
             DataProcessingInstruction::AND => {
-                let rd_val = data.rn & data.shifter_operand.val;
+                let rd_val = rn_val & data.shifter_operand.val;
                 self.registers.set_reg(rd_reg, rd_val);
 
                 if data.s_flag.is_set() {
@@ -62,7 +65,7 @@ impl<'a> ArmExecuter<'a> {
                 }
             }
             DataProcessingInstruction::EOR => {
-                let rd_val = data.rn ^ data.shifter_operand.val;
+                let rd_val = rn_val ^ data.shifter_operand.val;
                 self.registers.set_reg(rd_reg, rd_val);
 
                 if data.s_flag.is_set() {
@@ -81,7 +84,7 @@ impl<'a> ArmExecuter<'a> {
                 }
             }
             DataProcessingInstruction::SUB => {
-                let rd_val = data.rn - data.shifter_operand.val;
+                let rd_val = rn_val - data.shifter_operand.val;
                 self.registers.set_reg(rd_reg, rd_val);
 
                 if data.s_flag.is_set() {
@@ -94,12 +97,12 @@ impl<'a> ArmExecuter<'a> {
                         cpsr.set_condition_bit(ConditionBit::Z, BitState::from(rd_val == 0));
                         cpsr.set_condition_bit(
                             ConditionBit::C,
-                            !Helper::borrow_from(vec![data.rn, data.shifter_operand.val]),
+                            !Helper::borrow_from(vec![rn_val, data.shifter_operand.val]),
                         );
                         cpsr.set_condition_bit(
                             ConditionBit::V,
                             Helper::overflow_from(vec![
-                                data.rn as i32,
+                                rn_val as i32,
                                 -(data.shifter_operand.val as i32),
                             ]),
                         );
@@ -107,7 +110,7 @@ impl<'a> ArmExecuter<'a> {
                 }
             }
             DataProcessingInstruction::RSB => {
-                let rd_val = data.shifter_operand.val - data.rn;
+                let rd_val = data.shifter_operand.val - rn_val;
                 self.registers.set_reg(rd_reg, rd_val);
 
                 if data.s_flag.is_set() {
@@ -120,20 +123,20 @@ impl<'a> ArmExecuter<'a> {
                         cpsr.set_condition_bit(ConditionBit::Z, BitState::from(rd_val == 0));
                         cpsr.set_condition_bit(
                             ConditionBit::C,
-                            !Helper::borrow_from(vec![data.shifter_operand.val, data.rn]),
+                            !Helper::borrow_from(vec![data.shifter_operand.val, rn_val]),
                         );
                         cpsr.set_condition_bit(
                             ConditionBit::V,
                             Helper::overflow_from(vec![
                                 data.shifter_operand.val as i32,
-                                data.rn as i32,
+                                rn_val as i32,
                             ]),
                         );
                     }
                 }
             }
             DataProcessingInstruction::ADD => {
-                let rd_val = data.rn + data.shifter_operand.val;
+                let rd_val = rn_val + data.shifter_operand.val;
                 self.registers.set_reg(rd_reg, rd_val);
 
                 if data.s_flag.is_set() {
@@ -145,12 +148,12 @@ impl<'a> ArmExecuter<'a> {
                         cpsr.set_condition_bit(ConditionBit::Z, BitState::from(rd_val == 0));
                         cpsr.set_condition_bit(
                             ConditionBit::C,
-                            Helper::carry_from(vec![data.rn, data.shifter_operand.val]),
+                            Helper::carry_from(vec![rn_val, data.shifter_operand.val]),
                         );
                         cpsr.set_condition_bit(
                             ConditionBit::N,
                             Helper::overflow_from(vec![
-                                data.rn as i32,
+                                rn_val as i32,
                                 data.shifter_operand.val as i32,
                             ]),
                         );
@@ -159,8 +162,8 @@ impl<'a> ArmExecuter<'a> {
             }
             DataProcessingInstruction::ADC => {
                 let c_flag = cpsr.get_condition_bit(ConditionBit::C);
-                
-                let rd_val = data.rn + data.shifter_operand.val + c_flag.get_as_u32();
+
+                let rd_val = rn_val + data.shifter_operand.val + c_flag.get_as_u32();
                 self.registers.set_reg(rd_reg, rd_val);
 
                 if data.s_flag.is_set() {
@@ -173,7 +176,7 @@ impl<'a> ArmExecuter<'a> {
                         cpsr.set_condition_bit(
                             ConditionBit::C,
                             Helper::carry_from(vec![
-                                data.rn,
+                                rn_val,
                                 data.shifter_operand.val,
                                 c_flag.get_as_u32(),
                             ]),
@@ -181,7 +184,7 @@ impl<'a> ArmExecuter<'a> {
                         cpsr.set_condition_bit(
                             ConditionBit::V,
                             Helper::overflow_from(vec![
-                                data.rn as i32,
+                                rn_val as i32,
                                 data.shifter_operand.val as i32,
                                 c_flag.get_as_i32(),
                             ]),
@@ -191,7 +194,7 @@ impl<'a> ArmExecuter<'a> {
             }
             DataProcessingInstruction::SBC => {
                 let c_flag = cpsr.get_condition_bit(ConditionBit::C);
-                let rd_val = data.rn - data.shifter_operand.val - (!c_flag).get_as_u32();
+                let rd_val = rn_val - data.shifter_operand.val - (!c_flag).get_as_u32();
                 self.registers.set_reg(rd_reg, rd_val);
 
                 if data.s_flag.is_set() {
@@ -205,7 +208,7 @@ impl<'a> ArmExecuter<'a> {
                         cpsr.set_condition_bit(
                             ConditionBit::C,
                             !Helper::borrow_from(vec![
-                                data.rn,
+                                rn_val,
                                 data.shifter_operand.val,
                                 (!c_flag).get_as_u32(),
                             ]),
@@ -213,7 +216,7 @@ impl<'a> ArmExecuter<'a> {
                         cpsr.set_condition_bit(
                             ConditionBit::N,
                             Helper::overflow_from(vec![
-                                data.rn as i32,
+                                rn_val as i32,
                                 data.shifter_operand.val as i32,
                                 (!c_flag).get_as_i32(),
                             ]),
@@ -223,7 +226,7 @@ impl<'a> ArmExecuter<'a> {
             }
             DataProcessingInstruction::RSC => {
                 let c_flag = cpsr.get_condition_bit(ConditionBit::C);
-                let rd_val = data.shifter_operand.val - data.rn - (!c_flag).get_as_u32();
+                let rd_val = data.shifter_operand.val - rn_val - (!c_flag).get_as_u32();
                 self.registers.set_reg(rd_reg, rd_val);
 
                 if data.s_flag.is_set() {
@@ -238,7 +241,7 @@ impl<'a> ArmExecuter<'a> {
                             ConditionBit::C,
                             !Helper::borrow_from(vec![
                                 data.shifter_operand.val,
-                                data.rn,
+                                rn_val,
                                 (!c_flag).get_as_u32(),
                             ]),
                         );
@@ -246,21 +249,83 @@ impl<'a> ArmExecuter<'a> {
                             ConditionBit::N,
                             Helper::overflow_from(vec![
                                 data.shifter_operand.val as i32,
-                                -(data.rn as i32),
+                                -(rn_val as i32),
                                 -(!c_flag).get_as_i32(),
                             ]),
                         );
                     }
                 }
             }
-            DataProcessingInstruction::TST => {}
-            DataProcessingInstruction::TEQ => {}
-            DataProcessingInstruction::CMP => {}
-            DataProcessingInstruction::CMN => {}
-            DataProcessingInstruction::ORR => {}
-            DataProcessingInstruction::MOV => {}
-            DataProcessingInstruction::BIC => {}
-            DataProcessingInstruction::MVN => {}
+            DataProcessingInstruction::TST | DataProcessingInstruction::TEQ => {
+                let alu_out = match data.opcode {
+                    DataProcessingInstruction::TST => rn_val & data.shifter_operand.val,
+                    DataProcessingInstruction::TEQ => rn_val ^ data.shifter_operand.val,
+                    _ => unreachable!("That shouldn't happen..."),
+                };
+
+                let cpsr = self.registers.get_mut_cpsr();
+                cpsr.set_condition_bit(ConditionBit::N, BitState::from(alu_out >> 31));
+                cpsr.set_condition_bit(ConditionBit::Z, BitState::from(alu_out == 0));
+                cpsr.set_condition_bit(ConditionBit::C, data.shifter_operand.shifter_carry_out);
+            }
+            DataProcessingInstruction::CMP => {
+                let alu_out = rn_val - data.shifter_operand.val;
+
+                let cpsr = self.registers.get_mut_cpsr();
+                cpsr.set_condition_bit(ConditionBit::N, BitState::from(alu_out >> 31));
+                cpsr.set_condition_bit(ConditionBit::Z, BitState::from(alu_out == 0));
+                cpsr.set_condition_bit(
+                    ConditionBit::C,
+                    !Helper::borrow_from(vec![rn_val, data.shifter_operand.val]),
+                );
+                cpsr.set_condition_bit(
+                    ConditionBit::V,
+                    !Helper::overflow_from(vec![rn_val as i32, -(data.shifter_operand.val as i32)]),
+                );
+            }
+            DataProcessingInstruction::CMN => {
+                let alu_out = rn_val + data.shifter_operand.val;
+
+                let cpsr = self.registers.get_mut_cpsr();
+                cpsr.set_condition_bit(ConditionBit::N, BitState::from(alu_out >> 31));
+                cpsr.set_condition_bit(ConditionBit::Z, BitState::from(alu_out == 0));
+                cpsr.set_condition_bit(
+                    ConditionBit::C,
+                    !Helper::carry_from(vec![rn_val, data.shifter_operand.val]),
+                );
+                cpsr.set_condition_bit(
+                    ConditionBit::V,
+                    !Helper::overflow_from(vec![rn_val as i32, data.shifter_operand.val as i32]),
+                );
+            }
+            DataProcessingInstruction::ORR
+            | DataProcessingInstruction::MOV
+            | DataProcessingInstruction::BIC
+            | DataProcessingInstruction::MVN => {
+                let rd_val = match data.opcode {
+                    DataProcessingInstruction::ORR => rn_val | data.shifter_operand.val,
+                    DataProcessingInstruction::MOV => data.shifter_operand.val,
+                    DataProcessingInstruction::BIC => rn_val & (!data.shifter_operand.val),
+                    DataProcessingInstruction::MVN => !data.shifter_operand.val,
+                    _ => unreachable!(),
+                };
+
+                self.registers.set_reg(rd_reg, rd_val);
+
+                if data.s_flag.is_set() {
+                    if rd_reg == RegisterName::R15 {
+                        self.registers.move_current_spsr_to_cpsr();
+                    } else {
+                        let cpsr = self.registers.get_mut_cpsr();
+                        cpsr.set_condition_bit(ConditionBit::N, BitState::from(rd_val >> 31));
+                        cpsr.set_condition_bit(ConditionBit::Z, BitState::from(rd_val == 0));
+                        cpsr.set_condition_bit(
+                            ConditionBit::C,
+                            data.shifter_operand.shifter_carry_out,
+                        );
+                    }
+                }
+            }
         }
     }
 
