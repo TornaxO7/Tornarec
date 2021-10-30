@@ -237,7 +237,7 @@ impl<'a> ArmExecuter<'a> {
                 cpsr.set_condition_bit(ConditionBit::C, data.shifter_operand.shifter_carry_out);
             }
             DataProcessingInstruction::CMP => {
-                let alu_out = rn_val - data.shifter_operand.val;
+                let (alu_out, overflowed) = rn_val.overflowing_sub(data.shifter_operand.val);
 
                 let cpsr = self.registers.get_mut_cpsr();
                 cpsr.set_condition_bit(ConditionBit::N, BitState::from(alu_out >> 31));
@@ -246,10 +246,7 @@ impl<'a> ArmExecuter<'a> {
                     ConditionBit::C,
                     !Helper::borrow_from(vec![rn_val, data.shifter_operand.val]),
                 );
-                cpsr.set_condition_bit(
-                    ConditionBit::V,
-                    !Helper::overflow_from(vec![rn_val as i32, -(data.shifter_operand.val as i32)]),
-                );
+                cpsr.set_condition_bit(ConditionBit::V, BitState::from(overflowed));
             }
             DataProcessingInstruction::CMN => {
                 let alu_out = rn_val + data.shifter_operand.val;

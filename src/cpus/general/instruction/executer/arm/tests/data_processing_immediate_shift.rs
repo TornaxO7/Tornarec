@@ -375,3 +375,38 @@ fn teq() {
         &expected_registers, &registers
     );
 }
+
+#[test]
+fn cmp() {
+    let mut registers = Registers::default();
+    registers.set_reg(RegisterName::R1, 1);
+
+    let mut arm_executer = ArmExecuter::new(&mut registers);
+
+    let data = DataProcessingImmediateShift {
+        opcode: DataProcessingInstruction::CMP,
+        s_flag: BitState::Set,
+        rn: 0b1,
+        rd: 0b0,
+        shifter_operand: ShifterOperand {
+            val: 11,
+            shifter_carry_out: BitState::Set,
+        },
+    };
+
+    arm_executer.data_processing_immediate_shift(data);
+
+    let mut expected_registers = Registers::default();
+    expected_registers.set_reg(RegisterName::R1, 1);
+    {
+        let cpsr = expected_registers.get_mut_cpsr();
+        cpsr.set_condition_bit(ConditionBit::N, BitState::Set);
+        cpsr.set_condition_bit(ConditionBit::V, BitState::Set);
+    }
+
+    assert_eq!(
+        expected_registers, registers,
+        "{:#?} {:#?}",
+        &expected_registers, &registers
+    );
+}
