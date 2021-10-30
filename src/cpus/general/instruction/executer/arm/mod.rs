@@ -78,7 +78,7 @@ impl<'a> ArmExecuter<'a> {
                 }
             }
             DataProcessingInstruction::SUB => {
-                let rd_val = rn_val - data.shifter_operand.val;
+                let (rd_val, overflowed) = rn_val.overflowing_sub(data.shifter_operand.val);
                 self.registers.set_reg(rd_reg, rd_val);
 
                 if data.s_flag.is_set() {
@@ -93,13 +93,7 @@ impl<'a> ArmExecuter<'a> {
                             ConditionBit::C,
                             !Helper::borrow_from(vec![rn_val, data.shifter_operand.val]),
                         );
-                        cpsr.set_condition_bit(
-                            ConditionBit::V,
-                            Helper::overflow_from(vec![
-                                rn_val as i32,
-                                -(data.shifter_operand.val as i32),
-                            ]),
-                        );
+                        cpsr.set_condition_bit(ConditionBit::V, BitState::from(overflowed));
                     }
                 }
             }

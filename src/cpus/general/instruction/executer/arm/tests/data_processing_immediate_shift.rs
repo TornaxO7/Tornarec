@@ -90,6 +90,41 @@ fn eor() {
 }
 
 #[test]
+fn sub() {
+    let mut registers = Registers::default();
+    registers.set_reg(RegisterName::R8, 42);
+
+    let mut arm_executer = ArmExecuter::new(&mut registers);
+
+    let data = DataProcessingImmediateShift {
+        opcode: DataProcessingInstruction::SUB,
+        s_flag: BitState::Set,
+        rn: 0b1000,
+        rd: 0b1,
+        shifter_operand: ShifterOperand {
+            val: 12,
+            shifter_carry_out: BitState::Set,
+        },
+    };
+
+    arm_executer.data_processing_immediate_shift(data);
+
+    let mut expected_registers = Registers::default();
+    expected_registers.set_reg(RegisterName::R8, 42);
+    expected_registers.set_reg(RegisterName::R1, 30);
+    {
+        let cpsr = expected_registers.get_mut_cpsr();
+        cpsr.set_condition_bit(ConditionBit::C, BitState::Set);
+    }
+
+    assert_eq!(
+        expected_registers, registers,
+        "{:#?} {:#?}",
+        &expected_registers, &registers
+    );
+}
+
+#[test]
 fn adc() {
     let mut registers = Registers::default();
     registers.set_reg(RegisterName::R3, 0xFFFF_FF01);
