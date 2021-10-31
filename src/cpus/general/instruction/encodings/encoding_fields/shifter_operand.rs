@@ -961,4 +961,33 @@ mod tests {
 
         assert_eq!(expected_value, value, "{:#?} {:#?}", &expected_value, &value);
     }
+
+    // ROR => else if rs_immed_5 == 0
+    #[test]
+    fn register_shift_ror2() {
+        let nds = {
+            let mut nds = NintendoDS::default();
+            // rs
+            nds.arm7tdmi.registers.set_reg(RegisterName::R1, 0b0000_0000_0000_0000__0000_0000_1110_0000);
+            // rm
+            nds.arm7tdmi.registers.set_reg(RegisterName::R2, u32::MAX);
+            nds
+        };
+        
+        let data = {
+            let instruction = Instruction {
+                val: 0b0000_000_0000_0_0000_0000_0001_0_11_1_0010,
+                .. Instruction::default()
+            };
+            DecodeData::new(instruction, &nds.arm7tdmi.registers)
+        };
+
+        let value = ShifterOperand::get_register_shift(data);
+        let expected_value = ShifterOperand {
+            val: u32::MAX,
+            shifter_carry_out: BitState::Set,
+        };
+
+        assert_eq!(expected_value, value, "{:#?} {:#?}", &expected_value, &value);
+    }
 }
