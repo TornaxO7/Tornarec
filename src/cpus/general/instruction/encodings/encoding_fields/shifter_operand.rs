@@ -529,6 +529,7 @@ mod tests {
     }
 
     // ----- Immediate (shift) tests -----
+    /// Test with LSL => if rs_immed_8 == 0
     #[test]
     fn register_shift_lsl1() {
         let nds = {
@@ -543,7 +544,7 @@ mod tests {
 
         let data = {
             let instruction = Instruction {
-                val: 0b0000_000_0000_0_0000_0000_1111_0_11_1_0011,
+                val: 0b0000_000_0000_0_0000_0000_0001_0_00_1_0011,
                 ..Instruction::default()
             };
             DecodeData::new(instruction, &nds.arm7tdmi.registers)
@@ -561,22 +562,25 @@ mod tests {
         );
     }
 
+    // LSL => else if rs_immed_8 < 32
     #[test]
     fn register_shift_lsl2() {
         let nds = {
             let mut nds = NintendoDS::default();
+            // rs
             nds.arm7tdmi
                 .registers
-                .set_reg(RegisterName::R1, 0b0000_0001);
+                .set_reg(RegisterName::R1, 31);
+            // rm
             nds.arm7tdmi
                 .registers
-                .set_reg(RegisterName::R2, 0b1000_0000);
+                .set_reg(RegisterName::R2, 1);
             nds
         };
 
         let data = {
             let instruction = Instruction {
-                val: 0b0000_000_0000_0_0000_0000_0001_0_11_1_0010,
+                val: 0b0000_000_0000_0_0000_0000_0001_0_00_1_0010,
                 ..Instruction::default()
             };
             DecodeData::new(instruction, &nds.arm7tdmi.registers)
@@ -585,7 +589,7 @@ mod tests {
         let value = ShifterOperand::get_register_shift(data);
 
         let expected_value = ShifterOperand {
-            val: 0b0100_0000,
+            val: 1 << 31,
             shifter_carry_out: BitState::Unset,
         };
 
@@ -594,5 +598,67 @@ mod tests {
             "{:#?} {:#?}",
             &expected_value, &value
         );
+    }
+
+    // LSL => else if rs_immed_8 == 32
+    #[test]
+    fn register_shift_lsl3() {
+        let nds = {
+            let mut nds = NintendoDS::default();
+            // rs
+            nds.arm7tdmi.registers.set_reg(RegisterName::R1, 32);
+            // rm 
+            nds.arm7tdmi.registers.set_reg(RegisterName::R2, 1);
+            nds
+        };
+    
+        let data = {
+            let instruction = Instruction {
+                val: 0b0000_000_0000_0_0000_0000_0001_0_00_1_0010,
+                ..Instruction::default()
+            };
+            DecodeData::new(instruction, &nds.arm7tdmi.registers)
+        };
+    
+        let value = ShifterOperand::get_register_shift(data);
+    
+        let expected_value = ShifterOperand {
+            val: 0,
+            shifter_carry_out: BitState::Set,
+        };
+    
+        assert_eq!(
+            expected_value, value,
+            "{:#?} {:#?}",
+            &expected_value, &value
+        );
+    }
+
+    // LSL => else
+    #[test]
+    fn register_shift_lsl4() {
+        let nds = {
+            let mut nds = NintendoDS::default();
+            // rs
+            nds.arm7tdmi.registers.set_reg(RegisterName::R1, 33);
+            nds
+        };
+
+        let data = {
+            let instruction = Instruction {
+                val: 0b0000_000_0000_0_0000_0000_0001_0_00_1_0000,
+                ..Instruction::default()
+            };
+
+            DecodeData::new(instruction, &nds.arm7tdmi.registers)
+        };
+
+        let value = ShifterOperand::get_register_shift(data);
+        let expected_value = ShifterOperand {
+            val: 0,
+            shifter_carry_out: BitState::Unset,
+        };
+
+        assert_eq!(expected_value, value, "{:#?} {:#?}", &expected_value, &value);
     }
 }
