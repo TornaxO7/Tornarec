@@ -835,4 +835,39 @@ mod tests {
             &expected_value, &value
         );
     }
+
+    // ASR => else if rs_immed_8 < 32
+    #[test]
+    fn register_shift_asr2() {
+        let nds = {
+            let mut nds = NintendoDS::default();
+            // rs
+            nds.arm7tdmi.registers.set_reg(RegisterName::R1, 2);
+            // rm
+            nds.arm7tdmi
+                .registers
+                .set_reg(RegisterName::R2, 0b1000_0000_0000_0000__0000_0000_0000_0010);
+            nds
+        };
+
+        let data = {
+            let instruction = Instruction {
+                val: 0b0000_000_0000_0_0000_0000_0001_0_10_1_0010,
+                ..Instruction::default()
+            };
+            DecodeData::new(instruction, &nds.arm7tdmi.registers)
+        };
+
+        let value = ShifterOperand::get_register_shift(data);
+        let expected_value = ShifterOperand {
+            val: 0b0010_0000_0000_0000__0000_0000_0000_0000,
+            shifter_carry_out: BitState::Set,
+        };
+
+        assert_eq!(
+            expected_value, value,
+            "{:#?} {:#?}",
+            &expected_value, &value
+        );
+    }
 }
