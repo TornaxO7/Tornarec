@@ -291,32 +291,10 @@ impl<'a> ArmExecuter<'a> {
         }
     }
 
-    pub fn miscellaneous_1(&self) {}
-
-    pub fn data_processing_register_shift(&self, _data: DataProcessingRegisterShift) {
-        let _cpsr = self.registers.get_ref_cpsr();
-        let _rn_reg = RegisterName::from(_data.rn);
-        let _rd_reg = RegisterName::from(_data.rd);
-
-        match _data.opcode {
-            DataProcessingInstruction::AND => {}
-            DataProcessingInstruction::EOR => {}
-            DataProcessingInstruction::SUB => {}
-            DataProcessingInstruction::RSB => {}
-            DataProcessingInstruction::ADD => {}
-            DataProcessingInstruction::ADC => {}
-            DataProcessingInstruction::SBC => {}
-            DataProcessingInstruction::RSC => {}
-            DataProcessingInstruction::TST => {}
-            DataProcessingInstruction::TEQ => {}
-            DataProcessingInstruction::CMP => {}
-            DataProcessingInstruction::CMN => {}
-            DataProcessingInstruction::ORR => {}
-            DataProcessingInstruction::MOV => {}
-            DataProcessingInstruction::BIC => {}
-            DataProcessingInstruction::MVN => {}
-        }
+    pub fn miscellaneous_1(&self) {
     }
+
+    pub fn data_processing_register_shift(&self) {}
 
     pub fn miscellaneous2(&self) {}
 
