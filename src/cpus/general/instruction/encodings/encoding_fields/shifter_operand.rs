@@ -568,13 +568,9 @@ mod tests {
         let nds = {
             let mut nds = NintendoDS::default();
             // rs
-            nds.arm7tdmi
-                .registers
-                .set_reg(RegisterName::R1, 31);
+            nds.arm7tdmi.registers.set_reg(RegisterName::R1, 31);
             // rm
-            nds.arm7tdmi
-                .registers
-                .set_reg(RegisterName::R2, 1);
+            nds.arm7tdmi.registers.set_reg(RegisterName::R2, 1);
             nds
         };
 
@@ -607,11 +603,11 @@ mod tests {
             let mut nds = NintendoDS::default();
             // rs
             nds.arm7tdmi.registers.set_reg(RegisterName::R1, 32);
-            // rm 
+            // rm
             nds.arm7tdmi.registers.set_reg(RegisterName::R2, 1);
             nds
         };
-    
+
         let data = {
             let instruction = Instruction {
                 val: 0b0000_000_0000_0_0000_0000_0001_0_00_1_0010,
@@ -619,14 +615,14 @@ mod tests {
             };
             DecodeData::new(instruction, &nds.arm7tdmi.registers)
         };
-    
+
         let value = ShifterOperand::get_register_shift(data);
-    
+
         let expected_value = ShifterOperand {
             val: 0,
             shifter_carry_out: BitState::Set,
         };
-    
+
         assert_eq!(
             expected_value, value,
             "{:#?} {:#?}",
@@ -659,6 +655,49 @@ mod tests {
             shifter_carry_out: BitState::Unset,
         };
 
-        assert_eq!(expected_value, value, "{:#?} {:#?}", &expected_value, &value);
+        assert_eq!(
+            expected_value, value,
+            "{:#?} {:#?}",
+            &expected_value, &value
+        );
+    }
+
+    // LSR => if rs_immed_8 == 0
+    #[test]
+    fn register_shift_lsr1() {
+        let nds = {
+            let mut nds = NintendoDS::default();
+            // rs
+            nds.arm7tdmi
+                .registers
+                .set_reg(RegisterName::R1, 0b1111_1111_1111_1111__1111_1111_0000_0000);
+            // rm
+            nds.arm7tdmi.registers.set_reg(RegisterName::R2, 100);
+            {
+                let cpsr = nds.arm7tdmi.registers.get_mut_cpsr();
+                cpsr.set_condition_bit(ConditionBit::C, BitState::Set);
+            };
+            nds
+        };
+
+        let data = {
+            let instruction = Instruction {
+                val: 0b0000_000_0000_0_0000_0000_0001_0_01_0_0010,
+                ..Instruction::default()
+            };
+            DecodeData::new(instruction, &nds.arm7tdmi.registers)
+        };
+
+        let value = ShifterOperand::get_register_shift(data);
+        let expected_value = ShifterOperand {
+            val: 100,
+            shifter_carry_out: BitState::Set,
+        };
+
+        assert_eq!(
+            expected_value, value,
+            "{:#?} {:#?}",
+            &expected_value, &value
+        );
     }
 }
