@@ -28,6 +28,8 @@ use crate::{
     },
 };
 
+use super::Architecture;
+
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct Arm7TDMI {
     pub registers: Registers,
@@ -64,7 +66,7 @@ impl Arm7TDMI {
     pub fn execute(&mut self, _ram: &mut Ram) {
         let _decoded_instruction = self.pipeline.get_decoded_instruction();
 
-        let _arm = ArmExecuter::new(&mut self.registers);
+        let _arm = ArmExecuter::new(&mut self.registers, Architecture::ARMv4T);
         let _thumb = ThumbExecuter::new();
 
         // match decoded_instruction {

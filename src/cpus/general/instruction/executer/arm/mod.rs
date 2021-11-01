@@ -4,27 +4,38 @@ mod helper;
 pub use error::ArmExecuterError;
 use helper::Helper;
 
-use crate::cpus::general::{
-    instruction::encodings::{
-        arm::DataProcessingImmediateShift,
-        encoding_fields::DataProcessingInstruction,
+use crate::cpus::{
+    general::{
+        instruction::{
+            decode::arm::Miscellaneous,
+            encodings::{
+                arm::DataProcessingImmediateShift,
+                encoding_fields::DataProcessingInstruction,
+            },
+        },
+        register::{
+            types::ConditionBit,
+            RegisterName,
+            Registers,
+        },
+        BitState,
+        BitMaskConstants,
     },
-    register::{
-        types::ConditionBit,
-        RegisterName,
-        Registers,
-    },
-    BitState,
+    Architecture,
 };
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct ArmExecuter<'a> {
     registers: &'a mut Registers,
+    architecture: Architecture,
 }
 
 impl<'a> ArmExecuter<'a> {
-    pub fn new(registers: &'a mut Registers) -> Self {
-        Self { registers }
+    pub fn new(registers: &'a mut Registers, architecture: Architecture) -> Self {
+        Self {
+            registers,
+            architecture,
+        }
     }
 
     pub fn data_processing_immediate_shift(&mut self, data: DataProcessingImmediateShift) {
@@ -288,12 +299,99 @@ impl<'a> ArmExecuter<'a> {
         }
     }
 
-    pub fn miscellaneous_1(&self) {
+    pub fn miscellaneous(&mut self, misc_instruction: Miscellaneous) {
+        match misc_instruction {
+            Miscellaneous::MRS(data) => {
+                let rd = RegisterName::from(data.rd);
+                let cpsr = self.registers.get_ref_cpsr();
+
+                if data.r_flag.is_set() {
+                    let operating_mode = cpsr.get_operating_mode().unwrap();
+                    let spsr = self.registers.get_spsr(operating_mode).unwrap();
+                    self.registers.set_reg(rd, spsr);
+                } else {
+                    let cpsr_val = self.registers.get_reg(RegisterName::Cpsr);
+                    self.registers.set_reg(rd, cpsr_val);
+                }
+            }
+            Miscellaneous::MSR(data) => {
+                if data.operand & BitMaskConstants::UnallocMask.as_u32(self.architecture) != 0 {
+                    todo!("Unpredictable");
+                }
+
+                let byte_mask = {
+                    let field_mask1 = BitState::from(data.field_mask);
+                    let field_mask2 = BitState::from(data.field_mask >> 1);
+                    let field_mask3 = BitState::from(data.field_mask >> 2);
+                    let field_mask4 = BitState::from(data.field_mask >> 3);
+
+                    let mut byte_mask = 0;
+                    
+                    if field_mask1.is_set() {
+                        byte_mask |= 0x0000_00FF;
+                    } 
+                    if field_mask2.is_set() {
+                        byte_mask |= 0x0000_FF00;
+                    }
+                    if field_mask3.is_set() {
+                        byte_mask |= 0x00FF_0000;
+                    }
+                    if field_mask4.is_set() {
+                        byte_mask |= 0xFF00_0000;
+                    }
+
+                    byte_mask
+                };
+
+                let cpsr = self.registers.get_ref_cpsr();
+                if data.r_flag.is_unset() {
+                    let mask = {
+                        if cpsr.in_privileged_mode() {
+                            if data.operand & BitMaskConstants::StateMask.as_u32(self.architecture) != 0 {
+                                todo!("Unpredictable");
+                            } else {
+                                byte_mask & (
+                                    BitMaskConstants::UserMask.as_u32(self.architecture)
+                                    | BitMaskConstants::PrivMask.as_u32(self.architecture))
+                            }
+                        } else {
+                            byte_mask & BitMaskConstants::UserMask.as_u32(self.architecture)
+                        }
+                    };
+
+                    let cpsr_val = self.registers.get_reg(RegisterName::Cpsr);
+                    let new_cpsr_val = (cpsr_val & !mask) | (data.operand & mask);
+                    self.registers.set_reg(RegisterName::Cpsr, new_cpsr_val);
+
+                } else {
+                    if cpsr.current_mode_has_spsr() {
+                        let mask = byte_mask & (
+                            BitMaskConstants::UserMask.as_u32(self.architecture)
+                            | BitMaskConstants::PrivMask.as_u32(self.architecture)
+                            | BitMaskConstants::StateMask.as_u32(self.architecture)
+                        );
+
+                        let current_operating_mode = cpsr.get_operating_mode().unwrap();
+                        let spsr_val = self.registers.get_spsr(current_operating_mode).unwrap();
+                        let new_spsr_val = (spsr_val & !mask) | (data.operand & mask);
+                        self.registers.set_spsr(new_spsr_val);
+                    } else {
+                        todo!("Unpredictable");
+                    }
+                }
+            }
+            Miscellaneous::BranchExchangeInstructionSetThumb(data) => {}
+            Miscellaneous::BranchExchangeInstructionSetJava(data) => {}
+            Miscellaneous::CountLeadingZeros(data) => {}
+            Miscellaneous::BranchAndLinkExchangeInstructionSetThumb(data) => {}
+            Miscellaneous::SaturatingAddSubtract(data) => {}
+            Miscellaneous::SoftwareBreakpoint(data) => {}
+            Miscellaneous::SignedMultipliesType2(data) => {}
+            Miscellaneous::Unknown => println!("Reached unknown miscellaneous instruction, LOL"),
+        }
     }
 
     pub fn data_processing_register_shift(&self) {}
-
-    pub fn miscellaneous2(&self) {}
 
     pub fn multiplies(&self) {}
 

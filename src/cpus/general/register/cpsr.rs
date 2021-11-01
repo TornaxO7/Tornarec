@@ -26,6 +26,13 @@ impl Cpsr {
         ![OperatingMode::Usr, OperatingMode::Sys].contains(&self.get_operating_mode().unwrap())
     }
 
+    pub fn in_privileged_mode(&self) -> bool {
+        match self.get_operating_mode().unwrap() {
+            OperatingMode::Usr => false,
+            _ => true,
+        }
+    }
+
     pub fn is_condition_set(&self, condition: ConditionCodeFlag) -> bool {
         let cb = self.get_condition_bits();
 

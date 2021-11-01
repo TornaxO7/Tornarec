@@ -3,8 +3,7 @@ use crate::cpus::general::Instruction;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum MiscellaneousChecker {
     MoveStatusRegisterToRegister,
-    MoveRegisterToStatusRegister,
-    MoveImmediateToStatusRegister,
+    MoveToStatusRegister,
     BranchExchangeInstructionSetThumb,
     BranchExchangeInstructionSetJava,
     CountLeadingZeros,
@@ -27,7 +26,7 @@ impl From<&Instruction> for MiscellaneousChecker {
                 0b0000 => {
                     match instruction20_21 {
                         0b00 => Self::MoveStatusRegisterToRegister,
-                        0b10 => Self::MoveRegisterToStatusRegister,
+                        0b10 => Self::MoveToStatusRegister,
                         _ => Self::Unknown,
                     }
                 },
@@ -45,7 +44,7 @@ impl From<&Instruction> for MiscellaneousChecker {
                 _ => Self::SignedMultiplies,
             }
         } else if instruction23_27 == 0b0_0110 && instruction20_21 == 0b10 {
-            Self::MoveImmediateToStatusRegister
+            Self::MoveToStatusRegister
         } else {
             Self::Unknown
         }
@@ -74,7 +73,7 @@ mod tests {
             val: 0b0000_00010_110_1111_1111_0000_0000_1111,
             .. Instruction::default()
         };
-        assert_eq!(MiscellaneousChecker::from(&instruction), MiscellaneousChecker::MoveRegisterToStatusRegister);
+        assert_eq!(MiscellaneousChecker::from(&instruction), MiscellaneousChecker::MoveToStatusRegister);
     }
 
     #[test]
@@ -83,7 +82,7 @@ mod tests {
             val: 0b0000_00110_110_1111_1111_1111_1111_1111,
             .. Instruction::default()
         };
-        assert_eq!(MiscellaneousChecker::from(&instruction), MiscellaneousChecker::MoveImmediateToStatusRegister);
+        assert_eq!(MiscellaneousChecker::from(&instruction), MiscellaneousChecker::MoveToStatusRegister);
     }
 
     #[test]

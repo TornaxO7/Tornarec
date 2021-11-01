@@ -143,6 +143,18 @@ impl Registers {
         }
     }
 
+    pub fn set_spsr(&mut self, new_val: u32) {
+        let cpsr = self.get_ref_cpsr();
+        match cpsr.get_operating_mode().unwrap() {
+            OperatingMode::Svc => self.set_reg(RegisterName::SpsrSvc, new_val),
+            OperatingMode::Abt => self.set_reg(RegisterName::SpsrAbt, new_val),
+            OperatingMode::Und => self.set_reg(RegisterName::SpsrUnd, new_val),
+            OperatingMode::Irq => self.set_reg(RegisterName::SpsrIrq, new_val),
+            OperatingMode::Fiq => self.set_reg(RegisterName::SpsrFiq, new_val),
+            other => unreachable!("{}", RegistersError::NoSpsr(other)),
+        }
+    }
+
     pub fn get_pc(&self) -> Address {
         Address::from(self.get_reg(RegisterName::Pc))
     }

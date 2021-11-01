@@ -1,4 +1,4 @@
-use crate::cpus::general::{
+use crate::cpus::{Architecture, general::{
     instruction::{
         encodings::{
             arm::DataProcessingImmediateShift,
@@ -18,13 +18,13 @@ use crate::cpus::general::{
         Registers,
     },
     BitState,
-};
+}};
 
 #[test]
 fn and() {
     let mut registers = Registers::default();
     registers.set_reg(RegisterName::R1, 0b1001);
-    let mut arm_executer = ArmExecuter::new(&mut registers);
+    let mut arm_executer = ArmExecuter::new(&mut registers, Architecture::ARMv4T);
 
     let data = DataProcessingImmediateShift {
         opcode: DataProcessingInstruction::AND,
@@ -63,7 +63,7 @@ fn and() {
 fn eor() {
     let mut registers = Registers::default();
     registers.set_reg(RegisterName::R2, 0b0111);
-    let mut arm_executer = ArmExecuter::new(&mut registers);
+    let mut arm_executer = ArmExecuter::new(&mut registers, Architecture::ARMv4T);
 
     let data = DataProcessingImmediateShift {
         opcode: DataProcessingInstruction::EOR,
@@ -94,7 +94,7 @@ fn sub() {
     let mut registers = Registers::default();
     registers.set_reg(RegisterName::R8, 42);
 
-    let mut arm_executer = ArmExecuter::new(&mut registers);
+    let mut arm_executer = ArmExecuter::new(&mut registers, Architecture::ARMv4T);
 
     let data = DataProcessingImmediateShift {
         opcode: DataProcessingInstruction::SUB,
@@ -129,7 +129,7 @@ fn rsb() {
     let mut registers = Registers::default();
     registers.set_reg(RegisterName::R5, 12);
 
-    let mut arm_executer = ArmExecuter::new(&mut registers);
+    let mut arm_executer = ArmExecuter::new(&mut registers, Architecture::ARMv4T);
 
     let data = DataProcessingImmediateShift {
         opcode: DataProcessingInstruction::RSB,
@@ -165,7 +165,7 @@ fn add() {
     let mut registers = Registers::default();
     registers.set_reg(RegisterName::R7, 10);
 
-    let mut arm_executer = ArmExecuter::new(&mut registers);
+    let mut arm_executer = ArmExecuter::new(&mut registers, Architecture::ARMv4T);
 
     let data = DataProcessingImmediateShift {
         opcode: DataProcessingInstruction::ADD,
@@ -199,7 +199,7 @@ fn adc() {
         let cpsr = registers.get_mut_cpsr();
         cpsr.set_condition_bit(ConditionBit::C, BitState::Set);
     }
-    let mut arm_executer = ArmExecuter::new(&mut registers);
+    let mut arm_executer = ArmExecuter::new(&mut registers, Architecture::ARMv4T);
 
     let data = DataProcessingImmediateShift {
         opcode: DataProcessingInstruction::ADC,
@@ -239,7 +239,7 @@ fn sbc() {
     let mut registers = Registers::default();
     registers.set_reg(RegisterName::R1, 10);
 
-    let mut arm_executer = ArmExecuter::new(&mut registers);
+    let mut arm_executer = ArmExecuter::new(&mut registers, Architecture::ARMv4T);
 
     let data = DataProcessingImmediateShift {
         opcode: DataProcessingInstruction::SBC,
@@ -275,7 +275,7 @@ fn rsc() {
     let mut registers = Registers::default();
     registers.set_reg(RegisterName::R3, 18);
 
-    let mut arm_executer = ArmExecuter::new(&mut registers);
+    let mut arm_executer = ArmExecuter::new(&mut registers, Architecture::ARMv4T);
 
     let data = DataProcessingImmediateShift {
         opcode: DataProcessingInstruction::RSC,
@@ -311,7 +311,7 @@ fn tst() {
     let mut registers = Registers::default();
     registers.set_reg(RegisterName::R1, 0b1111_1111_1111_1111__1111_1111_1111_1111);
 
-    let mut arm_executer = ArmExecuter::new(&mut registers);
+    let mut arm_executer = ArmExecuter::new(&mut registers, Architecture::ARMv4T);
 
     let data = DataProcessingImmediateShift {
         opcode: DataProcessingInstruction::TST,
@@ -346,7 +346,7 @@ fn teq() {
     let mut registers = Registers::default();
     registers.set_reg(RegisterName::R1, 0b1111_1111_1111_1111__1111_1111_1111_1111);
 
-    let mut arm_executer = ArmExecuter::new(&mut registers);
+    let mut arm_executer = ArmExecuter::new(&mut registers, Architecture::ARMv4T);
 
     let data = DataProcessingImmediateShift {
         opcode: DataProcessingInstruction::TEQ,
@@ -381,7 +381,7 @@ fn cmp() {
     let mut registers = Registers::default();
     registers.set_reg(RegisterName::R1, 1);
 
-    let mut arm_executer = ArmExecuter::new(&mut registers);
+    let mut arm_executer = ArmExecuter::new(&mut registers, Architecture::ARMv4T);
 
     let data = DataProcessingImmediateShift {
         opcode: DataProcessingInstruction::CMP,
@@ -416,7 +416,7 @@ fn cmn() {
     let mut registers = Registers::default();
     registers.set_reg(RegisterName::R1, u32::MAX);
 
-    let mut arm_executer = ArmExecuter::new(&mut registers);
+    let mut arm_executer = ArmExecuter::new(&mut registers, Architecture::ARMv4T);
 
     let data = DataProcessingImmediateShift {
         opcode: DataProcessingInstruction::CMN,
@@ -451,7 +451,7 @@ fn orr() {
     let mut registers = Registers::default();
     registers.set_reg(RegisterName::R1, 0b1);
 
-    let mut arm_executer = ArmExecuter::new(&mut registers);
+    let mut arm_executer = ArmExecuter::new(&mut registers, Architecture::ARMv4T);
 
     let data = DataProcessingImmediateShift {
         opcode: DataProcessingInstruction::ORR,
@@ -485,7 +485,7 @@ fn orr() {
 #[test]
 fn mov() {
     let mut registers = Registers::default();
-    let mut arm_executer = ArmExecuter::new(&mut registers);
+    let mut arm_executer = ArmExecuter::new(&mut registers, Architecture::ARMv4T);
 
     let data = DataProcessingImmediateShift {
         opcode: DataProcessingInstruction::MOV,
@@ -520,7 +520,7 @@ fn bic() {
     let mut registers = Registers::default();
     registers.set_reg(RegisterName::R1, 0b11 << 30);
 
-    let mut arm_executer = ArmExecuter::new(&mut registers);
+    let mut arm_executer = ArmExecuter::new(&mut registers, Architecture::ARMv4T);
 
     let data = DataProcessingImmediateShift {
         opcode: DataProcessingInstruction::BIC,
@@ -554,7 +554,7 @@ fn bic() {
 #[test]
 fn mvn() {
     let mut registers = Registers::default();
-    let mut arm_executer = ArmExecuter::new(&mut registers);
+    let mut arm_executer = ArmExecuter::new(&mut registers, Architecture::ARMv4T);
 
     let data = DataProcessingImmediateShift {
         opcode: DataProcessingInstruction::MVN,

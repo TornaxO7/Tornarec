@@ -6,8 +6,7 @@ use crate::cpus::general::instruction::{
         BranchExchangeInstructionSetJava,
         BranchExchangeInstructionSetThumb,
         CountLeadingZeros,
-        MoveImmediateToStatusRegister,
-        MoveRegisterToStatusRegister,
+        MoveToStatusRegister,
         MoveStatusRegisterToRegister,
         SaturatingAddSubtract,
         SignedMultipliesType2,
@@ -17,9 +16,8 @@ use crate::cpus::general::instruction::{
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Miscellaneous {
-    MoveStatusRegisterToRegister(MoveStatusRegisterToRegister),
-    MoveRegisterToStatusRegister(MoveRegisterToStatusRegister),
-    MoveImmediateToStatusRegister(MoveImmediateToStatusRegister),
+    MRS(MoveStatusRegisterToRegister),
+    MSR(MoveToStatusRegister),
     BranchExchangeInstructionSetThumb(BranchExchangeInstructionSetThumb),
     BranchExchangeInstructionSetJava(BranchExchangeInstructionSetJava),
     CountLeadingZeros(CountLeadingZeros),
@@ -33,15 +31,8 @@ pub enum Miscellaneous {
 impl<'a> From<DecodeData<'a>> for Miscellaneous {
     fn from(data: DecodeData<'a>) -> Self {
         match MiscellaneousChecker::from(&data.instruction) {
-            MiscellaneousChecker::MoveStatusRegisterToRegister => {
-                Self::MoveStatusRegisterToRegister(MoveStatusRegisterToRegister::from(data))
-            }
-            MiscellaneousChecker::MoveRegisterToStatusRegister => {
-                Self::MoveRegisterToStatusRegister(MoveRegisterToStatusRegister::from(data))
-            }
-            MiscellaneousChecker::MoveImmediateToStatusRegister => {
-                Self::MoveImmediateToStatusRegister(MoveImmediateToStatusRegister::from(data))
-            }
+            MiscellaneousChecker::MoveToStatusRegister => Self::MSR(MoveToStatusRegister::from(data)),
+            MiscellaneousChecker::MoveStatusRegisterToRegister => Self::MRS(MoveStatusRegisterToRegister::from(data)),
             MiscellaneousChecker::BranchExchangeInstructionSetThumb => {
                 Self::BranchExchangeInstructionSetThumb(BranchExchangeInstructionSetThumb::from(
                     data,

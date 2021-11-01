@@ -1,5 +1,5 @@
 use crate::cpus::general::instruction::decode::{
-    ArmDecode,
+    arm::ArmDecode,
     DecodeData,
     ThumbDecode,
 };
