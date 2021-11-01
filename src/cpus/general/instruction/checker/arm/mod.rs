@@ -1,4 +1,4 @@
-mod miscellaneous;
+pub mod miscellaneous;
 
 use crate::cpus::general::{
     BitState,
@@ -15,6 +15,7 @@ pub enum ArmInstructionChecker {
     DataProcessingImmediateShift,
     DataProcessingRegisterShift,
     Multiplies,
+    Miscellaneous,
     ExtraLoadAndStores,
     DataProcessingImmediate,
     UndefinedInstruction,
@@ -52,12 +53,12 @@ impl From<&Instruction> for ArmInstructionChecker {
 
                 if bit4.is_unset() {
                     if bit20.is_unset() && bit24_23 == 0b10 {
-                        todo!("Miscellaneous1");
+                        Self::Miscellaneous
                     } else {
                         Self::DataProcessingImmediateShift
                     }
                 } else if bit7.is_unset() && bit20.is_unset() && bit24_23 == 0b10 {
-                        todo!("Miscellaneous2");
+                    Self::Miscellaneous
                 } else if bit7.is_set() {
                     let bit4_7 = (instruction.val >> 4) & 0b1111;
                     let bit24_27 = (instruction.val >> 24) & 0b1111;
@@ -67,7 +68,7 @@ impl From<&Instruction> for ArmInstructionChecker {
                         Self::Multiplies
                     } else {
                         Self::ExtraLoadAndStores
-                    } 
+                    }
                 } else {
                     Self::DataProcessingRegisterShift
                 }
@@ -150,17 +151,17 @@ mod tests {
         );
     }
 
-    // #[test]
-    // fn miscellaneous1() {
-    //     let instruction = Instruction {
-    //         val: 0b0000_000_1000_0_0000_0000_00000_00_0_0000,
-    //         ..Instruction::default()
-    //     };
-    //     assert_eq!(
-    //         ArmInstructionChecker::from(&instruction),
-    //         ArmInstructionChecker::Miscellaneous1
-    //     );
-    // }
+    #[test]
+    fn miscellaneous1() {
+        let instruction = Instruction {
+            val: 0b0000_000_1000_0_0000_0000_00000_00_0_0000,
+            ..Instruction::default()
+        };
+        assert_eq!(
+            ArmInstructionChecker::from(&instruction),
+            ArmInstructionChecker::Miscellaneous,
+        );
+    }
 
     #[test]
     fn data_processing_register_shift() {
@@ -174,17 +175,17 @@ mod tests {
         );
     }
 
-    // #[test]
-    // fn miscellaneous2() {
-    //     let instruction = Instruction {
-    //         val: 0b0000_1010_0_0000_0000_0000_0_00_1_0000,
-    //         ..Instruction::default()
-    //     };
-    //     assert_eq!(
-    //         ArmInstructionChecker::from(&instruction),
-    //         ArmInstructionChecker::Miscellaneous2
-    //     );
-    // }
+    #[test]
+    fn miscellaneous2() {
+        let instruction = Instruction {
+            val: 0b0000_1010_0_0000_0000_0000_0_00_1_0000,
+            ..Instruction::default()
+        };
+        assert_eq!(
+            ArmInstructionChecker::from(&instruction),
+            ArmInstructionChecker::Miscellaneous
+        );
+    }
 
     #[test]
     fn multiplies() {

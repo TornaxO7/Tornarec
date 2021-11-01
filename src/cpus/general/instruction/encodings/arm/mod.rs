@@ -9,10 +9,10 @@ mod extra_load_stores;
 mod load_and_store_immediate_offset;
 mod load_and_store_multiple;
 mod load_and_store_register_offset;
-mod miscellaneous;
+pub mod miscellaneous;
 // mod miscellaneous1;
 // mod miscellaneous2;
-mod multiplies;
+pub mod multiplies;
 
 pub use branch_and_branch_with_link::BranchAndBranchWithLink;
 pub use coprocessor_data_processing::CoprocessorDataProcessing;
@@ -28,4 +28,3 @@ pub use load_and_store_register_offset::LoadAndStoreRegisterOffset;
 // pub use miscellaneous1::Miscellaneous1;
 // pub use miscellaneous2::Miscellaneous2;
 pub use multiplies::Multiplies;
-pub use miscellaneous::Miscellaneous;

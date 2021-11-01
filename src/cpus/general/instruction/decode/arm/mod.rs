@@ -1,6 +1,8 @@
 mod error;
+mod miscellaneous;
 
 pub use error::ArmDecodeError;
+pub use miscellaneous::Miscellaneous;
 
 use crate::cpus::general::instruction::{
     checker::ArmInstructionChecker,
@@ -28,6 +30,7 @@ pub enum ArmDecode {
     DataProcessingImmediateShift(DataProcessingImmediateShift),
     DataProcessingRegisterShift(DataProcessingRegisterShift),
     Multiplies(Multiplies),
+    Miscellaneous(Miscellaneous),
     ExtraLoadAndStores(ExtraLoadAndStores),
     DataProcessingImmediate(DataProcessingImmediate),
     UndefinedInstruction,
@@ -56,6 +59,8 @@ impl<'a> TryFrom<DecodeData<'a>> for ArmDecode {
                Ok(Self::DataProcessingRegisterShift(DataProcessingRegisterShift::from(decode_data))),
            ArmInstructionChecker::Multiplies =>
                Ok(Self::Multiplies(Multiplies::from(decode_data))),
+           ArmInstructionChecker::Miscellaneous =>
+               Ok(Self::Miscellaneous(Miscellaneous::from(decode_data))),
            ArmInstructionChecker::ExtraLoadAndStores =>
                Ok(Self::ExtraLoadAndStores(ExtraLoadAndStores::from(decode_data))),
            ArmInstructionChecker::DataProcessingImmediate =>
