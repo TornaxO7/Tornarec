@@ -17,8 +17,6 @@ use crate::cpus::general::instruction::{
         LoadAndStoreImmediateOffset,
         LoadAndStoreMultiple,
         LoadAndStoreRegisterOffset,
-        Miscellaneous1,
-        Miscellaneous2,
         Multiplies,
     },
 };
@@ -28,9 +26,7 @@ use std::convert::TryFrom;
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ArmDecode {
     DataProcessingImmediateShift(DataProcessingImmediateShift),
-    Miscellaneous1(Miscellaneous1),
     DataProcessingRegisterShift(DataProcessingRegisterShift),
-    Miscellaneous2(Miscellaneous2),
     Multiplies(Multiplies),
     ExtraLoadAndStores(ExtraLoadAndStores),
     DataProcessingImmediate(DataProcessingImmediate),
@@ -56,12 +52,8 @@ impl<'a> TryFrom<DecodeData<'a>> for ArmDecode {
         match ArmInstructionChecker::from(&decode_data.instruction) {
            ArmInstructionChecker::DataProcessingImmediateShift =>
                Ok(Self::DataProcessingImmediateShift(DataProcessingImmediateShift::from(decode_data))),
-           ArmInstructionChecker::Miscellaneous1 =>
-               Ok(Self::Miscellaneous1(Miscellaneous1::from(decode_data))),
            ArmInstructionChecker::DataProcessingRegisterShift =>
                Ok(Self::DataProcessingRegisterShift(DataProcessingRegisterShift::from(decode_data))),
-           ArmInstructionChecker::Miscellaneous2 =>
-               Ok(Self::Miscellaneous2(Miscellaneous2::from(decode_data))),
            ArmInstructionChecker::Multiplies =>
                Ok(Self::Multiplies(Multiplies::from(decode_data))),
            ArmInstructionChecker::ExtraLoadAndStores =>
