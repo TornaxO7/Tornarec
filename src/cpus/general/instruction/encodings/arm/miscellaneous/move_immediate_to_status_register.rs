@@ -27,10 +27,7 @@ impl<'a> From<DecodeData<'a>> for MoveImmediateToStatusRegister {
         let immediate = u8::try_from(data.instruction.val & 0b1111_1111).unwrap();
 
         if sbo != 0b1111 {
-            unreachable!(
-                "{}",
-                MiscellaneousError::SBOConflict(data.instruction.val)
-            );
+            unreachable!("{}", MiscellaneousError::SBOConflict(data.instruction.val));
         }
 
         Self {
