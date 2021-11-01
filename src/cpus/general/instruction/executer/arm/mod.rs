@@ -6,10 +6,7 @@ use helper::Helper;
 
 use crate::cpus::general::{
     instruction::encodings::{
-        arm::{
-            DataProcessingImmediateShift,
-            DataProcessingRegisterShift,
-        },
+        arm::DataProcessingImmediateShift,
         encoding_fields::DataProcessingInstruction,
     },
     register::{

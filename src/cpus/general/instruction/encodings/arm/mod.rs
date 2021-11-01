@@ -9,9 +9,9 @@ mod extra_load_stores;
 mod load_and_store_immediate_offset;
 mod load_and_store_multiple;
 mod load_and_store_register_offset;
+mod miscellaneous;
 mod miscellaneous1;
 mod miscellaneous2;
-mod move_immediate_to_status_register;
 mod multiplies;
 
 pub use branch_and_branch_with_link::BranchAndBranchWithLink;
@@ -27,5 +27,4 @@ pub use load_and_store_multiple::LoadAndStoreMultiple;
 pub use load_and_store_register_offset::LoadAndStoreRegisterOffset;
 pub use miscellaneous1::Miscellaneous1;
 pub use miscellaneous2::Miscellaneous2;
-pub use move_immediate_to_status_register::MoveImmediateToStatusRegister;
 pub use multiplies::Multiplies;

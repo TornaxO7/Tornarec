@@ -18,7 +18,6 @@ pub enum ArmInstructionChecker {
     ExtraLoadAndStores,
     DataProcessingImmediate,
     UndefinedInstruction,
-    MoveImmediateToStatusRegister,
     LoadAndStoreImmediateOffset,
     LoadAndStoreRegisterOffset,
     MediaInstructions,
@@ -85,7 +84,7 @@ impl From<&Instruction> for ArmInstructionChecker {
                 if bit24_23 == 0b10 && bit20.is_unset() {
                     match bit21 {
                         BitState::Unset => Self::UndefinedInstruction,
-                        BitState::Set => Self::MoveImmediateToStatusRegister,
+                        _ => todo!("Not implemented yet."),
                     }
                 } else {
                     Self::DataProcessingImmediate
@@ -235,17 +234,17 @@ mod tests {
         );
     }
 
-    #[test]
-    fn move_immediate_to_status_register() {
-        let instruction = Instruction {
-            val: 0b0000_001_10_0_10_0000_1111_0000_0000_0000,
-            ..Instruction::default()
-        };
-        assert_eq!(
-            ArmInstructionChecker::from(&instruction),
-            ArmInstructionChecker::MoveImmediateToStatusRegister
-        );
-    }
+    // #[test]
+    // fn move_immediate_to_status_register() {
+    //     let instruction = Instruction {
+    //         val: 0b0000_001_10_0_10_0000_1111_0000_0000_0000,
+    //         ..Instruction::default()
+    //     };
+    //     assert_eq!(
+    //         ArmInstructionChecker::from(&instruction),
+    //         ArmInstructionChecker::MoveImmediateToStatusRegister
+    //     );
+    // }
 
     #[test]
     fn load_store_immediate_offset() {

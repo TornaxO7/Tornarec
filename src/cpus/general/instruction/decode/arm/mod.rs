@@ -19,7 +19,6 @@ use crate::cpus::general::instruction::{
         LoadAndStoreRegisterOffset,
         Miscellaneous1,
         Miscellaneous2,
-        MoveImmediateToStatusRegister,
         Multiplies,
     },
 };
@@ -36,7 +35,6 @@ pub enum ArmDecode {
     ExtraLoadAndStores(ExtraLoadAndStores),
     DataProcessingImmediate(DataProcessingImmediate),
     UndefinedInstruction,
-    MoveImmediateToStatusRegister(MoveImmediateToStatusRegister),
     LoadAndStoreImmediateOffset(LoadAndStoreImmediateOffset),
     LoadAndStoreRegisterOffset(LoadAndStoreRegisterOffset),
     MediaInstructions,
@@ -72,8 +70,6 @@ impl<'a> TryFrom<DecodeData<'a>> for ArmDecode {
                Ok(Self::DataProcessingImmediate(DataProcessingImmediate::from(decode_data))),
            ArmInstructionChecker::UndefinedInstruction =>
                Ok(Self::UndefinedInstruction),
-           ArmInstructionChecker::MoveImmediateToStatusRegister =>
-               Ok(Self::MoveImmediateToStatusRegister(MoveImmediateToStatusRegister::from(decode_data))),
            ArmInstructionChecker::LoadAndStoreImmediateOffset =>
                Ok(Self::LoadAndStoreImmediateOffset(LoadAndStoreImmediateOffset::from(decode_data))),
            ArmInstructionChecker::LoadAndStoreRegisterOffset =>

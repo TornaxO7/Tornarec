@@ -1,6 +1,4 @@
-pub mod error;
-
-use error::MoveImmediateToStatusRegisterError;
+use super::error::MiscellaneousError;
 
 use crate::cpus::general::{
     instruction::decode::DecodeData,
@@ -13,33 +11,31 @@ use std::convert::{
 };
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct MoveImmediateToStatusRegister {
-    r_flag: BitState,
-    mask: u8,
-    rotate: u8,
-    immediate: u8,
+pub struct MoveStatusRegisterToRegister {
+    pub r_flag: BitState,
+    pub rd: u8,
 }
 
-impl<'a> From<DecodeData<'a>> for MoveImmediateToStatusRegister {
+impl<'a> From<DecodeData<'a>> for MoveStatusRegisterToRegister {
     fn from(data: DecodeData<'a>) -> Self {
         let r_flag = BitState::from(data.instruction.val >> 22);
-        let mask = u8::try_from((data.instruction.val >> 16) & 0b1111).unwrap();
-        let sbo = u8::try_from((data.instruction.val >> 12) & 0b1111).unwrap();
-        let rotate = u8::try_from((data.instruction.val >> 8) & 0b1111).unwrap();
-        let immediate = u8::try_from(data.instruction.val & 0b1111_1111).unwrap();
+        let sbo = u8::try_from((data.instruction.val >> 16) & 0b1111).unwrap();
+        let rd = u8::try_from((data.instruction.val >> 12) & 0b1111).unwrap();
+        let sbz1 = u8::try_from((data.instruction.val >> 8) & 0b1111).unwrap();
+        let sbz2 = u8::try_from(data.instruction.val & 0b1111).unwrap();
 
         if sbo != 0b1111 {
             unreachable!(
                 "{}",
-                MoveImmediateToStatusRegisterError::SBOConflict(data.instruction.val)
+                MiscellaneousError::SBOConflict(data.instruction.val)
             );
+        } else if sbz1 != 0 || sbz2 != 0 {
+            unreachable!("{}", MiscellaneousError::SBZConflict(data.instruction.val));
         }
 
         Self {
             r_flag,
-            mask,
-            rotate,
-            immediate,
+            rd,
         }
     }
 }
@@ -49,7 +45,7 @@ mod tests {
     use super::{
         BitState,
         DecodeData,
-        MoveImmediateToStatusRegister,
+        MoveStatusRegisterToRegister
     };
 
     use crate::{
@@ -61,18 +57,16 @@ mod tests {
     fn from() {
         let nds = NintendoDS::default();
         let instruction = Instruction {
-            val: 0b0000_00110_1_10_1010_1111_1001_1111_0000,
+            val: 0b0000_00010_100_1111_1101_0000_0000_0000,
             ..Instruction::default()
         };
         let data = DecodeData::new(instruction, &nds.arm7tdmi.registers);
 
-        let value = MoveImmediateToStatusRegister::from(data);
+        let value = MoveStatusRegisterToRegister::from(data);
 
-        let expected_value = MoveImmediateToStatusRegister {
+        let expected_value = MoveStatusRegisterToRegister {
             r_flag: BitState::Set,
-            mask: 0b1010,
-            rotate: 0b1001,
-            immediate: 0b1111_0000,
+            rd: 0b1101,
         };
 
         assert_eq!(
@@ -87,11 +81,11 @@ mod tests {
     fn from_invalid_sbo() {
         let nds = NintendoDS::default();
         let instruction = Instruction {
-            val: 0b0000_00110_1_10_1010_0110_1001_1111_0000,
+            val: 0b0000_00010_100_1101_1111_0000_0000_0000,
             ..Instruction::default()
         };
         let data = DecodeData::new(instruction, &nds.arm7tdmi.registers);
 
-        MoveImmediateToStatusRegister::from(data);
+        MoveStatusRegisterToRegister::from(data);
     }
 }
