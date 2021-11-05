@@ -1,5 +1,7 @@
 use std::ops::Mul;
 
+// TODO: Convert this into a `pub struct DataTypeSize(u32)` which implements three constants and a
+// function to add a custom size
 #[derive(Debug, Clone, PartialEq, Eq)]
 #[repr(u32)]
 pub enum DataTypeSize {

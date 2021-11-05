@@ -49,6 +49,7 @@ fn and() {
             z: BitState::Unset,
             c: BitState::Set,
             v: BitState::Unset,
+            q: BitState::Unset,
         });
     }
 
@@ -224,6 +225,7 @@ fn adc() {
             z: BitState::Unset,
             c: BitState::Set,
             v: BitState::Set,
+            q: BitState::Unset,
         });
     }
 

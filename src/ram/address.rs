@@ -5,7 +5,7 @@ use std::{
         LowerHex,
         UpperHex,
     },
-    ops::Add,
+    ops::{Add, Sub},
 };
 
 use crate::ram::data_types::DataTypeSize;
@@ -84,6 +84,14 @@ impl Add<DataTypeSize> for Address {
 
     fn add(self, size: DataTypeSize) -> Self::Output {
         Address::from(self.0 + size as u32)
+    }
+}
+
+impl Sub<DataTypeSize> for Address {
+    type Output = Self;
+
+    fn sub(self, size: DataTypeSize) -> Self::Output {
+        Address::from(self.0 - size as u32)
     }
 }
 

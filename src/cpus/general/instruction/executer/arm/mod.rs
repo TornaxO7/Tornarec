@@ -10,7 +10,10 @@ use crate::cpus::{
             decode::arm::Miscellaneous,
             encodings::{
                 arm::DataProcessingData,
-                encoding_fields::DataProcessingInstruction,
+                encoding_fields::{
+                    DataProcessingInstruction,
+                    SaturatingOpcode,
+                },
             },
         },
         register::{
@@ -18,8 +21,9 @@ use crate::cpus::{
             RegisterName,
             Registers,
         },
-        BitState,
         BitMaskConstants,
+        BitState,
+        OperatingState,
     },
     Architecture,
 };
@@ -326,10 +330,10 @@ impl<'a> ArmExecuter<'a> {
                     let field_mask4 = BitState::from(data.field_mask >> 3);
 
                     let mut byte_mask = 0;
-                    
+
                     if field_mask1.is_set() {
                         byte_mask |= 0x0000_00FF;
-                    } 
+                    }
                     if field_mask2.is_set() {
                         byte_mask |= 0x0000_FF00;
                     }
@@ -347,12 +351,14 @@ impl<'a> ArmExecuter<'a> {
                 if data.r_flag.is_unset() {
                     let mask = {
                         if cpsr.in_privileged_mode() {
-                            if data.operand & BitMaskConstants::StateMask.as_u32(self.architecture) != 0 {
+                            if data.operand & BitMaskConstants::StateMask.as_u32(self.architecture)
+                                != 0
+                            {
                                 todo!("Unpredictable");
                             } else {
-                                byte_mask & (
-                                    BitMaskConstants::UserMask.as_u32(self.architecture)
-                                    | BitMaskConstants::PrivMask.as_u32(self.architecture))
+                                byte_mask
+                                    & (BitMaskConstants::UserMask.as_u32(self.architecture)
+                                        | BitMaskConstants::PrivMask.as_u32(self.architecture))
                             }
                         } else {
                             byte_mask & BitMaskConstants::UserMask.as_u32(self.architecture)
@@ -362,14 +368,12 @@ impl<'a> ArmExecuter<'a> {
                     let cpsr_val = self.registers.get_reg(RegisterName::Cpsr);
                     let new_cpsr_val = (cpsr_val & !mask) | (data.operand & mask);
                     self.registers.set_reg(RegisterName::Cpsr, new_cpsr_val);
-
                 } else {
                     if cpsr.current_mode_has_spsr() {
-                        let mask = byte_mask & (
-                            BitMaskConstants::UserMask.as_u32(self.architecture)
-                            | BitMaskConstants::PrivMask.as_u32(self.architecture)
-                            | BitMaskConstants::StateMask.as_u32(self.architecture)
-                        );
+                        let mask = byte_mask
+                            & (BitMaskConstants::UserMask.as_u32(self.architecture)
+                                | BitMaskConstants::PrivMask.as_u32(self.architecture)
+                                | BitMaskConstants::StateMask.as_u32(self.architecture));
 
                         let current_operating_mode = cpsr.get_operating_mode().unwrap();
                         let spsr_val = self.registers.get_spsr(current_operating_mode).unwrap();
@@ -380,12 +384,97 @@ impl<'a> ArmExecuter<'a> {
                     }
                 }
             }
-            Miscellaneous::BranchExchangeInstructionSetThumb(data) => {}
-            Miscellaneous::BranchExchangeInstructionSetJava(data) => {}
-            Miscellaneous::CountLeadingZeros(data) => {}
-            Miscellaneous::BranchAndLinkExchangeInstructionSetThumb(data) => {}
-            Miscellaneous::SaturatingAddSubtract(data) => {}
-            Miscellaneous::SoftwareBreakpoint(data) => {}
+            Miscellaneous::BX(data) => {
+                // set the pc value
+                let rm_reg = RegisterName::from(data.rm);
+                let rm_val = self.registers.get_reg(rm_reg);
+
+                self.registers
+                    .set_reg(RegisterName::Pc, rm_val & 0xFFFF_FFFE);
+
+                // Set T bit if needed
+                let cpsr = self.registers.get_mut_cpsr();
+                let new_operatin_state = {
+                    let bit_value = BitState::from(data.rm);
+                    OperatingState::from(bit_value)
+                };
+
+                cpsr.set_operating_state(new_operatin_state);
+            }
+            Miscellaneous::BXJ(_) => unreachable!("{}", ArmExecuterError::NoJazelleSupport),
+            Miscellaneous::CLZ(data) => {
+                if self.architecture == Architecture::ARMv5TE {
+                    let rm_reg = RegisterName::from(data.rm);
+                    let rd_reg = RegisterName::from(data.rd);
+
+                    let rm_val = self.registers.get_reg(rm_reg);
+
+                    self.registers.set_reg(rd_reg, rm_val.leading_zeros());
+                }
+            }
+            Miscellaneous::BLX(data) => {
+                if self.architecture == Architecture::ARMv5TE {
+                    self.registers.move_pc_to_lr();
+
+                    // Adjust the cpsr
+                    {
+                        let cpsr = self.registers.get_mut_cpsr();
+                        cpsr.set_operating_state(OperatingState::Thumb);
+                    }
+
+                    // update the pc
+                    let pc_val = self.registers.get_reg(RegisterName::Pc);
+                    self.registers.set_reg(
+                        RegisterName::Pc,
+                        pc_val
+                            + (Helper::sign_extend(data.signed_immed_24, 24) << 2)
+                            + (data.h_flag.get_as_u32() << 1),
+                    );
+                } else {
+                    unreachable!("{}", ArmExecuterError::ARMv4TExecutesARM5vTE);
+                }
+            }
+            Miscellaneous::QADDOrQSUB(data) => {
+                // NOTE: Use of R15 as RD, RM or RN isn't covered as unpredictable
+                if self.architecture == Architecture::ARMv5TE {
+                    let rm_reg = RegisterName::from(data.rm);
+                    let rn_reg = RegisterName::from(data.rn);
+                    let rd_reg = RegisterName::from(data.rd);
+
+                    let rm_val = self.registers.get_reg(rm_reg);
+                    let rn_val = self.registers.get_reg(rn_reg);
+
+                    match data.opcode {
+                        SaturatingOpcode::QADD => {
+                            let (sum, _) = rm_val.overflowing_add(rn_val);
+                            let val = Helper::signed_sat(sum as i32, 32);
+                            self.registers.set_reg(rd_reg, val as u32);
+
+                            if Helper::signed_does_sat(sum as i32, 32) {
+                                let cpsr = self.registers.get_mut_cpsr();
+                                cpsr.set_condition_bit(ConditionBit::Q, BitState::Set);
+                            }
+                        }
+                        SaturatingOpcode::QSUB => {
+                            let (subtraction, _) = rm_val.overflowing_sub(rn_val);
+                            let val = Helper::signed_sat(subtraction as i32, 32);
+                            self.registers.set_reg(rd_reg, val as u32);
+
+                            if Helper::signed_does_sat(subtraction as i32, 32) {
+                                let cpsr = self.registers.get_mut_cpsr();
+                                cpsr.set_condition_bit(ConditionBit::Q, BitState::Set);
+                            }
+                        }
+                    }
+                } else {
+                    unreachable!("{}", ArmExecuterError::ARMv4TExecutesARM5vTE);
+                }
+            }
+            // TODO: Here, Manual page 164
+            Miscellaneous::BKPT(data) => {
+                let bkpt_address = self.registers.get_adjusted_pc();
+                // self.registers.set_reg(RegisterName::R14Abt, bkpt_address + DataTypeSize::);
+            }
             Miscellaneous::SignedMultipliesType2(data) => {}
             Miscellaneous::Unknown => println!("Reached unknown miscellaneous instruction, LOL"),
         }

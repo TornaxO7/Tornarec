@@ -2,16 +2,13 @@ mod error;
 
 pub use error::RegistersError;
 
-use crate::{
-    cpus::general::{
+use crate::{cpus::general::{
         register::{
             Cpsr,
             RegisterName,
         },
         OperatingMode,
-    },
-    ram::Address,
-};
+    }, ram::{Address, data_types::DataTypeSize}};
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct Registers {
@@ -21,8 +18,12 @@ pub struct Registers {
     /// The banked registers from r8 to r12
     fiq_registers: [u32; 5],
 
+    /// Stack pointers
     r13: [u32; 6],
+    /// LR pointers
     r14: [u32; 6],
+
+    /// PC
     r15: u32,
 
     cpsr: Cpsr,
@@ -155,8 +156,40 @@ impl Registers {
         }
     }
 
-    pub fn get_pc(&self) -> Address {
-        Address::from(self.get_reg(RegisterName::Pc))
+    pub fn set_lr(&mut self, new_address: Address) {
+        let new_val = new_address.get_as_u32();
+
+        let cpsr = self.get_ref_cpsr();
+        match cpsr.get_operating_mode().unwrap() {
+            OperatingMode::Usr | OperatingMode::Sys => self.set_reg(RegisterName::Lr, new_val),
+            OperatingMode::Fiq => self.set_reg(RegisterName::LrFiq, new_val),
+            OperatingMode::Irq => self.set_reg(RegisterName::LrIrq, new_val),
+            OperatingMode::Svc => self.set_reg(RegisterName::LrSvc, new_val),
+            OperatingMode::Abt => self.set_reg(RegisterName::LrAbt, new_val),
+            OperatingMode::Und => self.set_reg(RegisterName::LrUnd, new_val),
+        }
+    }
+
+    pub fn get_adjusted_pc(&self) -> Address {
+        Address::from(self.get_reg(RegisterName::Pc) - DataTypeSize::Halfword as u32)
+    }
+
+    pub fn move_pc_to_lr(&mut self) {
+        let lr_val = {
+            let pc_val = self.get_adjusted_pc();
+            let lr_address = pc_val + DataTypeSize::Halfword;
+            lr_address.get_as_u32()
+        };
+
+        let cpsr = self.get_ref_cpsr();
+        match cpsr.get_operating_mode().unwrap() {
+            OperatingMode::Usr | OperatingMode::Sys => self.set_reg(RegisterName::Lr, lr_val),
+            OperatingMode::Fiq => self.set_reg(RegisterName::LrFiq, lr_val),
+            OperatingMode::Irq => self.set_reg(RegisterName::LrIrq, lr_val),
+            OperatingMode::Svc => self.set_reg(RegisterName::LrSvc, lr_val),
+            OperatingMode::Abt => self.set_reg(RegisterName::LrAbt, lr_val),
+            OperatingMode::Und => self.set_reg(RegisterName::LrUnd, lr_val),
+        }
     }
 
     pub fn move_current_spsr_to_cpsr(&mut self) {

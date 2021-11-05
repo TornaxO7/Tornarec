@@ -6,7 +6,7 @@ use crate::cpus::general::instruction::decode::DecodeData;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct BranchExchangeInstructionSetThumb {
-    rm: u8,
+    pub rm: u8,
 }
 
 impl<'a> From<DecodeData<'a>> for BranchExchangeInstructionSetThumb {

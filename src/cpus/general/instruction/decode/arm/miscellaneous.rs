@@ -18,12 +18,12 @@ use crate::cpus::general::instruction::{
 pub enum Miscellaneous {
     MRS(MoveStatusRegisterToRegister),
     MSR(MoveToStatusRegister),
-    BranchExchangeInstructionSetThumb(BranchExchangeInstructionSetThumb),
-    BranchExchangeInstructionSetJava(BranchExchangeInstructionSetJava),
-    CountLeadingZeros(CountLeadingZeros),
-    BranchAndLinkExchangeInstructionSetThumb(BranchAndLinkExchangeInstructionSetThumb),
-    SaturatingAddSubtract(SaturatingAddSubtract),
-    SoftwareBreakpoint(SoftwareBreakpoint),
+    BX(BranchExchangeInstructionSetThumb),
+    BXJ(BranchExchangeInstructionSetJava),
+    CLZ(CountLeadingZeros),
+    BLX(BranchAndLinkExchangeInstructionSetThumb),
+    QADDOrQSUB(SaturatingAddSubtract),
+    BKPT(SoftwareBreakpoint),
     SignedMultipliesType2(SignedMultipliesType2),
     Unknown,
 }
@@ -34,26 +34,26 @@ impl<'a> From<DecodeData<'a>> for Miscellaneous {
             MiscellaneousChecker::MoveToStatusRegister => Self::MSR(MoveToStatusRegister::from(data)),
             MiscellaneousChecker::MoveStatusRegisterToRegister => Self::MRS(MoveStatusRegisterToRegister::from(data)),
             MiscellaneousChecker::BranchExchangeInstructionSetThumb => {
-                Self::BranchExchangeInstructionSetThumb(BranchExchangeInstructionSetThumb::from(
+                Self::BX(BranchExchangeInstructionSetThumb::from(
                     data,
                 ))
             }
             MiscellaneousChecker::BranchExchangeInstructionSetJava => {
-                Self::BranchExchangeInstructionSetJava(BranchExchangeInstructionSetJava::from(data))
+                Self::BXJ(BranchExchangeInstructionSetJava::from(data))
             }
             MiscellaneousChecker::CountLeadingZeros => {
-                Self::CountLeadingZeros(CountLeadingZeros::from(data))
+                Self::CLZ(CountLeadingZeros::from(data))
             }
             MiscellaneousChecker::BranchAndLinkExchangeInstructionSetThumb => {
-                Self::BranchAndLinkExchangeInstructionSetThumb(
+                Self::BLX(
                     BranchAndLinkExchangeInstructionSetThumb::from(data),
                 )
             }
             MiscellaneousChecker::SaturatingAddSubtract => {
-                Self::SaturatingAddSubtract(SaturatingAddSubtract::from(data))
+                Self::QADDOrQSUB(SaturatingAddSubtract::from(data))
             }
             MiscellaneousChecker::SoftwareBreakpoint => {
-                Self::SoftwareBreakpoint(SoftwareBreakpoint::from(data))
+                Self::BKPT(SoftwareBreakpoint::from(data))
             }
             MiscellaneousChecker::SignedMultiplies => {
                 Self::SignedMultipliesType2(SignedMultipliesType2::from(data))

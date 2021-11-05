@@ -1,7 +1,6 @@
 pub mod error;
 
-use crate::{
-    cpus::general::{
+use crate::{cpus::general::{
         bit_state::BitState,
         exception::{
             Exception,
@@ -21,12 +20,7 @@ use crate::{
             RegisterName,
             Registers,
         },
-    },
-    ram::{
-        data_types::DataTypeSize,
-        Ram,
-    },
-};
+    }, ram::{Address, Ram, data_types::DataTypeSize}};
 
 use super::Architecture;
 
@@ -51,7 +45,7 @@ impl Arm7TDMI {
 
     pub fn fetch(&mut self, ram: &Ram) {
         let cpsr = self.registers.get_ref_cpsr();
-        let pc = self.registers.get_pc();
+        let pc = Address::from(self.registers.get_reg(RegisterName::Pc));
 
         match cpsr.get_operating_state() {
             OperatingState::Arm => self.pipeline.fetch(ram, pc, DataTypeSize::Word),

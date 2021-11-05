@@ -5,19 +5,19 @@ use std::convert::{
     TryFrom,
 };
 
-use crate::cpus::general::instruction::decode::DecodeData;
+use crate::cpus::general::instruction::{decode::DecodeData, encodings::encoding_fields::SaturatingOpcode};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SaturatingAddSubtract {
-    op: u8,
-    rn: u8,
-    rd: u8,
-    rm: u8,
+    pub opcode: SaturatingOpcode,
+    pub rn: u8,
+    pub rd: u8,
+    pub rm: u8,
 }
 
 impl<'a> From<DecodeData<'a>> for SaturatingAddSubtract {
     fn from(data: DecodeData<'a>) -> Self {
-        let op = u8::try_from((data.instruction.val >> 21) & 0b11).unwrap();
+        let op = SaturatingOpcode::from(data.instruction.val >> 21);
         let rn = u8::try_from((data.instruction.val >> 16) & 0b1111).unwrap();
         let rd = u8::try_from((data.instruction.val >> 12) & 0b1111).unwrap();
         let sbz = u8::try_from((data.instruction.val >> 8) & 0b1111).unwrap();
@@ -27,7 +27,7 @@ impl<'a> From<DecodeData<'a>> for SaturatingAddSubtract {
             unreachable!("{}", MiscellaneousError::SBZConflict(data.instruction.val));
         }
 
-        Self { op, rn, rd, rm }
+        Self { opcode: op, rn, rd, rm }
     }
 }
 
@@ -41,6 +41,7 @@ mod tests {
     use super::{
         DecodeData,
         SaturatingAddSubtract,
+        SaturatingOpcode,
     };
 
     #[test]
@@ -48,7 +49,7 @@ mod tests {
         let nds = NintendoDS::default();
         let data = {
             let instruction = Instruction {
-                val: 0b0000_00010_11_0_1101_1100_0000_0101_1000,
+                val: 0b0000_00010_00_0_1101_1100_0000_0101_1000,
                 ..Instruction::default()
             };
             DecodeData::new(instruction, &nds.arm7tdmi.registers)
@@ -56,7 +57,7 @@ mod tests {
 
         let value = SaturatingAddSubtract::from(data);
         let expected_value = SaturatingAddSubtract {
-            op: 0b11,
+            opcode: SaturatingOpcode::QADD,
             rn: 0b1101,
             rd: 0b1100,
             rm: 0b1000,

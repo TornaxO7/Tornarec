@@ -8,6 +8,7 @@ pub struct ConditionBits {
     pub z: BitState,
     pub c: BitState,
     pub v: BitState,
+    pub q: BitState,
 }
 
 impl From<u32> for ConditionBits {
@@ -16,7 +17,8 @@ impl From<u32> for ConditionBits {
         let z = BitState::from(num >> 30);
         let c = BitState::from(num >> 29);
         let v = BitState::from(num >> 28);
+        let q = BitState::from(num >> 27);
 
-        Self { n, z, c, v }
+        Self { n, z, c, v, q }
     }
 }

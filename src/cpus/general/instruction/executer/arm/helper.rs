@@ -25,6 +25,30 @@ impl Helper {
         }
         BitState::Unset
     }
+
+    /// Manual: Page 1134
+    pub fn sign_extend(value: u32, sign_index: u8) -> u32 {
+        let new_ones = u32::MAX & !((1 << (sign_index + 1)) - 1);
+        value | new_ones
+    }
+
+    /// Manual: Page 1134
+    pub fn signed_sat(x: i32, n: u32) -> i32 {
+        let border_val = 2_i32.pow(n - 1);
+        if x < -border_val {
+            -border_val
+        } else if -border_val <= x && x <= border_val - 1 {
+            x
+        } else {
+            border_val
+        }
+    }
+
+    // Manual: Page 1134
+    pub fn signed_does_sat(x: i32, n: u32) -> bool {
+        let border_val = 2_i32.pow(n - 1);
+        !(-border_val <= x && x <= border_val -1)
+    }
 }
 
 #[cfg(test)]
@@ -50,5 +74,33 @@ mod tests {
 
         let values = vec![0x1, 0x1];
         assert_eq!(Helper::borrow_from(values), BitState::Unset);
+    }
+
+    #[test]
+    fn sign_extend() {
+        let value = Helper::sign_extend(0b1000_0000, 7);
+        let expected_value = 0b1111_1111_1111_1111_1111_1111_1000_0000;
+        assert_eq!(value, expected_value, "{:b} {:b}", &value, &expected_value);
+    }
+
+    #[test]
+    fn signed_sat() {
+        // if x < -border_val
+        let val1 = Helper::signed_sat(-9, 4);
+        assert_eq!(val1, -8, "{:b}", &val1);
+
+        // else if -border_val <= x && x <= border_val - 1
+        let val2 = Helper::signed_sat(1, 3);
+        assert_eq!(val2, 1, "{:b}", &val2);
+
+        // else
+        let val3 = Helper::signed_sat(9, 4);
+        assert_eq!(val3, 8, "{:b}", &val3);
+    }
+
+    #[test]
+    fn signed_does_sat() {
+        assert!(!Helper::signed_does_sat(1, 3));
+        assert!(Helper::signed_does_sat(42, 2));
     }
 }

@@ -9,8 +9,8 @@ use std::convert::{
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CountLeadingZeros {
-    rd: u8,
-    rm: u8,
+    pub rd: u8,
+    pub rm: u8,
 }
 
 impl<'a> From<DecodeData<'a>> for CountLeadingZeros {

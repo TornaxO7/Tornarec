@@ -4,4 +4,5 @@ pub enum ConditionBit {
     Z,
     C,
     V,
+    Q,
 }

@@ -64,6 +64,7 @@ impl Cpsr {
         self.set_condition_bit(ConditionBit::Z, condition_bits.z);
         self.set_condition_bit(ConditionBit::C, condition_bits.c);
         self.set_condition_bit(ConditionBit::V, condition_bits.v);
+        self.set_condition_bit(ConditionBit::Q, condition_bits.q);
     }
 
     pub fn set_interrupt_bit(&mut self, interrupt: Interruption, state: BitState) {
@@ -140,11 +141,13 @@ impl Cpsr {
     }
 
     pub fn set_condition_bit(&mut self, condition_bit: ConditionBit, state: BitState) {
+        let state_val = state.get_as_u32();
         match condition_bit {
-            ConditionBit::N => self.0 = (self.0 & !(1 << 31)) | (state.get_as_u32() << 31),
-            ConditionBit::Z => self.0 = (self.0 & !(1 << 30)) | (state.get_as_u32() << 30),
-            ConditionBit::C => self.0 = (self.0 & !(1 << 29)) | (state.get_as_u32() << 29),
-            ConditionBit::V => self.0 = (self.0 & !(1 << 28)) | (state.get_as_u32() << 28),
+            ConditionBit::N => self.0 = (self.0 & !(1 << 31)) | (state_val << 31),
+            ConditionBit::Z => self.0 = (self.0 & !(1 << 30)) | (state_val << 30),
+            ConditionBit::C => self.0 = (self.0 & !(1 << 29)) | (state_val << 29),
+            ConditionBit::V => self.0 = (self.0 & !(1 << 28)) | (state_val << 28),
+            ConditionBit::Q => self.0 = (self.0 & !(1 << 27)) | (state_val << 27),
         };
     }
 
@@ -154,6 +157,7 @@ impl Cpsr {
             ConditionBit::Z => BitState::from(self.0 >> 30),
             ConditionBit::C => BitState::from(self.0 >> 29),
             ConditionBit::V => BitState::from(self.0 >> 28),
+            ConditionBit::Q => BitState::from(self.0 >> 27),
         }
     }
 
