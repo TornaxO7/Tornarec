@@ -1,16 +1,12 @@
-use crate::{
-    cpus::general::{
-        bit_state::BitState,
-        instruction::{
-            decode::DecodeData,
-            encodings::encoding_fields::{
-                DataProcessingInstruction,
-                ShifterOperand,
-            },
+use crate::cpus::general::{
+    instruction::{
+        decode::DecodeData,
+        encodings::encoding_fields::{
+            DataProcessingInstruction,
+            ShifterOperand,
         },
-        register::RegisterName,
     },
-    ram::data_types::DataTypeSize,
+    BitState,
 };
 
 use std::convert::{
@@ -19,31 +15,33 @@ use std::convert::{
 };
 
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct DataProcessingImmediate {
+pub struct DataProcessingData {
     pub opcode: DataProcessingInstruction,
     pub s_flag: BitState,
-    pub rn: u32,
+    pub rn: u8,
     pub rd: u8,
     pub shifter_operand: ShifterOperand,
 }
 
-impl<'a> From<DecodeData<'a>> for DataProcessingImmediate {
+impl<'a> From<DecodeData<'a>> for DataProcessingData {
     fn from(data: DecodeData<'a>) -> Self {
-        let opcode = DataProcessingInstruction::from((data.instruction.val >> 21) & 0b1111);
+        let opcode = DataProcessingInstruction::from(data.instruction.val >> 21);
         let s_flag = BitState::from(data.instruction.val >> 20);
+        let rn = u8::try_from((data.instruction.val >> 16) & 0b1111).unwrap();
+        let rd = u8::try_from((data.instruction.val >> 12) & 0b1111).unwrap();
 
-        let rn = {
-            let rn = (data.instruction.val >> 16) & 0b1111;
-            if RegisterName::from(rn) == RegisterName::R15 {
-                let value = data.instruction.address + DataTypeSize::Byte;
-                value.get_as_u32()
+        let shifter_operand = {
+            let is_immediate = (data.instruction.val >> 25) & 0b1 == 1;
+
+            if is_immediate {
+                ShifterOperand::get_immediate(data)
+            } else if (data.instruction.val >> 7) & 0b1 == 0 && (data.instruction.val >> 4) & 1 == 1
+            {
+                ShifterOperand::get_immediate_shift(data)
             } else {
-                rn
+                ShifterOperand::get_register_shift(data)
             }
         };
-
-        let rd = u8::try_from((data.instruction.val >> 12) & 0b1111).unwrap();
-        let shifter_operand = ShifterOperand::get_immediate(data);
 
         Self {
             opcode,
@@ -57,23 +55,23 @@ impl<'a> From<DecodeData<'a>> for DataProcessingImmediate {
 
 #[cfg(test)]
 mod tests {
-    use super::{
-        BitState,
-        DataProcessingImmediate,
-        DataProcessingInstruction,
-        DecodeData,
-    };
-
     use crate::{
         cpus::general::{
-            instruction::encodings::encoding_fields::ShifterOperand,
+            instruction::decode::DecodeData,
+            BitState,
             Instruction,
         },
         NintendoDS,
     };
 
+    use super::{
+        DataProcessingData,
+        DataProcessingInstruction,
+        ShifterOperand,
+    };
+
     #[test]
-    fn from() {
+    fn immediate() {
         let nds = NintendoDS::default();
         let instruction = Instruction {
             val: 0b0000_001_1111_1_1100_0011_1010_0011_1011,
@@ -81,9 +79,9 @@ mod tests {
         };
         let data = DecodeData::new(instruction, &nds.arm7tdmi.registers);
 
-        let value = DataProcessingImmediate::from(data.clone());
+        let value = DataProcessingData::from(data.clone());
 
-        let expected_value = DataProcessingImmediate {
+        let expected_value = DataProcessingData {
             opcode: DataProcessingInstruction::MVN,
             s_flag: BitState::Set,
             rn: 0b1100,

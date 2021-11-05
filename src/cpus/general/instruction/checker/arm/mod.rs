@@ -12,24 +12,24 @@ use std::convert::{
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ArmInstructionChecker {
+    ArchitecturallyUndefined,
+    BranchAndBranchWithLink,
+    CoprocessorDataProcessing,
+    CoprocessorLoadAndStoreAndDoubleRegisterTransfers,
+    CoprocessorRegisterTransfers,
+    DataProcessingImmediate,
     DataProcessingImmediateShift,
     DataProcessingRegisterShift,
-    Multiplies,
-    Miscellaneous,
     ExtraLoadAndStores,
-    DataProcessingImmediate,
-    UndefinedInstruction,
     LoadAndStoreImmediateOffset,
+    LoadAndStoreMultiple,
     LoadAndStoreRegisterOffset,
     MediaInstructions,
-    ArchitecturallyUndefined,
-    LoadAndStoreMultiple,
-    BranchAndBranchWithLink,
-    CoprocessorLoadAndStoreAndDoubleRegisterTransfers,
-    CoprocessorDataProcessing,
-    CoprocessorRegisterTransfers,
+    Miscellaneous,
+    Multiplies,
     SoftwareInterrupt,
     UnconditionalInstructions,
+    UndefinedInstruction,
 }
 
 impl From<&Instruction> for ArmInstructionChecker {

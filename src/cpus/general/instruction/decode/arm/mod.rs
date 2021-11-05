@@ -12,9 +12,7 @@ use crate::cpus::general::instruction::{
         CoprocessorDataProcessing,
         CoprocessorLoadAndStoreAndDoubleRegisterTransfers,
         CoprocessorRegisterTransfers,
-        DataProcessingImmediate,
-        DataProcessingImmediateShift,
-        DataProcessingRegisterShift,
+        DataProcessingData,
         ExtraLoadAndStores,
         LoadAndStoreImmediateOffset,
         LoadAndStoreMultiple,
@@ -27,12 +25,12 @@ use std::convert::TryFrom;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ArmDecode {
-    DataProcessingImmediateShift(DataProcessingImmediateShift),
-    DataProcessingRegisterShift(DataProcessingRegisterShift),
+    DataProcessingImmediateShift(DataProcessingData),
+    DataProcessingRegisterShift(DataProcessingData),
     Multiplies(Multiplies),
     Miscellaneous(Miscellaneous),
     ExtraLoadAndStores(ExtraLoadAndStores),
-    DataProcessingImmediate(DataProcessingImmediate),
+    DataProcessingImmediate(DataProcessingData),
     UndefinedInstruction,
     LoadAndStoreImmediateOffset(LoadAndStoreImmediateOffset),
     LoadAndStoreRegisterOffset(LoadAndStoreRegisterOffset),
@@ -54,9 +52,9 @@ impl<'a> TryFrom<DecodeData<'a>> for ArmDecode {
     fn try_from(decode_data: DecodeData<'a>) -> Result<Self, Self::Error> {
         match ArmInstructionChecker::from(&decode_data.instruction) {
            ArmInstructionChecker::DataProcessingImmediateShift =>
-               Ok(Self::DataProcessingImmediateShift(DataProcessingImmediateShift::from(decode_data))),
+               Ok(Self::DataProcessingImmediateShift(DataProcessingData::from(decode_data))),
            ArmInstructionChecker::DataProcessingRegisterShift =>
-               Ok(Self::DataProcessingRegisterShift(DataProcessingRegisterShift::from(decode_data))),
+               Ok(Self::DataProcessingRegisterShift(DataProcessingData::from(decode_data))),
            ArmInstructionChecker::Multiplies =>
                Ok(Self::Multiplies(Multiplies::from(decode_data))),
            ArmInstructionChecker::Miscellaneous =>
@@ -64,7 +62,7 @@ impl<'a> TryFrom<DecodeData<'a>> for ArmDecode {
            ArmInstructionChecker::ExtraLoadAndStores =>
                Ok(Self::ExtraLoadAndStores(ExtraLoadAndStores::from(decode_data))),
            ArmInstructionChecker::DataProcessingImmediate =>
-               Ok(Self::DataProcessingImmediate(DataProcessingImmediate::from(decode_data))),
+               Ok(Self::DataProcessingImmediate(DataProcessingData::from(decode_data))),
            ArmInstructionChecker::UndefinedInstruction =>
                Ok(Self::UndefinedInstruction),
            ArmInstructionChecker::LoadAndStoreImmediateOffset =>

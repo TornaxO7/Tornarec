@@ -1,7 +1,7 @@
 use crate::cpus::{Architecture, general::{
     instruction::{
         encodings::{
-            arm::DataProcessingImmediateShift,
+            arm::DataProcessingData,
             encoding_fields::{
                 DataProcessingInstruction,
                 ShifterOperand,
@@ -26,7 +26,7 @@ fn and() {
     registers.set_reg(RegisterName::R1, 0b1001);
     let mut arm_executer = ArmExecuter::new(&mut registers, Architecture::ARMv4T);
 
-    let data = DataProcessingImmediateShift {
+    let data = DataProcessingData {
         opcode: DataProcessingInstruction::AND,
         s_flag: BitState::Set,
         rn: 0b1,
@@ -37,7 +37,7 @@ fn and() {
         },
     };
 
-    arm_executer.data_processing_immediate_shift(data);
+    arm_executer.data_processing(data);
 
     let mut expected_registers = Registers::default();
     expected_registers.set_reg(RegisterName::R1, 0b1001);
@@ -65,7 +65,7 @@ fn eor() {
     registers.set_reg(RegisterName::R2, 0b0111);
     let mut arm_executer = ArmExecuter::new(&mut registers, Architecture::ARMv4T);
 
-    let data = DataProcessingImmediateShift {
+    let data = DataProcessingData {
         opcode: DataProcessingInstruction::EOR,
         s_flag: BitState::Set,
         rn: 0b0010,
@@ -76,7 +76,7 @@ fn eor() {
         },
     };
 
-    arm_executer.data_processing_immediate_shift(data);
+    arm_executer.data_processing(data);
 
     let mut expected_registers = Registers::default();
     expected_registers.set_reg(RegisterName::R2, 0b0111);
@@ -96,7 +96,7 @@ fn sub() {
 
     let mut arm_executer = ArmExecuter::new(&mut registers, Architecture::ARMv4T);
 
-    let data = DataProcessingImmediateShift {
+    let data = DataProcessingData {
         opcode: DataProcessingInstruction::SUB,
         s_flag: BitState::Set,
         rn: 0b1000,
@@ -107,7 +107,7 @@ fn sub() {
         },
     };
 
-    arm_executer.data_processing_immediate_shift(data);
+    arm_executer.data_processing(data);
 
     let mut expected_registers = Registers::default();
     expected_registers.set_reg(RegisterName::R8, 42);
@@ -131,7 +131,7 @@ fn rsb() {
 
     let mut arm_executer = ArmExecuter::new(&mut registers, Architecture::ARMv4T);
 
-    let data = DataProcessingImmediateShift {
+    let data = DataProcessingData {
         opcode: DataProcessingInstruction::RSB,
         s_flag: BitState::Set,
         rn: 0b0101,
@@ -142,7 +142,7 @@ fn rsb() {
         },
     };
 
-    arm_executer.data_processing_immediate_shift(data);
+    arm_executer.data_processing(data);
 
     let mut expected_registers = Registers::default();
     expected_registers.set_reg(RegisterName::R5, 12);
@@ -167,7 +167,7 @@ fn add() {
 
     let mut arm_executer = ArmExecuter::new(&mut registers, Architecture::ARMv4T);
 
-    let data = DataProcessingImmediateShift {
+    let data = DataProcessingData {
         opcode: DataProcessingInstruction::ADD,
         s_flag: BitState::Set,
         rn: 0b0111,
@@ -178,7 +178,7 @@ fn add() {
         },
     };
 
-    arm_executer.data_processing_immediate_shift(data);
+    arm_executer.data_processing(data);
 
     let mut expected_registers = Registers::default();
     expected_registers.set_reg(RegisterName::R7, 10);
@@ -201,7 +201,7 @@ fn adc() {
     }
     let mut arm_executer = ArmExecuter::new(&mut registers, Architecture::ARMv4T);
 
-    let data = DataProcessingImmediateShift {
+    let data = DataProcessingData {
         opcode: DataProcessingInstruction::ADC,
         s_flag: BitState::Set,
         rn: 0b0011,
@@ -212,7 +212,7 @@ fn adc() {
         },
     };
 
-    arm_executer.data_processing_immediate_shift(data);
+    arm_executer.data_processing(data);
 
     let mut expected_registers = Registers::default();
     expected_registers.set_reg(RegisterName::R3, 0xFFFF_FF01);
@@ -241,7 +241,7 @@ fn sbc() {
 
     let mut arm_executer = ArmExecuter::new(&mut registers, Architecture::ARMv4T);
 
-    let data = DataProcessingImmediateShift {
+    let data = DataProcessingData {
         opcode: DataProcessingInstruction::SBC,
         s_flag: BitState::Set,
         rn: 0b1,
@@ -252,7 +252,7 @@ fn sbc() {
         },
     };
 
-    arm_executer.data_processing_immediate_shift(data);
+    arm_executer.data_processing(data);
 
     let mut expected_registers = Registers::default();
     expected_registers.set_reg(RegisterName::R1, 10);
@@ -277,7 +277,7 @@ fn rsc() {
 
     let mut arm_executer = ArmExecuter::new(&mut registers, Architecture::ARMv4T);
 
-    let data = DataProcessingImmediateShift {
+    let data = DataProcessingData {
         opcode: DataProcessingInstruction::RSC,
         s_flag: BitState::Set,
         rn: 0b11,
@@ -288,7 +288,7 @@ fn rsc() {
         },
     };
 
-    arm_executer.data_processing_immediate_shift(data);
+    arm_executer.data_processing(data);
 
     let mut expected_registers = Registers::default();
     expected_registers.set_reg(RegisterName::R3, 18);
@@ -313,7 +313,7 @@ fn tst() {
 
     let mut arm_executer = ArmExecuter::new(&mut registers, Architecture::ARMv4T);
 
-    let data = DataProcessingImmediateShift {
+    let data = DataProcessingData {
         opcode: DataProcessingInstruction::TST,
         s_flag: BitState::Set,
         rn: 0b1,
@@ -324,7 +324,7 @@ fn tst() {
         },
     };
 
-    arm_executer.data_processing_immediate_shift(data);
+    arm_executer.data_processing(data);
 
     let mut expected_registers = Registers::default();
     expected_registers.set_reg(RegisterName::R1, u32::MAX);
@@ -348,7 +348,7 @@ fn teq() {
 
     let mut arm_executer = ArmExecuter::new(&mut registers, Architecture::ARMv4T);
 
-    let data = DataProcessingImmediateShift {
+    let data = DataProcessingData {
         opcode: DataProcessingInstruction::TEQ,
         s_flag: BitState::Set,
         rn: 0b1,
@@ -359,7 +359,7 @@ fn teq() {
         },
     };
 
-    arm_executer.data_processing_immediate_shift(data);
+    arm_executer.data_processing(data);
 
     let mut expected_registers = Registers::default();
     expected_registers.set_reg(RegisterName::R1, u32::MAX);
@@ -383,7 +383,7 @@ fn cmp() {
 
     let mut arm_executer = ArmExecuter::new(&mut registers, Architecture::ARMv4T);
 
-    let data = DataProcessingImmediateShift {
+    let data = DataProcessingData {
         opcode: DataProcessingInstruction::CMP,
         s_flag: BitState::Set,
         rn: 0b1,
@@ -394,7 +394,7 @@ fn cmp() {
         },
     };
 
-    arm_executer.data_processing_immediate_shift(data);
+    arm_executer.data_processing(data);
 
     let mut expected_registers = Registers::default();
     expected_registers.set_reg(RegisterName::R1, 1);
@@ -418,7 +418,7 @@ fn cmn() {
 
     let mut arm_executer = ArmExecuter::new(&mut registers, Architecture::ARMv4T);
 
-    let data = DataProcessingImmediateShift {
+    let data = DataProcessingData {
         opcode: DataProcessingInstruction::CMN,
         s_flag: BitState::Set,
         rn: 0b1,
@@ -429,7 +429,7 @@ fn cmn() {
         },
     };
 
-    arm_executer.data_processing_immediate_shift(data);
+    arm_executer.data_processing(data);
 
     let mut expected_registers = Registers::default();
     expected_registers.set_reg(RegisterName::R1, u32::MAX);
@@ -453,7 +453,7 @@ fn orr() {
 
     let mut arm_executer = ArmExecuter::new(&mut registers, Architecture::ARMv4T);
 
-    let data = DataProcessingImmediateShift {
+    let data = DataProcessingData {
         opcode: DataProcessingInstruction::ORR,
         s_flag: BitState::Set,
         rn: 0b1,
@@ -464,7 +464,7 @@ fn orr() {
         },
     };
 
-    arm_executer.data_processing_immediate_shift(data);
+    arm_executer.data_processing(data);
 
     let mut expected_registers = Registers::default();
     expected_registers.set_reg(RegisterName::R1, 1);
@@ -487,7 +487,7 @@ fn mov() {
     let mut registers = Registers::default();
     let mut arm_executer = ArmExecuter::new(&mut registers, Architecture::ARMv4T);
 
-    let data = DataProcessingImmediateShift {
+    let data = DataProcessingData {
         opcode: DataProcessingInstruction::MOV,
         s_flag: BitState::Set,
         rn: 0b1,
@@ -498,7 +498,7 @@ fn mov() {
         },
     };
 
-    arm_executer.data_processing_immediate_shift(data);
+    arm_executer.data_processing(data);
 
     let mut expected_registers = Registers::default();
     expected_registers.set_reg(RegisterName::R2, u32::MAX);
@@ -522,7 +522,7 @@ fn bic() {
 
     let mut arm_executer = ArmExecuter::new(&mut registers, Architecture::ARMv4T);
 
-    let data = DataProcessingImmediateShift {
+    let data = DataProcessingData {
         opcode: DataProcessingInstruction::BIC,
         s_flag: BitState::Set,
         rn: 0b1,
@@ -533,7 +533,7 @@ fn bic() {
         },
     };
 
-    arm_executer.data_processing_immediate_shift(data);
+    arm_executer.data_processing(data);
 
     let mut expected_registers = Registers::default();
     expected_registers.set_reg(RegisterName::R1, 0b11 << 30);
@@ -556,7 +556,7 @@ fn mvn() {
     let mut registers = Registers::default();
     let mut arm_executer = ArmExecuter::new(&mut registers, Architecture::ARMv4T);
 
-    let data = DataProcessingImmediateShift {
+    let data = DataProcessingData {
         opcode: DataProcessingInstruction::MVN,
         s_flag: BitState::Set,
         rn: 0b0,
@@ -567,7 +567,7 @@ fn mvn() {
         },
     };
 
-    arm_executer.data_processing_immediate_shift(data);
+    arm_executer.data_processing(data);
 
     let mut expected_registers = Registers::default();
     expected_registers.set_reg(RegisterName::R1, u32::MAX);

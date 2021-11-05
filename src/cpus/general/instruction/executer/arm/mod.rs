@@ -9,7 +9,7 @@ use crate::cpus::{
         instruction::{
             decode::arm::Miscellaneous,
             encodings::{
-                arm::DataProcessingImmediateShift,
+                arm::DataProcessingData,
                 encoding_fields::DataProcessingInstruction,
             },
         },
@@ -38,7 +38,7 @@ impl<'a> ArmExecuter<'a> {
         }
     }
 
-    pub fn data_processing_immediate_shift(&mut self, data: DataProcessingImmediateShift) {
+    pub fn data_processing(&mut self, data: DataProcessingData) {
         // some general values which are needed during this process
         let cpsr = self.registers.get_ref_cpsr();
         let rd_reg = RegisterName::from(data.rd);
