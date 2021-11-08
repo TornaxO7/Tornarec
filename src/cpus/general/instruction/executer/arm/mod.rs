@@ -4,9 +4,7 @@ mod helper;
 pub use error::ArmExecuterError;
 use helper::Helper;
 
-use crate::cpus::{
-    general::{
-        instruction::{
+use crate::{cpus::{Architecture, general::{BitMaskConstants, BitState, Interruption, OperatingMode, OperatingState, exception::ExceptionVector, instruction::{
             decode::arm::Miscellaneous,
             encodings::{
                 arm::DataProcessingData,
@@ -15,18 +13,11 @@ use crate::cpus::{
                     SaturatingOpcode,
                 },
             },
-        },
-        register::{
+        }, register::{
             types::ConditionBit,
             RegisterName,
             Registers,
-        },
-        BitMaskConstants,
-        BitState,
-        OperatingState,
-    },
-    Architecture,
-};
+        }}}, ram::data_types::DataTypeSize};
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct ArmExecuter<'a> {
@@ -471,9 +462,22 @@ impl<'a> ArmExecuter<'a> {
                 }
             }
             // TODO: Here, Manual page 164
-            Miscellaneous::BKPT(data) => {
+            // DEBUGGER: _data variable
+            Miscellaneous::BKPT(_data) => {
                 let bkpt_address = self.registers.get_adjusted_pc();
-                // self.registers.set_reg(RegisterName::R14Abt, bkpt_address + DataTypeSize::);
+                self.registers.set_reg(RegisterName::R14Abt, (bkpt_address + DataTypeSize::Custom(4)).get_as_u32());
+
+                let cpsr_val = self.registers.get_reg(RegisterName::Cpsr);
+                self.registers.set_reg(RegisterName::SpsrAbt, cpsr_val);
+
+                {
+                    let cpsr = self.registers.get_mut_cpsr();
+                    cpsr.set_operating_mode(OperatingMode::Abt);
+                    cpsr.set_operating_state(OperatingState::Arm);
+                    cpsr.set_interrupt_bit(Interruption::Irq, BitState::Set);
+                }
+                
+                self.registers.set_reg(RegisterName::Pc, ExceptionVector::PABT);
             }
             Miscellaneous::SignedMultipliesType2(data) => {}
             Miscellaneous::Unknown => println!("Reached unknown miscellaneous instruction, LOL"),
