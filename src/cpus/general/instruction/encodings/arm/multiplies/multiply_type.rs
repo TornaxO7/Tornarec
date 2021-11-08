@@ -37,3 +37,53 @@ impl From <&Instruction> for MultiplyType {
         }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::{Instruction, MultiplyType, BitState};
+
+    #[test]
+    fn normal() {
+        let instruction = Instruction {
+            val: 0b0000_0000_0011_1110_1100_1000_1001_1111,
+            .. Instruction::default()
+        };
+        
+        let value = MultiplyType::from(&instruction);
+        let expected_value = MultiplyType::Normal {
+            a_flag: BitState::Set,
+            s_flag: BitState::Set,
+        };
+
+        assert_eq!(expected_value, value, "{:#?} {:#?}", &expected_value, &value);
+    }
+
+    #[test]
+    fn unsigned_multiply() {
+        let instruction = Instruction {
+            val: 0b0000_0000_0100_1111_1111_1111_1001_1111,
+            .. Instruction::default()
+        };
+
+        let value = MultiplyType::from(&instruction);
+
+        assert_eq!(MultiplyType::UnsignedMultiply, value);
+    }
+
+    #[test]
+    fn long() {
+        let instruction = Instruction {
+            val: 0b0000_0000_1111_1110_1100_1000_1001_11111,
+            .. Instruction::default()
+        };
+
+        let value = MultiplyType::from(&instruction);
+        let expected_value = MultiplyType::Long {
+            un_flag: BitState::Set,
+            a_flag: BitState::Set,
+            s_flag: BitState::Set,
+        };
+
+        assert_eq!(expected_value, value, "{:#?} {:#?}", &expected_value, &value);
+    }
+}
