@@ -36,18 +36,16 @@ impl<'a> ArmExecuter<'a> {
     pub fn data_processing(&mut self, data: DataProcessingData) {
         // some general values which are needed during this process
         let cpsr = self.registers.get_ref_cpsr();
-        let rd_reg = RegisterName::from(data.rd);
 
-        let rn_reg = RegisterName::from(data.rn);
-        let rn_val = self.registers.get_reg(rn_reg);
+        let rn_val = self.registers.get_reg(data.rn_reg);
 
         match data.opcode {
             DataProcessingInstruction::AND => {
                 let rd_val = rn_val & data.shifter_operand.val;
-                self.registers.set_reg(rd_reg, rd_val);
+                self.registers.set_reg(data.rd_reg, rd_val);
 
                 if data.s_flag.is_set() {
-                    if rd_reg == RegisterName::R15 {
+                    if data.rd_reg == RegisterName::R15 {
                         self.registers.move_current_spsr_to_cpsr();
                     } else {
                         let cpsr = self.registers.get_mut_cpsr();
@@ -63,10 +61,10 @@ impl<'a> ArmExecuter<'a> {
             }
             DataProcessingInstruction::EOR => {
                 let rd_val = rn_val ^ data.shifter_operand.val;
-                self.registers.set_reg(rd_reg, rd_val);
+                self.registers.set_reg(data.rd_reg, rd_val);
 
                 if data.s_flag.is_set() {
-                    if rd_reg == RegisterName::R15 {
+                    if data.rd_reg == RegisterName::R15 {
                         self.registers.move_current_spsr_to_cpsr();
                     } else {
                         let cpsr = self.registers.get_mut_cpsr();
@@ -82,10 +80,10 @@ impl<'a> ArmExecuter<'a> {
             }
             DataProcessingInstruction::SUB => {
                 let (rd_val, overflowed) = rn_val.overflowing_sub(data.shifter_operand.val);
-                self.registers.set_reg(rd_reg, rd_val);
+                self.registers.set_reg(data.rd_reg, rd_val);
 
                 if data.s_flag.is_set() {
-                    if rd_reg == RegisterName::R15 {
+                    if data.rd_reg == RegisterName::R15 {
                         self.registers.move_current_spsr_to_cpsr();
                     } else {
                         let cpsr = self.registers.get_mut_cpsr();
@@ -102,10 +100,10 @@ impl<'a> ArmExecuter<'a> {
             }
             DataProcessingInstruction::RSB => {
                 let (rd_val, overflowed) = data.shifter_operand.val.overflowing_sub(rn_val);
-                self.registers.set_reg(rd_reg, rd_val);
+                self.registers.set_reg(data.rd_reg, rd_val);
 
                 if data.s_flag.is_set() {
-                    if rd_reg == RegisterName::R15 {
+                    if data.rd_reg == RegisterName::R15 {
                         self.registers.move_current_spsr_to_cpsr();
                     } else {
                         let cpsr = self.registers.get_mut_cpsr();
@@ -122,10 +120,10 @@ impl<'a> ArmExecuter<'a> {
             }
             DataProcessingInstruction::ADD => {
                 let (rd_val, overflowed) = rn_val.overflowing_add(data.shifter_operand.val);
-                self.registers.set_reg(rd_reg, rd_val);
+                self.registers.set_reg(data.rd_reg, rd_val);
 
                 if data.s_flag.is_set() {
-                    if rd_reg == RegisterName::R15 {
+                    if data.rd_reg == RegisterName::R15 {
                         self.registers.move_current_spsr_to_cpsr();
                     } else {
                         let cpsr = self.registers.get_mut_cpsr();
@@ -148,10 +146,10 @@ impl<'a> ArmExecuter<'a> {
 
                     (rd_val, overflowed1 || overflowed2)
                 };
-                self.registers.set_reg(rd_reg, rd_val);
+                self.registers.set_reg(data.rd_reg, rd_val);
 
                 if data.s_flag.is_set() {
-                    if rd_reg == RegisterName::R15 {
+                    if data.rd_reg == RegisterName::R15 {
                         self.registers.move_current_spsr_to_cpsr();
                     } else {
                         let cpsr = self.registers.get_mut_cpsr();
@@ -176,10 +174,10 @@ impl<'a> ArmExecuter<'a> {
                     let (rd_val, overflowed2) = rd_val.overflowing_sub((!c_flag).get_as_u32());
                     (rd_val, overflowed1 || overflowed2)
                 };
-                self.registers.set_reg(rd_reg, rd_val);
+                self.registers.set_reg(data.rd_reg, rd_val);
 
                 if data.s_flag.is_set() {
-                    if rd_reg == RegisterName::R15 {
+                    if data.rd_reg == RegisterName::R15 {
                         self.registers.move_current_spsr_to_cpsr();
                     } else {
                         let cpsr = self.registers.get_mut_cpsr();
@@ -205,10 +203,10 @@ impl<'a> ArmExecuter<'a> {
                     let (rd_val, overflowed2) = rd_val.overflowing_sub((!c_flag).get_as_u32());
                     (rd_val, overflowed1 || overflowed2)
                 };
-                self.registers.set_reg(rd_reg, rd_val);
+                self.registers.set_reg(data.rd_reg, rd_val);
 
                 if data.s_flag.is_set() {
-                    if rd_reg == RegisterName::R15 {
+                    if data.rd_reg == RegisterName::R15 {
                         self.registers.move_current_spsr_to_cpsr();
                     } else {
                         let cpsr = self.registers.get_mut_cpsr();
@@ -275,10 +273,10 @@ impl<'a> ArmExecuter<'a> {
                     _ => unreachable!(),
                 };
 
-                self.registers.set_reg(rd_reg, rd_val);
+                self.registers.set_reg(data.rd_reg, rd_val);
 
                 if data.s_flag.is_set() {
-                    if rd_reg == RegisterName::R15 {
+                    if data.rd_reg == RegisterName::R15 {
                         self.registers.move_current_spsr_to_cpsr();
                     } else {
                         let cpsr = self.registers.get_mut_cpsr();
@@ -297,16 +295,15 @@ impl<'a> ArmExecuter<'a> {
     pub fn miscellaneous(&mut self, misc_instruction: Miscellaneous) {
         match misc_instruction {
             Miscellaneous::MRS(data) => {
-                let rd = RegisterName::from(data.rd);
                 let cpsr = self.registers.get_ref_cpsr();
 
                 if data.r_flag.is_set() {
                     let operating_mode = cpsr.get_operating_mode().unwrap();
                     let spsr = self.registers.get_spsr(operating_mode).unwrap();
-                    self.registers.set_reg(rd, spsr);
+                    self.registers.set_reg(data.rd_reg, spsr);
                 } else {
                     let cpsr_val = self.registers.get_reg(RegisterName::Cpsr);
-                    self.registers.set_reg(rd, cpsr_val);
+                    self.registers.set_reg(data.rd_reg, cpsr_val);
                 }
             }
             Miscellaneous::MSR(data) => {
@@ -377,7 +374,7 @@ impl<'a> ArmExecuter<'a> {
             }
             Miscellaneous::BX(data) => {
                 // set the pc value
-                let rm_reg = RegisterName::from(data.rm);
+                let rm_reg = RegisterName::from(data.rm_reg);
                 let rm_val = self.registers.get_reg(rm_reg);
 
                 self.registers
@@ -386,17 +383,18 @@ impl<'a> ArmExecuter<'a> {
                 // Set T bit if needed
                 let cpsr = self.registers.get_mut_cpsr();
                 let new_operatin_state = {
-                    let bit_value = BitState::from(data.rm);
+                    let bit_value = BitState::from(rm_val);
                     OperatingState::from(bit_value)
                 };
 
                 cpsr.set_operating_state(new_operatin_state);
             }
+            // The CPUs of the NintendoDS doesn't support Jazelle
             Miscellaneous::BXJ(_) => unreachable!("{}", ArmExecuterError::NoJazelleSupport),
             Miscellaneous::CLZ(data) => {
                 if self.architecture == Architecture::ARMv5TE {
-                    let rm_reg = RegisterName::from(data.rm);
-                    let rd_reg = RegisterName::from(data.rd);
+                    let rm_reg = RegisterName::from(data.rm_reg);
+                    let rd_reg = RegisterName::from(data.rd_reg);
 
                     let rm_val = self.registers.get_reg(rm_reg);
 
@@ -428,18 +426,14 @@ impl<'a> ArmExecuter<'a> {
             Miscellaneous::QADDOrQSUB(data) => {
                 // NOTE: Use of R15 as RD, RM or RN isn't covered as unpredictable
                 if self.architecture == Architecture::ARMv5TE {
-                    let rm_reg = RegisterName::from(data.rm);
-                    let rn_reg = RegisterName::from(data.rn);
-                    let rd_reg = RegisterName::from(data.rd);
-
-                    let rm_val = self.registers.get_reg(rm_reg);
-                    let rn_val = self.registers.get_reg(rn_reg);
+                    let rm_val = self.registers.get_reg(data.rm_reg);
+                    let rn_val = self.registers.get_reg(data.rn_reg);
 
                     match data.opcode {
                         SaturatingOpcode::QADD => {
                             let (sum, _) = rm_val.overflowing_add(rn_val);
                             let val = Helper::signed_sat(sum as i32, 32);
-                            self.registers.set_reg(rd_reg, val as u32);
+                            self.registers.set_reg(data.rd_reg, val as u32);
 
                             if Helper::signed_does_sat(sum as i32, 32) {
                                 let cpsr = self.registers.get_mut_cpsr();
@@ -449,7 +443,7 @@ impl<'a> ArmExecuter<'a> {
                         SaturatingOpcode::QSUB => {
                             let (subtraction, _) = rm_val.overflowing_sub(rn_val);
                             let val = Helper::signed_sat(subtraction as i32, 32);
-                            self.registers.set_reg(rd_reg, val as u32);
+                            self.registers.set_reg(data.rd_reg, val as u32);
 
                             if Helper::signed_does_sat(subtraction as i32, 32) {
                                 let cpsr = self.registers.get_mut_cpsr();
@@ -481,16 +475,9 @@ impl<'a> ArmExecuter<'a> {
             }
             Miscellaneous::SignedMultipliesType2(data) => {
                 if self.architecture == Architecture::ARMv5TE {
-                    let rm_reg = RegisterName::from(data.rm);
-                    let rm_val = self.registers.get_reg(rm_reg);
-
-                    let rs_reg = RegisterName::from(data.rs);
-                    let rs_val = self.registers.get_reg(rs_reg);
-
-                    let rd_reg = RegisterName::from(data.rd);
-
-                    let rn_reg = RegisterName::from(data.rn);
-                    let rn_val = self.registers.get_reg(rn_reg);
+                    let rm_val = self.registers.get_reg(data.rm_reg);
+                    let rs_val = self.registers.get_reg(data.rs_reg);
+                    let rn_val = self.registers.get_reg(data.rn_reg);
 
                     let operand1 = if data.x.is_set() {
                         Helper::sign_extend(rm_val & 0b1111_1111_1111_1111, 15)
@@ -509,7 +496,7 @@ impl<'a> ArmExecuter<'a> {
                         let (result, overflowed2) = multiplication.overflowing_add(rn_val);
                         (result, overflowed1 | overflowed2)
                     };
-                    self.registers.set_reg(rd_reg, calculation);
+                    self.registers.set_reg(data.rd_reg, calculation);
 
                     if overflowed {
                         let cpsr = self.registers.get_mut_cpsr();

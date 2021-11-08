@@ -2,6 +2,7 @@ use super::error::MiscellaneousError;
 
 use crate::cpus::general::{
     instruction::decode::DecodeData,
+    register::RegisterName,
     BitState,
 };
 
@@ -13,30 +14,24 @@ use std::convert::{
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct MoveStatusRegisterToRegister {
     pub r_flag: BitState,
-    pub rd: u8,
+    pub rd_reg: RegisterName,
 }
 
 impl<'a> From<DecodeData<'a>> for MoveStatusRegisterToRegister {
     fn from(data: DecodeData<'a>) -> Self {
         let r_flag = BitState::from(data.instruction.val >> 22);
         let sbo = u8::try_from((data.instruction.val >> 16) & 0b1111).unwrap();
-        let rd = u8::try_from((data.instruction.val >> 12) & 0b1111).unwrap();
+        let rd_reg = RegisterName::from((data.instruction.val >> 12) & 0b1111);
         let sbz1 = u8::try_from((data.instruction.val >> 8) & 0b1111).unwrap();
         let sbz2 = u8::try_from(data.instruction.val & 0b1111).unwrap();
 
         if sbo != 0b1111 {
-            unreachable!(
-                "{}",
-                MiscellaneousError::SBOConflict(data.instruction.val)
-            );
+            unreachable!("{}", MiscellaneousError::SBOConflict(data.instruction.val));
         } else if sbz1 != 0 || sbz2 != 0 {
             unreachable!("{}", MiscellaneousError::SBZConflict(data.instruction.val));
         }
 
-        Self {
-            r_flag,
-            rd,
-        }
+        Self { r_flag, rd_reg }
     }
 }
 
@@ -45,7 +40,8 @@ mod tests {
     use super::{
         BitState,
         DecodeData,
-        MoveStatusRegisterToRegister
+        MoveStatusRegisterToRegister,
+        RegisterName,
     };
 
     use crate::{
@@ -66,7 +62,7 @@ mod tests {
 
         let expected_value = MoveStatusRegisterToRegister {
             r_flag: BitState::Set,
-            rd: 0b1101,
+            rd_reg: RegisterName::R13,
         };
 
         assert_eq!(

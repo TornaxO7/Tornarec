@@ -7,12 +7,12 @@ use std::convert::{
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CoprocessorDataProcessing {
-    opcode1: u8,
-    crn: u8,
-    crd: u8,
-    cp_num: u8,
-    opcode2: u8,
-    crm: u8,
+    pub opcode1: u8,
+    pub crn: u8,
+    pub crd: u8,
+    pub cp_num: u8,
+    pub opcode2: u8,
+    pub crm: u8,
 }
 
 impl<'a> From<DecodeData<'a>> for CoprocessorDataProcessing {

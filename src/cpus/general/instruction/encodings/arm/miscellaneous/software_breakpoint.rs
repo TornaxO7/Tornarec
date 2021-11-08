@@ -7,8 +7,8 @@ use std::convert::{
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SoftwareBreakpoint {
-    immed_12: u16,
-    immed: u8,
+    pub immed_12: u16,
+    pub immed: u8,
 }
 
 impl<'a> From<DecodeData<'a>> for SoftwareBreakpoint {

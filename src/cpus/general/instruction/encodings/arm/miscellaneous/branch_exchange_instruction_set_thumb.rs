@@ -2,16 +2,16 @@ use super::error::MiscellaneousError;
 
 use std::convert::{From, TryFrom};
 
-use crate::cpus::general::instruction::decode::DecodeData;
+use crate::cpus::general::{instruction::decode::DecodeData, register::RegisterName};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct BranchExchangeInstructionSetThumb {
-    pub rm: u8,
+    pub rm_reg: RegisterName,
 }
 
 impl<'a> From<DecodeData<'a>> for BranchExchangeInstructionSetThumb {
     fn from(data: DecodeData<'a>) -> Self {
-        let rm = u8::try_from(data.instruction.val & 0b1111).unwrap();
+        let rm_reg = RegisterName::from(data.instruction.val & 0b1111);
         let sbo1 = u8::try_from((data.instruction.val >> 16) & 0b1111).unwrap();
         let sbo2 = u8::try_from((data.instruction.val >> 12) & 0b1111).unwrap();
         let sbo3 = u8::try_from((data.instruction.val >> 8) & 0b1111).unwrap();
@@ -21,7 +21,7 @@ impl<'a> From<DecodeData<'a>> for BranchExchangeInstructionSetThumb {
         }
 
         Self {
-            rm,
+            rm_reg,
         }
     }
 }
@@ -30,7 +30,7 @@ impl<'a> From<DecodeData<'a>> for BranchExchangeInstructionSetThumb {
 mod tests {
     use crate::{NintendoDS, cpus::general::Instruction};
 
-    use super::{DecodeData, BranchExchangeInstructionSetThumb};
+    use super::{DecodeData, BranchExchangeInstructionSetThumb, RegisterName};
 
     #[test]
     fn from() {
@@ -45,7 +45,7 @@ mod tests {
 
         let value = BranchExchangeInstructionSetThumb::from(data);
         let expected_value = BranchExchangeInstructionSetThumb {
-            rm: 0b1101,
+            rm_reg: RegisterName::R13,
         };
 
         assert_eq!(expected_value, value, "{:#?} {:#?}", &expected_value, &value);

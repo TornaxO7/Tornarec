@@ -29,8 +29,8 @@ fn and() {
     let data = DataProcessingData {
         opcode: DataProcessingInstruction::AND,
         s_flag: BitState::Set,
-        rn: 0b1,
-        rd: 0b10,
+        rn_reg: RegisterName::R1,
+        rd_reg: RegisterName::R2,
         shifter_operand: ShifterOperand {
             val: 0b1111,
             shifter_carry_out: BitState::Set,
@@ -69,8 +69,8 @@ fn eor() {
     let data = DataProcessingData {
         opcode: DataProcessingInstruction::EOR,
         s_flag: BitState::Set,
-        rn: 0b0010,
-        rd: 0b0100,
+        rn_reg: RegisterName::R2,
+        rd_reg: RegisterName::R4,
         shifter_operand: ShifterOperand {
             val: 0b1100,
             shifter_carry_out: BitState::Unset,
@@ -100,8 +100,8 @@ fn sub() {
     let data = DataProcessingData {
         opcode: DataProcessingInstruction::SUB,
         s_flag: BitState::Set,
-        rn: 0b1000,
-        rd: 0b1,
+        rn_reg: RegisterName::R8,
+        rd_reg: RegisterName::R1,
         shifter_operand: ShifterOperand {
             val: 12,
             shifter_carry_out: BitState::Set,
@@ -135,8 +135,8 @@ fn rsb() {
     let data = DataProcessingData {
         opcode: DataProcessingInstruction::RSB,
         s_flag: BitState::Set,
-        rn: 0b0101,
-        rd: 0b1,
+        rn_reg: RegisterName::R5,
+        rd_reg: RegisterName::R1,
         shifter_operand: ShifterOperand {
             val: 2,
             shifter_carry_out: BitState::Set,
@@ -171,8 +171,8 @@ fn add() {
     let data = DataProcessingData {
         opcode: DataProcessingInstruction::ADD,
         s_flag: BitState::Set,
-        rn: 0b0111,
-        rd: 0b11,
+        rn_reg: RegisterName::R7,
+        rd_reg: RegisterName::R3,
         shifter_operand: ShifterOperand {
             val: 32,
             shifter_carry_out: BitState::Set,
@@ -205,8 +205,8 @@ fn adc() {
     let data = DataProcessingData {
         opcode: DataProcessingInstruction::ADC,
         s_flag: BitState::Set,
-        rn: 0b0011,
-        rd: 0b1011,
+        rn_reg: RegisterName::R3,
+        rd_reg: RegisterName::R11,
         shifter_operand: ShifterOperand {
             val: 0xFF,
             shifter_carry_out: BitState::Unset,
@@ -246,8 +246,8 @@ fn sbc() {
     let data = DataProcessingData {
         opcode: DataProcessingInstruction::SBC,
         s_flag: BitState::Set,
-        rn: 0b1,
-        rd: 0b10,
+        rn_reg: RegisterName::R1,
+        rd_reg: RegisterName::R2,
         shifter_operand: ShifterOperand {
             val: 10,
             shifter_carry_out: BitState::Set,
@@ -282,8 +282,8 @@ fn rsc() {
     let data = DataProcessingData {
         opcode: DataProcessingInstruction::RSC,
         s_flag: BitState::Set,
-        rn: 0b11,
-        rd: 0b1,
+        rn_reg: RegisterName::R3,
+        rd_reg: RegisterName::R1,
         shifter_operand: ShifterOperand {
             val: 8,
             shifter_carry_out: BitState::Set,
@@ -318,8 +318,8 @@ fn tst() {
     let data = DataProcessingData {
         opcode: DataProcessingInstruction::TST,
         s_flag: BitState::Set,
-        rn: 0b1,
-        rd: 0b0,
+        rn_reg: RegisterName::R1,
+        rd_reg: RegisterName::R0,
         shifter_operand: ShifterOperand {
             val: 1 << 31,
             shifter_carry_out: BitState::Set,
@@ -353,8 +353,8 @@ fn teq() {
     let data = DataProcessingData {
         opcode: DataProcessingInstruction::TEQ,
         s_flag: BitState::Set,
-        rn: 0b1,
-        rd: 0b0,
+        rn_reg: RegisterName::R1,
+        rd_reg: RegisterName::R0,
         shifter_operand: ShifterOperand {
             val: (1 << 31) - 1,
             shifter_carry_out: BitState::Set,
@@ -388,8 +388,8 @@ fn cmp() {
     let data = DataProcessingData {
         opcode: DataProcessingInstruction::CMP,
         s_flag: BitState::Set,
-        rn: 0b1,
-        rd: 0b0,
+        rn_reg: RegisterName::R1,
+        rd_reg: RegisterName::R0,
         shifter_operand: ShifterOperand {
             val: 11,
             shifter_carry_out: BitState::Set,
@@ -423,8 +423,8 @@ fn cmn() {
     let data = DataProcessingData {
         opcode: DataProcessingInstruction::CMN,
         s_flag: BitState::Set,
-        rn: 0b1,
-        rd: 0b0,
+        rn_reg: RegisterName::R1,
+        rd_reg: RegisterName::R0,
         shifter_operand: ShifterOperand {
             val: 3,
             shifter_carry_out: BitState::Set,
@@ -458,8 +458,8 @@ fn orr() {
     let data = DataProcessingData {
         opcode: DataProcessingInstruction::ORR,
         s_flag: BitState::Set,
-        rn: 0b1,
-        rd: 0b10,
+        rn_reg: RegisterName::R1,
+        rd_reg: RegisterName::R2,
         shifter_operand: ShifterOperand {
             val: u32::MAX,
             shifter_carry_out: BitState::Set,
@@ -492,8 +492,8 @@ fn mov() {
     let data = DataProcessingData {
         opcode: DataProcessingInstruction::MOV,
         s_flag: BitState::Set,
-        rn: 0b1,
-        rd: 0b10,
+        rn_reg: RegisterName::R1,
+        rd_reg: RegisterName::R2,
         shifter_operand: ShifterOperand {
             val: u32::MAX,
             shifter_carry_out: BitState::Set,
@@ -527,8 +527,8 @@ fn bic() {
     let data = DataProcessingData {
         opcode: DataProcessingInstruction::BIC,
         s_flag: BitState::Set,
-        rn: 0b1,
-        rd: 0b10,
+        rn_reg: RegisterName::R1,
+        rd_reg: RegisterName::R2,
         shifter_operand: ShifterOperand {
             val: 0,
             shifter_carry_out: BitState::Set,
@@ -561,8 +561,8 @@ fn mvn() {
     let data = DataProcessingData {
         opcode: DataProcessingInstruction::MVN,
         s_flag: BitState::Set,
-        rn: 0b0,
-        rd: 0b1,
+        rn_reg: RegisterName::R0,
+        rd_reg: RegisterName::R1,
         shifter_operand: ShifterOperand {
             val: 0,
             shifter_carry_out: BitState::Set,

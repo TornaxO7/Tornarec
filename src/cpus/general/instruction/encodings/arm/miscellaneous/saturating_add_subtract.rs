@@ -5,29 +5,29 @@ use std::convert::{
     TryFrom,
 };
 
-use crate::cpus::general::instruction::{decode::DecodeData, encodings::encoding_fields::SaturatingOpcode};
+use crate::cpus::general::{instruction::{decode::DecodeData, encodings::encoding_fields::SaturatingOpcode}, register::RegisterName};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SaturatingAddSubtract {
     pub opcode: SaturatingOpcode,
-    pub rn: u8,
-    pub rd: u8,
-    pub rm: u8,
+    pub rn_reg: RegisterName,
+    pub rd_reg: RegisterName,
+    pub rm_reg: RegisterName,
 }
 
 impl<'a> From<DecodeData<'a>> for SaturatingAddSubtract {
     fn from(data: DecodeData<'a>) -> Self {
         let op = SaturatingOpcode::from(data.instruction.val >> 21);
-        let rn = u8::try_from((data.instruction.val >> 16) & 0b1111).unwrap();
-        let rd = u8::try_from((data.instruction.val >> 12) & 0b1111).unwrap();
+        let rn_reg = RegisterName::from((data.instruction.val >> 16) & 0b1111);
+        let rd_reg = RegisterName::from((data.instruction.val >> 12) & 0b1111);
         let sbz = u8::try_from((data.instruction.val >> 8) & 0b1111).unwrap();
-        let rm = u8::try_from(data.instruction.val & 0b1111).unwrap();
+        let rm_reg = RegisterName::from(data.instruction.val & 0b1111);
 
         if sbz != 0 {
             unreachable!("{}", MiscellaneousError::SBZConflict(data.instruction.val));
         }
 
-        Self { opcode: op, rn, rd, rm }
+        Self { opcode: op, rn_reg, rd_reg, rm_reg }
     }
 }
 
@@ -42,6 +42,7 @@ mod tests {
         DecodeData,
         SaturatingAddSubtract,
         SaturatingOpcode,
+        RegisterName,
     };
 
     #[test]
@@ -58,9 +59,9 @@ mod tests {
         let value = SaturatingAddSubtract::from(data);
         let expected_value = SaturatingAddSubtract {
             opcode: SaturatingOpcode::QADD,
-            rn: 0b1101,
-            rd: 0b1100,
-            rm: 0b1000,
+            rn_reg: RegisterName::R13,
+            rd_reg: RegisterName::R12,
+            rm_reg: RegisterName::R8,
         };
 
         assert_eq!(

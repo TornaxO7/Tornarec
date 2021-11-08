@@ -6,20 +6,18 @@ use crate::cpus::general::{
             ShifterOperand,
         },
     },
+    register::RegisterName,
     BitState,
 };
 
-use std::convert::{
-    From,
-    TryFrom,
-};
+use std::convert::From;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DataProcessingData {
     pub opcode: DataProcessingInstruction,
     pub s_flag: BitState,
-    pub rn: u8,
-    pub rd: u8,
+    pub rn_reg: RegisterName,
+    pub rd_reg: RegisterName,
     pub shifter_operand: ShifterOperand,
 }
 
@@ -27,8 +25,8 @@ impl<'a> From<DecodeData<'a>> for DataProcessingData {
     fn from(data: DecodeData<'a>) -> Self {
         let opcode = DataProcessingInstruction::from(data.instruction.val >> 21);
         let s_flag = BitState::from(data.instruction.val >> 20);
-        let rn = u8::try_from((data.instruction.val >> 16) & 0b1111).unwrap();
-        let rd = u8::try_from((data.instruction.val >> 12) & 0b1111).unwrap();
+        let rn_reg = RegisterName::from((data.instruction.val >> 16) & 0b1111);
+        let rd_reg = RegisterName::from((data.instruction.val >> 12) & 0b1111);
 
         let shifter_operand = {
             let is_immediate = (data.instruction.val >> 25) & 0b1 == 1;
@@ -46,8 +44,8 @@ impl<'a> From<DecodeData<'a>> for DataProcessingData {
         Self {
             opcode,
             s_flag,
-            rn,
-            rd,
+            rn_reg,
+            rd_reg,
             shifter_operand,
         }
     }
@@ -68,6 +66,7 @@ mod tests {
         DataProcessingData,
         DataProcessingInstruction,
         ShifterOperand,
+        RegisterName,
     };
 
     #[test]
@@ -84,8 +83,8 @@ mod tests {
         let expected_value = DataProcessingData {
             opcode: DataProcessingInstruction::MVN,
             s_flag: BitState::Set,
-            rn: 0b1100,
-            rd: 0b0011,
+            rn_reg: RegisterName::R12,
+            rd_reg: RegisterName::R3,
             shifter_operand: ShifterOperand::get_immediate(data),
         };
 

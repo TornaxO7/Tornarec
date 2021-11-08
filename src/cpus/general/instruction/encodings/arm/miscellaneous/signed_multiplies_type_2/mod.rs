@@ -4,43 +4,41 @@ pub use signed_multiplies_opcode::SignedMultipliesOpcode;
 
 use crate::cpus::general::{
     instruction::decode::DecodeData,
+    register::RegisterName,
     BitState,
 };
 
-use std::convert::{
-    From,
-    TryFrom,
-};
+use std::convert::From;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SignedMultipliesType2 {
     pub opcode: SignedMultipliesOpcode,
-    pub rd: u8,
-    pub rn: u8,
-    pub rs: u8,
+    pub rd_reg: RegisterName,
+    pub rn_reg: RegisterName,
+    pub rs_reg: RegisterName,
     pub y: BitState,
     pub x: BitState,
-    pub rm: u8,
+    pub rm_reg: RegisterName,
 }
 
 impl<'a> From<DecodeData<'a>> for SignedMultipliesType2 {
     fn from(data: DecodeData<'a>) -> Self {
         let opcode = SignedMultipliesOpcode::from(&data.instruction);
-        let rd = u8::try_from((data.instruction.val >> 16) & 0b1111).unwrap();
-        let rn = u8::try_from((data.instruction.val >> 12) & 0b1111).unwrap();
-        let rs = u8::try_from((data.instruction.val >> 8) & 0b1111).unwrap();
+        let rd_reg = RegisterName::from((data.instruction.val >> 16) & 0b1111);
+        let rn_reg = RegisterName::from((data.instruction.val >> 12) & 0b1111);
+        let rs_reg = RegisterName::from((data.instruction.val >> 8) & 0b1111);
         let y = BitState::from(data.instruction.val >> 6);
         let x = BitState::from(data.instruction.val >> 5);
-        let rm = u8::try_from(data.instruction.val & 0b1111).unwrap();
+        let rm_reg = RegisterName::from(data.instruction.val & 0b1111);
 
         Self {
             opcode,
-            rd,
-            rn,
-            rs,
+            rd_reg,
+            rn_reg,
+            rs_reg,
             y,
             x,
-            rm,
+            rm_reg,
         }
     }
 }
@@ -55,6 +53,7 @@ mod tests {
     use super::{
         BitState,
         DecodeData,
+        RegisterName,
         SignedMultipliesOpcode,
         SignedMultipliesType2,
     };
@@ -73,12 +72,12 @@ mod tests {
         let value = SignedMultipliesType2::from(data);
         let expected_value = SignedMultipliesType2 {
             opcode: SignedMultipliesOpcode::SMUL,
-            rd: 0b1111,
-            rn: 0b1110,
-            rs: 0b1100,
+            rd_reg: RegisterName::R15,
+            rn_reg: RegisterName::R14,
+            rs_reg: RegisterName::R12,
             y: BitState::Set,
             x: BitState::Set,
-            rm: 0b1000,
+            rm_reg: RegisterName::R8,
         };
 
         assert_eq!(

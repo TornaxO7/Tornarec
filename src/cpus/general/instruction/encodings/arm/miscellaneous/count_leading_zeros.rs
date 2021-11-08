@@ -1,4 +1,4 @@
-use crate::cpus::general::instruction::decode::DecodeData;
+use crate::cpus::general::{instruction::decode::DecodeData, register::RegisterName};
 
 use super::error::MiscellaneousError;
 
@@ -9,22 +9,22 @@ use std::convert::{
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct CountLeadingZeros {
-    pub rd: u8,
-    pub rm: u8,
+    pub rd_reg: RegisterName,
+    pub rm_reg: RegisterName,
 }
 
 impl<'a> From<DecodeData<'a>> for CountLeadingZeros {
     fn from(data: DecodeData<'a>) -> Self {
         let sbo1 = u8::try_from((data.instruction.val >> 16) & 0b1111).unwrap();
-        let rd = u8::try_from((data.instruction.val >> 12) & 0b1111).unwrap();
+        let rd_reg = RegisterName::from((data.instruction.val >> 12) & 0b1111);
         let sbo2 = u8::try_from((data.instruction.val >> 8) & 0b1111).unwrap();
-        let rm = u8::try_from(data.instruction.val & 0b1111).unwrap();
+        let rm_reg = RegisterName::from(data.instruction.val & 0b1111);
 
         if sbo1 != 0b1111 || sbo2 != 0b1111 {
             unreachable!("{}", MiscellaneousError::SBOConflict(data.instruction.val));
         }
 
-        Self { rd, rm }
+        Self { rd_reg, rm_reg }
     }
 }
 
@@ -38,6 +38,7 @@ mod tests {
     use super::{
         CountLeadingZeros,
         DecodeData,
+        RegisterName,
     };
 
     #[test]
@@ -53,8 +54,8 @@ mod tests {
 
         let value = CountLeadingZeros::from(data);
         let expected_value = CountLeadingZeros {
-            rd: 0b1100,
-            rm: 0b1010,
+            rd_reg: RegisterName::R12,
+            rm_reg: RegisterName::R10,
         };
 
         assert_eq!(
