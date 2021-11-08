@@ -171,7 +171,7 @@ impl Registers {
     }
 
     pub fn get_adjusted_pc(&self) -> Address {
-        Address::from(self.get_reg(RegisterName::Pc) - DataTypeSize::Halfword as u32)
+        Address::from(self.get_reg(RegisterName::Pc) - DataTypeSize::Halfword)
     }
 
     pub fn move_pc_to_lr(&mut self) {

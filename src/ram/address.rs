@@ -83,7 +83,7 @@ impl Add<DataTypeSize> for Address {
     type Output = Self;
 
     fn add(self, size: DataTypeSize) -> Self::Output {
-        Address::from(self.0 + size as u32)
+        Address::from(self.0 + size.val())
     }
 }
 
@@ -91,7 +91,7 @@ impl Sub<DataTypeSize> for Address {
     type Output = Self;
 
     fn sub(self, size: DataTypeSize) -> Self::Output {
-        Address::from(self.0 - size as u32)
+        Address::from(self.0 - size.val())
     }
 }
 

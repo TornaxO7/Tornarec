@@ -1,19 +1,37 @@
-use std::ops::Mul;
+use std::ops::{Mul, Sub};
 
-// TODO: Convert this into a `pub struct DataTypeSize(u32)` which implements three constants and a
-// function to add a custom size
 #[derive(Debug, Clone, PartialEq, Eq)]
-#[repr(u32)]
 pub enum DataTypeSize {
-    Byte     = 8,
-    Halfword = 16,
-    Word     = 32,
+    Byte,
+    Halfword,
+    Word,
+    Custom(u32),
+}
+
+impl DataTypeSize {
+    pub fn val(self) -> u32 {
+        match self {
+            Self::Byte => 8,
+            Self::Halfword => 16,
+            Self::Word => 32,
+            Self::Custom(val) => val,
+        }
+    }
 }
 
 impl Mul<u32> for DataTypeSize {
     type Output = u32;
 
     fn mul(self, num: u32) -> Self::Output {
-        self as u32 * num
+        let val = self.val();
+        val * num
+    }
+}
+
+impl Sub<DataTypeSize> for u32 {
+    type Output = u32;
+
+    fn sub(self, rhs: DataTypeSize) -> u32 {
+        self - rhs.val()
     }
 }
