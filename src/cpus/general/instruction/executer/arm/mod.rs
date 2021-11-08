@@ -480,7 +480,42 @@ impl<'a> ArmExecuter<'a> {
                 self.registers.set_reg(RegisterName::Pc, ExceptionVector::PABT);
             }
             Miscellaneous::SignedMultipliesType2(data) => {
-                 
+                if self.architecture == Architecture::ARMv5TE {
+                    let rm_reg = RegisterName::from(data.rm);
+                    let rm_val = self.registers.get_reg(rm_reg);
+
+                    let rs_reg = RegisterName::from(data.rs);
+                    let rs_val = self.registers.get_reg(rs_reg);
+
+                    let rd_reg = RegisterName::from(data.rd);
+
+                    let rn_reg = RegisterName::from(data.rn);
+                    let rn_val = self.registers.get_reg(rn_reg);
+
+                    let operand1 = if data.x.is_set() {
+                        Helper::sign_extend(rm_val & 0b1111_1111_1111_1111, 15)
+                    } else {
+                        Helper::sign_extend(rm_val >> 16, 15)
+                    };
+
+                    let operand2 = if data.y.is_set() {
+                        Helper::sign_extend(rs_val & 0b1111_1111_1111_1111, 15)
+                    } else {
+                        Helper::sign_extend(rs_val >> 16, 15)
+                    };
+
+                    let (calculation, overflowed) = {
+                        let (multiplication, overflowed1) = operand1.overflowing_mul(operand2);
+                        let (result, overflowed2) = multiplication.overflowing_add(rn_val);
+                        (result, overflowed1 | overflowed2)
+                    };
+                    self.registers.set_reg(rd_reg, calculation);
+
+                    if overflowed {
+                        let cpsr = self.registers.get_mut_cpsr();
+                        cpsr.set_condition_bit(ConditionBit::Q, BitState::Set);
+                    }
+                }
             }
             Miscellaneous::Unknown => println!("Reached unknown miscellaneous instruction, LOL"),
         }

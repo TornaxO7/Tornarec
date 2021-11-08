@@ -86,6 +86,6 @@ mod tests {
         };
         let data = DecodeData::new(instruction, &nds.arm7tdmi.registers);
 
-        MoveStatusRegisterToRegister::from(data);
+        let _ = MoveStatusRegisterToRegister::from(data);
     }
 }

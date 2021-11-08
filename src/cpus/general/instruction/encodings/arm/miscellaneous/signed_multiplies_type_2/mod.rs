@@ -55,8 +55,8 @@ mod tests {
     use super::{
         BitState,
         DecodeData,
-        SignedMultipliesType2,
         SignedMultipliesOpcode,
+        SignedMultipliesType2,
     };
 
     #[test]
