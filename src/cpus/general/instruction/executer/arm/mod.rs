@@ -4,20 +4,35 @@ mod helper;
 pub use error::ArmExecuterError;
 use helper::Helper;
 
-use crate::{cpus::{Architecture, general::{BitMaskConstants, BitState, Interruption, OperatingMode, OperatingState, exception::ExceptionVector, instruction::{
-            decode::arm::Miscellaneous,
-            encodings::{
-                arm::DataProcessingData,
-                encoding_fields::{
-                    DataProcessingInstruction,
-                    SaturatingOpcode,
+use crate::{
+    cpus::{
+        general::{
+            exception::ExceptionVector,
+            instruction::{
+                decode::arm::Miscellaneous,
+                encodings::{
+                    arm::DataProcessingData,
+                    encoding_fields::{
+                        DataProcessingInstruction,
+                        SaturatingOpcode,
+                    },
                 },
             },
-        }, register::{
-            types::ConditionBit,
-            RegisterName,
-            Registers,
-        }}}, ram::data_types::DataTypeSize};
+            register::{
+                types::ConditionBit,
+                RegisterName,
+                Registers,
+            },
+            BitMaskConstants,
+            BitState,
+            Interruption,
+            OperatingMode,
+            OperatingState,
+        },
+        Architecture,
+    },
+    ram::data_types::DataTypeSize,
+};
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct ArmExecuter<'a> {
@@ -455,11 +470,13 @@ impl<'a> ArmExecuter<'a> {
                     unreachable!("{}", ArmExecuterError::ARMv4TExecutesARM5vTE);
                 }
             }
-            // TODO: Here, Manual page 164
             // DEBUGGER: _data variable
             Miscellaneous::BKPT(_data) => {
                 let bkpt_address = self.registers.get_adjusted_pc();
-                self.registers.set_reg(RegisterName::R14Abt, (bkpt_address + DataTypeSize::Custom(4)).get_as_u32());
+                self.registers.set_reg(
+                    RegisterName::R14Abt,
+                    (bkpt_address + DataTypeSize::Custom(4)).get_as_u32(),
+                );
 
                 let cpsr_val = self.registers.get_reg(RegisterName::Cpsr);
                 self.registers.set_reg(RegisterName::SpsrAbt, cpsr_val);
@@ -470,8 +487,9 @@ impl<'a> ArmExecuter<'a> {
                     cpsr.set_operating_state(OperatingState::Arm);
                     cpsr.set_interrupt_bit(Interruption::Irq, BitState::Set);
                 }
-                
-                self.registers.set_reg(RegisterName::Pc, ExceptionVector::PABT);
+
+                self.registers
+                    .set_reg(RegisterName::Pc, ExceptionVector::PABT);
             }
             Miscellaneous::SignedMultipliesType2(data) => {
                 if self.architecture == Architecture::ARMv5TE {
@@ -508,13 +526,9 @@ impl<'a> ArmExecuter<'a> {
         }
     }
 
-    pub fn data_processing_register_shift(&self) {}
-
     pub fn multiplies(&self) {}
 
     pub fn extra_load_and_stores(&self) {}
-
-    pub fn data_processing_immediate(&self) {}
 
     pub fn undefined_instruction(&self) {}
 

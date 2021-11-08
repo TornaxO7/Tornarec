@@ -4,6 +4,7 @@ use crate::cpus::general::BitState;
 pub struct Helper;
 
 impl Helper {
+    // Manual: Page 1124
     pub fn carry_from(values: Vec<u32>) -> BitState {
         let mut sum: u32 = 0;
         for value in values {
@@ -15,6 +16,7 @@ impl Helper {
         BitState::Unset
     }
 
+    // Manual: Page 1123
     pub fn borrow_from(values: Vec<u32>) -> BitState {
         let mut num = values[0].clone();
         for value in values[1..].iter() {
