@@ -479,7 +479,9 @@ impl<'a> ArmExecuter<'a> {
                 
                 self.registers.set_reg(RegisterName::Pc, ExceptionVector::PABT);
             }
-            Miscellaneous::SignedMultipliesType2(data) => {}
+            Miscellaneous::SignedMultipliesType2(data) => {
+                 
+            }
             Miscellaneous::Unknown => println!("Reached unknown miscellaneous instruction, LOL"),
         }
     }

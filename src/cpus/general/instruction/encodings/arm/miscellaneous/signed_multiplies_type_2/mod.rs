@@ -1,3 +1,7 @@
+mod signed_multiplies_opcode;
+
+pub use signed_multiplies_opcode::SignedMultipliesOpcode;
+
 use crate::cpus::general::{
     instruction::decode::DecodeData,
     BitState,
@@ -10,18 +14,18 @@ use std::convert::{
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct SignedMultipliesType2 {
-    op: u8,
-    rd: u8,
-    rn: u8,
-    rs: u8,
-    y: BitState,
-    x: BitState,
-    rm: u8,
+    pub opcode: SignedMultipliesOpcode,
+    pub rd: u8,
+    pub rn: u8,
+    pub rs: u8,
+    pub y: BitState,
+    pub x: BitState,
+    pub rm: u8,
 }
 
 impl<'a> From<DecodeData<'a>> for SignedMultipliesType2 {
     fn from(data: DecodeData<'a>) -> Self {
-        let op = u8::try_from((data.instruction.val >> 21) & 0b11).unwrap();
+        let opcode = SignedMultipliesOpcode::from(&data.instruction);
         let rd = u8::try_from((data.instruction.val >> 16) & 0b1111).unwrap();
         let rn = u8::try_from((data.instruction.val >> 12) & 0b1111).unwrap();
         let rs = u8::try_from((data.instruction.val >> 8) & 0b1111).unwrap();
@@ -30,7 +34,7 @@ impl<'a> From<DecodeData<'a>> for SignedMultipliesType2 {
         let rm = u8::try_from(data.instruction.val & 0b1111).unwrap();
 
         Self {
-            op,
+            opcode,
             rd,
             rn,
             rs,
@@ -52,6 +56,7 @@ mod tests {
         BitState,
         DecodeData,
         SignedMultipliesType2,
+        SignedMultipliesOpcode,
     };
 
     #[test]
@@ -67,7 +72,7 @@ mod tests {
 
         let value = SignedMultipliesType2::from(data);
         let expected_value = SignedMultipliesType2 {
-            op: 0b11,
+            opcode: SignedMultipliesOpcode::SMUL,
             rd: 0b1111,
             rn: 0b1110,
             rs: 0b1100,

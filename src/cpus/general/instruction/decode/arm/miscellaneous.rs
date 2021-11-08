@@ -24,6 +24,12 @@ pub enum Miscellaneous {
     BLX(BranchAndLinkExchangeInstructionSetThumb),
     QADDOrQSUB(SaturatingAddSubtract),
     BKPT(SoftwareBreakpoint),
+    /// This includes:
+    ///     - SMLA<x><y>
+    ///     - SMLAW<y>
+    ///     - SMULW<y>
+    ///     - SMLAL<x><y>
+    ///     - SMUL<x><y>
     SignedMultipliesType2(SignedMultipliesType2),
     Unknown,
 }
