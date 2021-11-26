@@ -6,8 +6,8 @@ mod extra_load_stores;
 mod load_and_store_immediate_offset;
 mod load_and_store_multiple;
 mod load_and_store_register_offset;
-mod multiplies;
 mod data_processing;
+pub mod multiplies;
 pub mod miscellaneous;
 
 pub use branch_and_branch_with_link::BranchAndBranchWithLink;

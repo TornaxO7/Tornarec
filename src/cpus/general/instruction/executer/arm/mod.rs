@@ -11,7 +11,11 @@ use crate::{
             instruction::{
                 decode::arm::Miscellaneous,
                 encodings::{
-                    arm::DataProcessingData,
+                    arm::{
+                        multiplies::MultiplyInstruction,
+                        DataProcessingData,
+                        Multiplies,
+                    },
                     encoding_fields::{
                         DataProcessingInstruction,
                         SaturatingOpcode,

@@ -1,14 +1,15 @@
-mod multiply_type;
+mod multiply_instruction;
 
-pub use multiply_type::MultiplyType;
+pub use multiply_instruction::MultiplyInstruction;
 
-use crate::cpus::general::{instruction::decode::DecodeData, register::RegisterName};
+use crate::cpus::general::{BitState, instruction::decode::DecodeData, register::RegisterName};
 
 use std::convert::From;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Multiplies {
-    pub op1: MultiplyType,
+    pub multiply_instruction: MultiplyInstruction,
+    pub s_flag: BitState,
     pub rn_reg: RegisterName,
     pub rd_reg: RegisterName,
     pub rs_reg: RegisterName,
@@ -17,14 +18,16 @@ pub struct Multiplies {
 
 impl<'a> From<DecodeData<'a>> for Multiplies {
     fn from(data: DecodeData<'a>) -> Self {
-        let op1 = MultiplyType::from(&data.instruction);
+        let multiply_instruction = MultiplyInstruction::from(&data.instruction);
+        let s_flag = BitState::from(data.instruction.val >> 20);
         let rn_reg = RegisterName::from((data.instruction.val >> 16) & 0b1111);
         let rd_reg = RegisterName::from((data.instruction.val >> 12) & 0b1111);
         let rs_reg = RegisterName::from((data.instruction.val >> 8) & 0b1111);
         let rm_reg = RegisterName::from(data.instruction.val & 0b1111);
 
         Self {
-            op1,
+            multiply_instruction,
+            s_flag,
             rn_reg,
             rd_reg,
             rs_reg,
@@ -39,7 +42,7 @@ mod tests {
         DecodeData,
         Multiplies,
         RegisterName,
-        MultiplyType,
+        MultiplyInstruction,
     };
 
     use crate::{NintendoDS, cpus::general::{BitState, Instruction}};
@@ -56,11 +59,8 @@ mod tests {
         let value = Multiplies::from(data);
 
         let expected_value = Multiplies {
-            op1: MultiplyType::Long {
-                un_flag: BitState::Set,
-                a_flag: BitState::Set,
-                s_flag: BitState::Set,
-            },
+            multiply_instruction: MultiplyInstruction::SMLAL,
+            s_flag: BitState::Set,
             rn_reg: RegisterName::R12,
             rd_reg: RegisterName::R3,
             rs_reg: RegisterName::R14,
