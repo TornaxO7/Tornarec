@@ -9,4 +9,11 @@ impl Dynarec {
             buffer: Vec::new(),
         }
     }
+
+    /// Let's get started!
+    pub fn exec(&self) {
+        unsafe {
+            self.buffer();
+        }
+    }
 }
