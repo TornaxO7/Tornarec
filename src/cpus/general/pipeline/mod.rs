@@ -13,10 +13,7 @@ use crate::{
         OperatingState,
     },
     ram::{
-        data_types::{
-            DataType,
-            DataTypeSize,
-        },
+        data_types::DataType,
         Address,
         Ram,
     },
@@ -25,7 +22,7 @@ use crate::{
 #[derive(thiserror::Error, Debug, Clone, PartialEq, Eq)]
 pub enum PipelineError {
     #[error("Invalid instruction size: {0:?}")]
-    InvalidInstructionSize(DataTypeSize),
+    InvalidInstructionSize(DataType),
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
@@ -35,14 +32,14 @@ pub struct Pipeline {
 }
 
 impl<'a> Pipeline {
-    pub fn fetch(&mut self, ram: &Ram, start: Address, instruction_size: DataTypeSize) {
-        let end: Address = start + instruction_size.clone();
+    pub fn fetch(&mut self, ram: &Ram, start: Address, instruction_size: DataType) {
+        let end: Address = start + instruction_size.get_size();
 
-        if end.get_as_u32() > ram.size() {
+        if end > ram.size() {
             self.prefetch = Prefetch::Invalid;
         } else {
             match instruction_size {
-                DataTypeSize::Word => match DataType::get_word(&ram[start..end]) {
+                DataType::Word(_) => match DataType::get_word(&ram[start..end]) {
                     Ok(word) => {
                         self.prefetch = Prefetch::Success(Instruction {
                             address: start,
@@ -51,7 +48,7 @@ impl<'a> Pipeline {
                     }
                     Err(err) => panic!("{}", err),
                 },
-                DataTypeSize::Halfword => match DataType::get_halfword(&ram[start..end]) {
+                DataType::Halfword(_) => match DataType::get_halfword(&ram[start..end]) {
                     Ok(halfword) => {
                         self.prefetch = Prefetch::Success(Instruction {
                             address: start,

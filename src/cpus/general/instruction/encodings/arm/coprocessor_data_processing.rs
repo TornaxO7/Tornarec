@@ -23,6 +23,7 @@ impl<'a> From<DecodeData<'a>> for CoprocessorDataProcessing {
         let cp_num = u8::try_from((data.instruction.val >> 8) & 0b1111).unwrap();
         let opcode2 = u8::try_from((data.instruction.val >> 5) & 0b111).unwrap();
         let crm = u8::try_from(data.instruction.val & 0b1111).unwrap();
+
         Self {
             opcode1,
             crn,

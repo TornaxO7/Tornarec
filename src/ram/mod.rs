@@ -1,8 +1,6 @@
-pub mod address;
 pub mod data_block;
 pub mod data_types;
 
-pub use address::Address;
 pub use data_block::DataBlock;
 
 use std::{
@@ -12,6 +10,8 @@ use std::{
         Range,
     },
 };
+
+pub type Address = u32;
 
 #[derive(thiserror::Error, Debug, Clone, PartialEq, Eq)]
 pub enum RamError {
@@ -40,7 +40,7 @@ impl Ram {
         data: DataBlock,
         starting_address: Address,
     ) -> Result<(), RamError> {
-        let last_address = starting_address.get_as_u32() + data.size();
+        let last_address = starting_address + data.size();
 
         if self.size() < last_address {
             self.ram.resize(usize::try_from(last_address).unwrap(), 0);
@@ -55,13 +55,13 @@ impl Ram {
             }
         }
 
-        self.ram[usize::try_from(starting_address.get_as_u32()).unwrap()..]
+        self.ram[usize::try_from(starting_address).unwrap()..]
             .copy_from_slice(data.get_ref());
         Ok(())
     }
 
     pub fn set_max_address(&mut self, new_max_size: Address) {
-        self.max_address = Some(new_max_size.get_as_u32());
+        self.max_address = Some(new_max_size);
     }
 
     pub fn size(&self) -> u32 {
@@ -77,8 +77,8 @@ impl Index<Range<Address>> for Ram {
 
     fn index(&self, index: Range<Address>) -> &Self::Output {
         let range = Range {
-            start: usize::try_from(index.start.get_as_u32()).unwrap(),
-            end: usize::try_from(index.end.get_as_u32()).unwrap(),
+            start: usize::try_from(index.start).unwrap(),
+            end: usize::try_from(index.end).unwrap(),
         };
 
         &self.ram[range]

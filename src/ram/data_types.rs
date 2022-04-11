@@ -1,10 +1,16 @@
-mod error;
-mod size;
-
-pub use error::DataTypeError;
-pub use size::DataTypeSize;
-
 use core::convert::TryInto;
+
+#[derive(thiserror::Error, Debug, Clone, PartialEq, Eq)]
+pub enum DataTypeError {
+    #[error("[BYTE-ERROR]: Couldn't parse the given array into a byte: {0:?}")]
+    ByteError(Vec<u8>),
+
+    #[error("[HALFWORD-ERROR]: Couldn't parse the given array into a halfword: {0:?}")]
+    HalfwordError(Vec<u8>),
+
+    #[error("[WORD-ERROR]: Couldn't parse the given array into a wordbyte: {0:?}")]
+    WordError(Vec<u8>),
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum DataType {
@@ -14,6 +20,10 @@ pub enum DataType {
 }
 
 impl DataType {
+    pub const BYTE_SIZE: u32 = 8;
+    pub const HALFWORD_SIZE: u32 = 16;
+    pub const WORD_SIZE: u32 = 32;
+
     pub fn get_byte(slice: &[u8]) -> Result<Self, DataTypeError> {
         match slice.try_into() {
             Ok(array) => Ok(Self::Byte(u8::from_le_bytes(array))),
@@ -40,6 +50,14 @@ impl DataType {
             Self::Byte(val) => u32::from(*val),
             Self::Halfword(val) => u32::from(*val),
             Self::Word(val) => *val,
+        }
+    }
+
+    pub fn get_size(&self) -> u32 {
+        match self {
+            Self::Byte(_) => Self::BYTE_SIZE,
+            Self::Halfword(_) => Self::HALFWORD_SIZE,
+            Self::Word(_) => Self::WORD_SIZE,
         }
     }
 }

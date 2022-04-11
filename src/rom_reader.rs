@@ -67,8 +67,7 @@ impl RomReader {
         let starting_address = Address::from(self.parser.arm7.load_address);
 
         if let Err(err) = ram.load_data(arm7tdmi_data, starting_address) {
-            println!("{}", err);
-            panic!("");
+            panic!("{}", err);
         }
     }
 }

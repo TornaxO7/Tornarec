@@ -1,4 +1,3 @@
-pub mod bit_state;
 pub mod condition_code_flag;
 pub mod condition_flag;
 pub mod exception;
@@ -11,7 +10,6 @@ pub mod pipeline;
 pub mod register;
 mod bit_mask_constants;
 
-pub use bit_state::BitState;
 pub use condition_flag::ConditionFlag;
 pub use exception::Exception;
 pub use instruction::Instruction;
@@ -20,3 +18,5 @@ pub use interruption::Interruption;
 pub use operating_mode::OperatingMode;
 pub use operating_state::OperatingState;
 pub use bit_mask_constants::BitMaskConstants;
+
+pub type BitState = bool;
