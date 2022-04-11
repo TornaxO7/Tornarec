@@ -19,4 +19,3 @@ pub use operating_mode::OperatingMode;
 pub use operating_state::OperatingState;
 pub use bit_mask_constants::BitMaskConstants;
 
-pub type BitState = bool;
