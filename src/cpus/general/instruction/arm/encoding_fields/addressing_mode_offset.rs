@@ -27,14 +27,14 @@ pub enum AddressingMode1Offset {
 }
 
 impl AddressingMode1Offset {
-    pub fn get_immediate(word: Word) -> Self {
+    pub fn get_immediate(word: &Word) -> Self {
         let rotate_imm = u8::try_from((word >> 8) & 0b1111).unwrap();
         let immed8 = u8::try_from(word & 0b1111_1111).unwrap();
 
         Self::Immediate { rotate_imm, immed8 }
     }
 
-    pub fn get_immediate_shift(word: Word) -> Self {
+    pub fn get_immediate_shift(word: &Word) -> Self {
         let shift_imm = u8::try_from((word >> 7) & 0b11111).unwrap();
         let shift = u8::try_from((word >> 5) & 0b11).unwrap();
         let rm = u8::try_from(word & 0b1111).unwrap();
@@ -46,7 +46,7 @@ impl AddressingMode1Offset {
         }
     }
 
-    pub fn get_register_shift(word: Word) -> Self {
+    pub fn get_register_shift(word: &Word) -> Self {
         let rs = u8::try_from((word >> 8) & 0b1111).unwrap();
         let shift = u8::try_from((word >> 5) & 0b11).unwrap();
         let rm = u8::try_from(word & 0b1111).unwrap();
@@ -67,18 +67,18 @@ pub enum AddressingMode2Offset {
 }
 
 impl AddressingMode2Offset {
-    pub fn get_immediate_offset(word: Word) -> Self {
+    pub fn get_immediate_offset(word: &Word) -> Self {
         let immed_offset = u16::try_from(word & 0b1111_1111_1111).unwrap();
         Self::ImmediateOffset(immed_offset)
     }
 
-    pub fn get_register_offset(word: Word) -> Self {
+    pub fn get_register_offset(word: &Word) -> Self {
         let rm = Register::try_from(word & 0b1111).unwrap();
 
         Self::RegisterOffset(rm)
     }
 
-    pub fn get_scaled_register_offset(word: Word) -> Self {
+    pub fn get_scaled_register_offset(word: &Word) -> Self {
         let shift_imm = u8::try_from((word >> 7) & 0b1111).unwrap();
         let shift = u8::try_from((word >> 5) & 0b11).unwrap();
         let rm = Register::try_from(word & 0b1111).unwrap();
@@ -94,16 +94,40 @@ impl AddressingMode2Offset {
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum AddressingMode3Offset {
     Immediate {
-        immedH: u8,
+        immed_h: u8,
         s: BitState,
         h: BitState,
-        immedl: u8,
+        immed_l: u8,
     },
     Register {
         s: BitState,
         h: BitState,
         rm: Register,
     },
+}
+
+impl AddressingMode3Offset {
+    pub fn get_immediate_offset(word: &Word) -> Self {
+        let immed_h = u8::try_from((word >> 8) & 0b1111).unwrap();
+        let s = BitState::from(((word >> 6) & 1) != 0);
+        let h = BitState::from(((word >> 5) & 1) != 0);
+        let immed_l = u8::try_from(word & 0b1111).unwrap();
+
+        Self::Immediate {
+            immed_h,
+            s,
+            h,
+            immed_l,
+        }
+    }
+
+    pub fn get_register_offset(word: &Word) -> Self {
+        let s = BitState::from(((word >> 6) & 1) != 0);
+        let h = BitState::from(((word >> 5) & 1) != 0);
+        let rm = Register::try_from(word & 0b1111).unwrap();
+
+        Self::Register { s, h, rm }
+    }
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -126,7 +150,10 @@ pub enum AddressingMode5Offset {
 #[cfg(test)]
 mod tests {
     use crate::cpus::general::instruction::arm::{
-        encoding_fields::AddressingMode2Offset,
+        encoding_fields::{
+            AddressingMode2Offset,
+            AddressingMode3Offset,
+        },
         Register,
     };
 
@@ -200,9 +227,38 @@ mod tests {
         assert_eq!(
             AddressingMode2Offset::get_scaled_register_offset(word),
             AddressingMode2Offset::ScaledRegisterOffset {
-                shift_imm: 0b1111,
+                shift_imm: 0b11111,
                 shift: 0b11,
                 rm: Register::from(0b1111)
+            }
+        );
+    }
+
+    #[test]
+    fn addressing_mode_3_immediate() {
+        let word = 0b0000_0000_0000_0000_0000_1111_1_11_1_1111;
+
+        assert_eq!(
+            AddressingMode3Offset::get_immediate_offset(word),
+            AddressingMode3Offset::Immediate {
+                immed_h: 0b1111,
+                s: true,
+                h: true,
+                immed_l: 0b1111
+            }
+        );
+    }
+
+    #[test]
+    fn addressing_mode_3_register() {
+        let word = 0b0000_0000_0000_0000_0000_0000_1_11_1_1111;
+
+        assert_eq!(
+            AddressingMode3Offset::get_register_offset(word),
+            AddressingMode3Offset::Register {
+                s: true,
+                h: true,
+                rm: Register::from(0b1111),
             }
         );
     }
