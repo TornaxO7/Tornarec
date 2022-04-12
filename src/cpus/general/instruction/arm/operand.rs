@@ -421,7 +421,25 @@ impl ArmOperand {
             rd,
             cp_num,
             opcode,
-            crm
+            crm,
+        }
+    }
+
+    pub fn get_mrc(value: Word) -> Self {
+        let opcode1 = CPOpcode::try_from((value >> 21) & 0b111).unwrap();
+        let crn = CPRegister::try_from((value >> 16) & 0b1111).unwrap();
+        let rd = Register::try_from((value >> 12) & 0b1111).unwrap();
+        let cp_num = CPNum::try_from((value >> 8) & 0b1111).unwrap();
+        let opcode2 = CPOpcode::try_from((value >> 5) & 0b111).unwrap();
+        let crm = CPRegister::try_from(value & 0b1111).unwrap();
+
+        Self::MRC {
+            opcode1,
+            crn,
+            rd,
+            cp_num,
+            opcode2,
+            crm,
         }
     }
 }
@@ -755,15 +773,15 @@ mod tests {
         let word = 0b0000_1110_1110_1111_1111_1111_1111_1111;
 
         assert_eq!(
-        ArmOperand::get_mcr(word),
-        ArmOperand::MCR {
-            opcode1: CPOpcode::from(0b111),
-            crn: CPRegister::from(0b1111),
-            rd: Register::from(0b1111),
-            cp_num: CPNum::from(0b1111),
-            opcode2: CPOpcode::from(0b111),
-            crm: CPRegister::from(0b1111),
-        }
+            ArmOperand::get_mcr(word),
+            ArmOperand::MCR {
+                opcode1: CPOpcode::from(0b111),
+                crn: CPRegister::from(0b1111),
+                rd: Register::from(0b1111),
+                cp_num: CPNum::from(0b1111),
+                opcode2: CPOpcode::from(0b111),
+                crm: CPRegister::from(0b1111),
+            }
         );
     }
 
@@ -780,6 +798,23 @@ mod tests {
                 opcode: CPOpcode::from(0b1111),
                 crm: CPOpcode::from(0b1111),
             }
+        );
+    }
+
+    #[test]
+    fn get_mrc() {
+        let word = 0b0000_1110_1111_1111_1111_1111_1111_1111;
+
+        assert_eq!(
+            ArmOperand::get_mrc(word),
+            ArmOperand::MRC {
+                opcode1: CPOpcode::from(0b111),
+                crn: CPRegister::from(0b1111),
+                rd: Register::from(0b1111),
+                cp_num: CPNum::from(0b1111),
+                opcode2: CPOpcode::from(0b1111),
+                crm: CPRegister::from(0b1111),
+            },
         );
     }
 }
