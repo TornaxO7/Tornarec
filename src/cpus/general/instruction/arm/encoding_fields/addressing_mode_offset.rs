@@ -6,7 +6,10 @@ use crate::{
     ram::Word,
 };
 
-use std::convert::TryFrom;
+use std::convert::{
+    From,
+    TryFrom,
+};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum AddressingMode1Offset {
@@ -138,6 +141,20 @@ pub enum AddressingMode4Offset {
     DecrementBefore,
 }
 
+impl From<Word> for AddressingMode4Offset {
+    fn from(word: Word) -> Self {
+        let p_flag = (word >> 24) & 0b1;
+        let u_flag = (word >> 23) & 0b1;
+
+        match (p_flag, u_flag) {
+            (0, 1) => Self::IncrementAfter,
+            (1, 1) => Self::IncrementBefore,
+            (0, 0) => Self::DecrementAfter,
+            (1, 0) => Self::DecrementBefore,
+        }
+    }
+}
+
 /// Coprocessor addressing mode
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum AddressingMode5Offset {
@@ -153,6 +170,7 @@ mod tests {
         encoding_fields::{
             AddressingMode2Offset,
             AddressingMode3Offset,
+            AddressingMode4Offset,
         },
         Register,
     };
@@ -260,6 +278,46 @@ mod tests {
                 h: true,
                 rm: Register::from(0b1111),
             }
+        );
+    }
+
+    #[test]
+    fn addressing_mode_4_increment_after() {
+        let word = 0b0000_1000_1000_0000_0000_0000_0000_0000;
+
+        assert_eq!(
+            AddressingMode4Offset::from(word),
+            AddressingMode4Offset::IncrementAfter
+        );
+    }
+
+    #[test]
+    fn addressing_mode_4_increment_before() {
+        let word = 0b0000_1001_1000_0000_0000_0000_0000_0000;
+
+        assert_eq!(
+            AddressingMode4Offset::from(word),
+            AddressingMode4Offset::IncrementBefore
+        );
+    }
+
+    #[test]
+    fn addressing_mode_4_decrement_after() {
+        let word = 0b0000_1000_0000_0000_0000_0000_0000_0000;
+
+        assert_eq!(
+            AddressingMode4Offset::from(word),
+            AddressingMode4Offset::DecrementAfter
+        );
+    }
+
+    #[test]
+    fn addressing_mode_4_decrement_before() {
+        let word = 0b0000_1001_0000_0000_0000_0000_0000_0000;
+
+        assert_eq!(
+            AddressingMode4Offset::from(word),
+            AddressingMode4Offset::DecrementBefore
         );
     }
 }
