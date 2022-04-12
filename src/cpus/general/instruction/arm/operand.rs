@@ -370,9 +370,24 @@ impl ArmOperand {
         let immed1 = u16::try_from((value >> 8) & 0b1111_1111_1111).unwrap();
         let immed2 = u8::try_from(value & 0b1111).unwrap();
 
-        Self::BKPT {
-            immed1,
-            immed2,
+        Self::BKPT { immed1, immed2 }
+    }
+
+    pub fn get_cpd(value: Word) -> Self {
+        let opcode1 = CPOpcode::try_from((value >> 20) & 0b1111).unwrap();
+        let crn = CPRegister::try_from((value >> 16) & 0b1111).unwrap();
+        let crd = CPRegister::try_from((value >> 12) & 0b1111).unwrap();
+        let cp_num = CPNum::try_from((value >> 8) & 0b1111).unwrap();
+        let opcode2 = CPOpcode::try_from((value >> 5) & 0b111).unwrap();
+        let crm = CPRegister::try_from(value & 0b1111).unwrap();
+
+        Self::CPD {
+            opcode1,
+            crn,
+            crd,
+            cp_num,
+            opcode2,
+            crm,
         }
     }
 }
@@ -384,7 +399,7 @@ mod tests {
         instruction::arm::{
             encoding_fields::MSRType,
             BitState,
-            Register,
+            Register, CPOpcode, CPRegister, CPNum,
         },
         OperatingMode,
     };
@@ -677,6 +692,23 @@ mod tests {
             ArmOperand::BKPT {
                 immed1: 0b1111_1111_1111,
                 immed2: 0b1111,
+            }
+        );
+    }
+
+    #[test]
+    fn get_cpd() {
+        let word = 0b0000_1110_1111_1111_1111_1111_1110_1111;
+
+        assert_eq!(
+            ArmOperand::get_cpd(word),
+            ArmOperand::CPD {
+                opcode1: CPOpcode::from(0b1111),
+                crn: CPRegister::from(0b1111),
+                crd: CPRegister::from(0b1111),
+                cp_num: CPNum::from(0b1111),
+                opcode2: CPOpcode::from(0b111),
+                crm: CPRegister::from(0b1111),
             }
         );
     }
