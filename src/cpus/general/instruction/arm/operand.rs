@@ -213,6 +213,15 @@ impl ArmOperand {
 
         Self::NormalMultiply { s, rd, rs, rm }
     }
+
+    pub fn get_long_multiply(value: Word) -> Self {
+        let rdhi = u8::try_from((value >> 16) & 0b1111).unwrap();
+        let rdlo = u8::try_from((value >> 12) & 0b1111).unwrap();
+        let rs = Register::try_from((value >> 8) & 0b1111).unwrap();
+        let rm = Register::try_from(value & 0b1111).unwrap();
+
+        Self::LongMultiply { rdhi, rdlo, rs, rm }
+    }
 }
 
 #[cfg(test)]
@@ -253,5 +262,20 @@ mod tests {
         let word = 0b0000_0000_0000_0_0000_1111_0000_0000_0000;
 
         ArmOperand::get_normal_multiply(word);
+    }
+
+    #[test]
+    fn get_long_multiply() {
+        let word = 0b0000_0000_0000_1111_1111_1111_1001_1111;
+
+        assert_eq!(
+            ArmOperand::get_long_multiply(word),
+            ArmOperand::LongMultiply {
+                rdhi: 0b1111,
+                rdlo: 0b1111,
+                rs: Register::from(0b1111),
+                rm: Register::from(0b1111),
+            }
+        );
     }
 }
