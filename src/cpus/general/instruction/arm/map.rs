@@ -69,6 +69,7 @@ fn data_processing_immediate_shift(
     value: &Word,
     registers: &Registers,
 ) -> ArmInstruction {
+
 }
 
 fn miscellaneous_instructions1(
@@ -76,6 +77,7 @@ fn miscellaneous_instructions1(
     value: &Word,
     registers: &Registers,
 ) -> ArmInstruction {
+
 }
 
 fn data_processing_register_shift(
