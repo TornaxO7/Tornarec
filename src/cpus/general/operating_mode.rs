@@ -1,5 +1,7 @@
 use std::fmt;
 
+use crate::ram::Word;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u32)]
 pub enum OperatingMode {
@@ -53,5 +55,22 @@ impl fmt::Display for OperatingMode {
         }
 
         write!(fmt, "{}", name)
+    }
+}
+
+impl From<Word> for OperatingMode {
+    fn from(word: Word) -> Self {
+        let bit4_0 = word & 0b1111;
+
+        match bit4_0 {
+            0b0000 => Self::Usr,
+            0b0001 => Self::Fiq,
+            0b0010 => Self::Irq,
+            0b0011 => Self::Svc,
+            0b0111 => Self::Abt,
+            0b1011 => Self::Und,
+            0b1111 => Self::Sys,
+            _ => unreachable!("Unknown operating mode bits: {}", bit4_0),
+        }
     }
 }

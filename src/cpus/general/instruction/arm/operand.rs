@@ -84,7 +84,7 @@ pub enum ArmOperand {
 
     CPS {
         imod: u8,
-        mmod: u8,
+        mmod: BitState,
         a: BitState,
         i: BitState,
         f: BitState,
@@ -324,15 +324,59 @@ impl ArmOperand {
             msr_type,
         }
     }
+
+    pub fn get_cps(value: Word) -> Self {
+        let imod = u8::try_from((value >> 18) & 0b11).unwrap();
+        let mmod = BitState::from(((value >> 17) & 0b1) != 0);
+        let sbz = (value >> 9) & 0b1111_111;
+        let a = BitState::from(((value >> 8) & 0b1) != 0);
+        let i = BitState::from(((value >> 7) & 0b1) != 0);
+        let f = BitState::from(((value >> 6) & 0b1) != 0);
+        let mode = OperatingMode::from(value);
+
+        if sbz != 0 {
+            todo!("[SBZ] A4.1.16 (page 179)");
+        }
+
+        Self::CPS {
+            imod,
+            mmod,
+            a,
+            i,
+            f,
+            mode,
+        }
+    }
+
+    pub fn get_semaphore(value: Word) -> Self {
+        let rn = Register::try_from((value >> 16) & 0b1111).unwrap();
+        let rd = Register::try_from((value >> 12) & 0b1111).unwrap();
+        let sbz = (value >> 8) & 0b1111;
+        let rm = Register::try_from(value & 0b1111).unwrap();
+
+        if sbz != 0 {
+            todo!("[SBZ] A4.1.108 (page 362)");
+        }
+
+        Self::Semaphore { rn, rd, rm }
+    }
+
+    pub fn get_swi(value: Word) -> Self {
+        let immed = value & ((1 << 25) - 1);
+        Self::SWI(immed)
+    }
 }
 
 #[cfg(test)]
 mod tests {
 
-    use crate::cpus::general::instruction::arm::{
-        encoding_fields::MSRType,
-        BitState,
-        Register,
+    use crate::cpus::general::{
+        instruction::arm::{
+            encoding_fields::MSRType,
+            BitState,
+            Register,
+        },
+        OperatingMode,
     };
 
     use super::ArmOperand;
@@ -558,5 +602,59 @@ mod tests {
     fn get_msr_register_sbz() {
         let word = 0b0000_0001_0110_1111_1111_0000_0000_1111;
         ArmOperand::get_msr(word);
+    }
+
+    #[test]
+    fn get_cps() {
+        let word = 0b1111_0001_0000_1110_0000_0001_1100_0000;
+
+        assert_eq!(
+            ArmOperand::get_cps(word),
+            ArmOperand::CPS {
+                imod: 0b11,
+                mmod: BitState::from(true),
+                a: BitState::from(true),
+                i: BitState::from(true),
+                f: BitState::from(true),
+                mode: OperatingMode::Usr
+            }
+        );
+    }
+
+    #[test]
+    fn get_cps_sbz() {
+        let word = 0b1111_0001_0000_1110_1111_1111_1100_0000;
+        ArmOperand::get_cps(word);
+    }
+
+    #[test]
+    fn get_semaphore() {
+        let word = 0b1111_0001_0000_1111_1111_0000_1001_1111;
+
+        assert_eq!(
+            ArmOperand::get_semaphore(word),
+            ArmOperand::Semaphore {
+                rn: Register::from(0b1111),
+                rd: Register::from(0b1111),
+                rm: Register::from(0b11111),
+            }
+        );
+    }
+
+    #[test]
+    #[should_panic]
+    fn get_semphore_sbz() {
+        let word = 0b0000_0001_0000_1111_1111_1111_1001_1111;
+        ArmOperand::get_semaphore(word);
+    }
+
+    #[test]
+    fn get_swi() {
+        let word = 0b0000_1111_1111_0000_1111_0000_1111_0000;
+
+        assert_eq!(
+            ArmOperand::get_swi(word),
+            ArmOperand::SWI(0b1111_0000_1111_0000_1111_0000)
+        );
     }
 }
