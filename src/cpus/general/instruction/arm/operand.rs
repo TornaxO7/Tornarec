@@ -269,6 +269,24 @@ impl ArmOperand {
 
         Self::DualHalfwordMultiply { rd, rs, x, rm }
     }
+
+    pub fn get_count_leading_zeros(value: Word) -> Self {
+        let sbo1 = (value >> 16) & 0b1111;
+        let rd = Register::try_from((value >> 12) & 0b1111).unwrap();
+        let sbo2 = (value >> 8) & 0b1111;
+        let rm = Register::try_from(value & 0b1111).unwrap();
+
+        if sbo1 != 0b1111 {
+            todo!("[SBO 1] A4.1.13");
+        } else if sbo2 != 0b1111 {
+            todo!("[SBO 2] A4.1.13");
+        }
+
+        Self::CountLeadingZeros {
+            rd,
+            rm,
+        }
+    }
 }
 
 #[cfg(test)]
@@ -396,5 +414,30 @@ mod tests {
                 rm: Register::from(0b1111),
             }
         );
+    }
+
+    #[test]
+    fn get_count_leading_zeros() {
+        let word = 0b0000_0001_0110_1111_1111_1111_0001_1111;
+
+        assert_eq!(
+            ArmOperand::get_count_leading_zeros(word),
+            ArmOperand::CountLeadingZeros {
+                rd: Register::from(0b1111),
+                rm: Register::from(0b1111),
+            }
+        );
+    }
+
+    #[test]
+    fn get_count_leading_zeros_sbo1() {
+        let word = 0b0000_0001_0110_0000_1111_1111_0001_1111;
+        ArmOperand::get_count_leading_zeros(word);
+    }
+
+    #[test]
+    fn get_count_leading_zeros_sbo2() {
+        let word = 0b0000_0001_0110_1111_1111_0000_0001_1111;
+        ArmOperand::get_count_leading_zeros(word);
     }
 }
