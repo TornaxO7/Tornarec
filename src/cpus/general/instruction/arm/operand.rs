@@ -365,6 +365,16 @@ impl ArmOperand {
         let immed = value & ((1 << 25) - 1);
         Self::SWI(immed)
     }
+
+    pub fn get_bkpt(value: Word) -> Self {
+        let immed1 = u16::try_from((value >> 8) & 0b1111_1111_1111).unwrap();
+        let immed2 = u8::try_from(value & 0b1111).unwrap();
+
+        Self::BKPT {
+            immed1,
+            immed2,
+        }
+    }
 }
 
 #[cfg(test)]
@@ -655,6 +665,19 @@ mod tests {
         assert_eq!(
             ArmOperand::get_swi(word),
             ArmOperand::SWI(0b1111_0000_1111_0000_1111_0000)
+        );
+    }
+
+    #[test]
+    fn get_bkpt() {
+        let word = 0b1110_0001_0010_1111_1111_1111_0111_1111;
+
+        assert_eq!(
+            ArmOperand::get_bkpt(word),
+            ArmOperand::BKPT {
+                immed1: 0b1111_1111_1111,
+                immed2: 0b1111,
+            }
         );
     }
 }
