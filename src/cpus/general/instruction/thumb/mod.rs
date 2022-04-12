@@ -1,3 +1,7 @@
+mod map;
+
+pub use map::get_thumb_instruction;
+
 use crate::ram::{
     Address,
     Word,

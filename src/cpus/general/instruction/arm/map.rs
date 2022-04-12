@@ -1,5 +1,5 @@
 use crate::{
-    cpus::general::{register::Registers, condition_code_flag::ConditionCodeFlag},
+    cpus::general::register::Registers,
     ram::{
         Address,
         Word,
@@ -7,8 +7,9 @@ use crate::{
 };
 
 use super::{
+    encoding_fields::AddressingMode1Offset,
+    opcode::ArmOpcode,
     ArmInstruction,
-    BitState, opcode::ArmOpcode, operand::ArmOperand, encoding_fields::AddressingMode1Offset,
 };
 
 pub fn get_arm_instruction(
@@ -76,7 +77,6 @@ fn miscellaneous_instructions1(
     value: &Word,
     registers: &Registers,
 ) -> ArmInstruction {
-
 }
 
 fn data_processing_register_shift(
