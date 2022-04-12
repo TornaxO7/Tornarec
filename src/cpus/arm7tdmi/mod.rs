@@ -24,7 +24,7 @@ use crate::{cpus::general::{
 
 use super::Architecture;
 
-#[derive(Debug, Clone, PartialEq, Eq, Default)]
+#[derive(Debug, Default)]
 pub struct Arm7TDMI {
     pub registers: Registers,
 

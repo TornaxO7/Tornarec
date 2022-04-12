@@ -8,7 +8,7 @@ use crate::{
     rom_reader::RomReader,
 };
 
-#[derive(Debug, Clone, PartialEq, Eq, Default)]
+#[derive(Debug, Default)]
 pub struct NintendoDS {
     arm7tdmi: Arm7TDMI,
     ram: Ram,

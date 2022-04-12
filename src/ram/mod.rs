@@ -12,6 +12,9 @@ use std::{
 };
 
 pub type Address = u32;
+pub type Byte = u8;
+pub type Halfword = u16;
+pub type Word = u32;
 
 #[derive(thiserror::Error, Debug, Clone, PartialEq, Eq)]
 pub enum RamError {

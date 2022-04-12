@@ -97,4 +97,5 @@ pub enum ArmOpcode {
     USADA8,
     USAT,
     USAT16,
+    NOOP,
 }

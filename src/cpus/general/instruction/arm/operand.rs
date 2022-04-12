@@ -185,4 +185,6 @@ pub enum ArmOperand {
         opcode: u8,
         crm: CPRegister,
     },
+
+    NOOP,
 }
