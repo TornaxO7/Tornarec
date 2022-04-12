@@ -251,6 +251,17 @@ impl ArmOperand {
 
         Self::WordHalfwordMultiply { rd, rs, y, rm }
     }
+
+    pub fn get_most_significant_word_multiply(value: Word) -> Self {
+        let rd = Register::try_from((value >> 16) & 0b1111).unwrap();
+        let rs = Register::try_from((value >> 8) & 0b1111).unwrap();
+        let r = BitState::from(((value >> 5) & 0b1) != 0);
+        let rm = Register::try_from(value & 0b1111).unwrap();
+
+        Self::MostSignificantWordMultiply { rd, rs, r, rm }
+    }
+
+
 }
 
 #[cfg(test)]
@@ -346,6 +357,21 @@ mod tests {
                 rs: Register::from(0b1111),
                 rm: Register::from(0b1111),
                 y: BitState::from(true),
+            }
+        );
+    }
+
+    #[test]
+    fn get_most_significant_word_multiply() {
+        let word = 0b0000_0111_0101_1111_1111_1111_0011_1111;
+
+        assert_eq!(
+            ArmOperand::get_most_significant_word_multiply(word),
+            ArmOperand::MostSignificantWordMultiply {
+                rd: Register::from(0b1111),
+                rs: Register::from(0b1111),
+                rm: Register::from(0b1111),
+                r: BitState::from(true),
             }
         );
     }
