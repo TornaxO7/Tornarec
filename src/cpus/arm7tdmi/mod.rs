@@ -1,6 +1,7 @@
 pub mod error;
 
-use crate::{cpus::general::{
+use crate::{
+    cpus::general::{
         bit_state::BitState,
         exception::{
             Exception,
@@ -20,7 +21,13 @@ use crate::{cpus::general::{
             RegisterName,
             Registers,
         },
-    }, ram::{Address, Ram, data_types::DataTypeSize}};
+    },
+    ram::{
+        data_types::DataTypeSize,
+        Address,
+        Ram,
+    },
+};
 
 use super::Architecture;
 

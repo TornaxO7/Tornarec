@@ -1,8 +1,21 @@
-use crate::{ram::{Address, Word}, cpus::general::register::Registers};
+use crate::{
+    cpus::general::register::Registers,
+    ram::{
+        Address,
+        Word,
+    },
+};
 
-use super::{ArmInstruction, BitState};
+use super::{
+    ArmInstruction,
+    BitState,
+};
 
-pub fn get_arm_instruction(address: &Address, value: &Word, registers: &Registers) -> ArmInstruction {
+pub fn get_arm_instruction(
+    address: &Address,
+    value: &Word,
+    registers: &Registers,
+) -> ArmInstruction {
     let bit25_27 = (value >> 25) & 0b111;
 
     match bit25_27 {
@@ -35,40 +48,53 @@ fn handle000(address: &Address, value: &Word, registers: &Registers) -> ArmInstr
 }
 
 // opcode[25:27] = 0b001
-fn handle001(address: &Address, value: &Word, registers: &Registers) -> ArmInstruction {
-}
+fn handle001(address: &Address, value: &Word, registers: &Registers) -> ArmInstruction {}
 
 // opcode[25:27] = 0b010
-fn handle010(address: &Address, value: &Word, registers: &Registers) -> ArmInstruction {
-}
+fn handle010(address: &Address, value: &Word, registers: &Registers) -> ArmInstruction {}
 
-fn handle011(address: &Address, value: &Word, registers: &Registers) -> ArmInstruction {
-}
+fn handle011(address: &Address, value: &Word, registers: &Registers) -> ArmInstruction {}
 
-fn handle100(address: &Address, value: &Word, registers: &Registers) -> ArmInstruction {
-}
+fn handle100(address: &Address, value: &Word, registers: &Registers) -> ArmInstruction {}
 
-fn handle101(address: &Address, value: &Word, registers: &Registers) -> ArmInstruction {
-}
+fn handle101(address: &Address, value: &Word, registers: &Registers) -> ArmInstruction {}
 
-fn handle110(address: &Address, value: &Word, registers: &Registers) -> ArmInstruction {
-}
+fn handle110(address: &Address, value: &Word, registers: &Registers) -> ArmInstruction {}
 
-fn handle111(address: &Address, value: &Word, registers: &Registers) -> ArmInstruction {
-}
+fn handle111(address: &Address, value: &Word, registers: &Registers) -> ArmInstruction {}
 
 /// ARM INSTRUCTIONS
-fn data_processing_immediate_shift(address: &Address, value: &Word, registers: &Registers) -> ArmInstruction {
+fn data_processing_immediate_shift(
+    address: &Address,
+    value: &Word,
+    registers: &Registers,
+) -> ArmInstruction {
 }
 
-fn miscellaneous_instructions1(address: &Address, value: &Word, registers: &Registers) -> ArmInstruction {
+fn miscellaneous_instructions1(
+    address: &Address,
+    value: &Word,
+    registers: &Registers,
+) -> ArmInstruction {
 }
 
-fn data_processing_register_shift(address: &Address, value: &Word, registers: &Registers) -> ArmInstruction {
+fn data_processing_register_shift(
+    address: &Address,
+    value: &Word,
+    registers: &Registers,
+) -> ArmInstruction {
 }
 
-fn miscellaneous_instructions2(address: &Address, value: &Word, registers: &Registers) -> ArmInstruction {
+fn miscellaneous_instructions2(
+    address: &Address,
+    value: &Word,
+    registers: &Registers,
+) -> ArmInstruction {
 }
 
-fn multiplies_and_extra_load_store(address: &Address, value: &Word, regisers: &Registers) -> ArmInstruction {
+fn multiplies_and_extra_load_store(
+    address: &Address,
+    value: &Word,
+    regisers: &Registers,
+) -> ArmInstruction {
 }

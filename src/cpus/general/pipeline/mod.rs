@@ -16,7 +16,10 @@ use crate::{
     },
 };
 
-use super::{Instruction, instruction::arm::ArmInstruction};
+use super::{
+    instruction::arm::ArmInstruction,
+    Instruction,
+};
 
 #[derive(thiserror::Error, Debug, Clone, PartialEq, Eq)]
 pub enum PipelineError {
@@ -78,9 +81,11 @@ impl<'a> Pipeline {
     }
 }
 
-fn get_arm_instruction(address: &Address, value: &Word, registers: &Registers) -> ArmInstruction {
+fn get_arm_instruction(address: &Address, value: &Word, registers: &Registers) -> ArmInstruction {}
 
-}
-
-fn get_thumb_instruction(address: &Address, value: &Word, registers: &Registers) -> ThumbInstruction {
+fn get_thumb_instruction(
+    address: &Address,
+    value: &Word,
+    registers: &Registers,
+) -> ThumbInstruction {
 }

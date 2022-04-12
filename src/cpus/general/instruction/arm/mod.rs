@@ -1,12 +1,15 @@
-pub mod opcode;
-pub mod operand;
 pub mod encoding_fields;
 pub mod map;
+pub mod opcode;
+pub mod operand;
 
 use opcode::ArmOpcode;
 use operand::ArmOperand;
 
-use crate::{cpus::general::condition_code_flag::ConditionCodeFlag, ram::Address};
+use crate::{
+    cpus::general::condition_code_flag::ConditionCodeFlag,
+    ram::Address,
+};
 
 use super::Instruction;
 
@@ -47,10 +50,9 @@ impl ArmInstruction {
         //     0b1100 => ConditionCodeFlag::LT,
         //     0b1101 => ConditionCodeFlag::LE,
         //     0b1110 => ConditionCodeFlag::AL,
-        //     _ => unreachable!("[INSTRUCTION ERROR]: Instruction has unknown condition flag!"),
-        // }
+        //     _ => unreachable!("[INSTRUCTION ERROR]: Instruction has unknown
+        // condition flag!"), }
     }
-
 }
 
 impl Instruction for ArmInstruction {

@@ -1,6 +1,10 @@
 use core::convert::TryInto;
 
-use super::{Byte, Halfword, Word};
+use super::{
+    Byte,
+    Halfword,
+    Word,
+};
 
 #[derive(thiserror::Error, Debug, Clone, PartialEq, Eq)]
 pub enum DataTypeError {

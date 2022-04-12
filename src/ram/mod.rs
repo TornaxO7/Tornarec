@@ -58,8 +58,7 @@ impl Ram {
             }
         }
 
-        self.ram[usize::try_from(starting_address).unwrap()..]
-            .copy_from_slice(data.get_ref());
+        self.ram[usize::try_from(starting_address).unwrap()..].copy_from_slice(data.get_ref());
         Ok(())
     }
 

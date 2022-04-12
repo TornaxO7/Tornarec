@@ -1,6 +1,7 @@
 use crate::ram::{
     data_types::DataType,
-    Address, Word,
+    Address,
+    Word,
 };
 
 #[derive(Debug, Clone, PartialEq, Eq)]

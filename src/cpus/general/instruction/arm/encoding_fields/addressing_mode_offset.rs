@@ -1,4 +1,10 @@
-use crate::{cpus::general::instruction::arm::{Register, BitState}, ram::Word};
+use crate::{
+    cpus::general::instruction::arm::{
+        BitState,
+        Register,
+    },
+    ram::Word,
+};
 
 trait AddressingModeOffset {
     fn get_offset(value: &Word) -> Self;
@@ -23,9 +29,7 @@ pub enum AddressingMode1Offset {
 }
 
 impl AddressingModeOffset for AddressingMode1Offset {
-    fn get_offset(value: &Word) -> Self {
-
-    }
+    fn get_offset(value: &Word) -> Self {}
 }
 
 #[derive(Debug, Clone, PartialEq, Eq)]

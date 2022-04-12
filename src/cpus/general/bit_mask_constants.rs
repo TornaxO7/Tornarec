@@ -23,7 +23,7 @@ impl BitMaskConstants {
                 Architecture::ARMv4T => 0x0000_000F,
                 Architecture::ARMv5TE => 0x0000_000F,
             },
-            Self::StateMask => match architecture{
+            Self::StateMask => match architecture {
                 Architecture::ARMv4T => 0x0,
                 Architecture::ARMv5TE => 0x0000_0020,
             },

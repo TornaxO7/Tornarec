@@ -2,13 +2,19 @@ mod error;
 
 pub use error::RegistersError;
 
-use crate::{cpus::general::{
+use crate::{
+    cpus::general::{
         register::{
             Cpsr,
             RegisterName,
         },
         OperatingMode,
-    }, ram::{Address, data_types::DataTypeSize}};
+    },
+    ram::{
+        data_types::DataTypeSize,
+        Address,
+    },
+};
 
 #[derive(Debug, Clone, PartialEq, Eq, Default)]
 pub struct Registers {
