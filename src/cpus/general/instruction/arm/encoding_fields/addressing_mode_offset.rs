@@ -52,6 +52,7 @@ pub enum AddressingMode4Offset {
     DecrementBefore,
 }
 
+/// Coprocessor addressing mode
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum AddressingMode5Offset {
     ImmediateOffset,

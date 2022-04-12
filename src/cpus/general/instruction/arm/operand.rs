@@ -7,10 +7,12 @@ use super::{
         AddressingMode3Offset,
         AddressingMode4Offset,
         AddressingMode5Offset,
-        RegisterList, MSRType,
+        MSRType,
+        RegisterList,
     },
     BitState,
     CPNum,
+    CPOpcode,
     CPRegister,
     Register,
 };
@@ -18,6 +20,8 @@ use super::{
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ArmOperand {
     Branch(u32),
+
+    // Multiply stuff
     NormalMultiply {
         s: BitState,
         rd: Register,
@@ -61,7 +65,6 @@ pub enum ArmOperand {
         rm: Register,
     },
 
-
     // Status register stuff
     MRS {
         r: BitState,
@@ -83,6 +86,7 @@ pub enum ArmOperand {
         mode: OperatingMode,
     },
 
+    // Address modes stuff
     AddressingMode1 {
         s: BitState,
         rn: Register,
@@ -123,7 +127,62 @@ pub enum ArmOperand {
         rn: Register,
         crd: CPRegister,
         cp_num: CPNum,
-        offset: u8,
+        offset_option: u8,
         offset_type: AddressingMode5Offset,
+    },
+
+    Semaphore {
+        rn: Register,
+        rd: Register,
+        rm: Register,
+    },
+
+    SWI(u32),
+    BKPT {
+        immed1: u16,
+        immed2: u8,
+    },
+
+    CPD {
+        opcode1: CPOpcode,
+        crn: CPRegister,
+        crd: CPRegister,
+        cp_num: CPNum,
+        opcode2: CPOpcode,
+        crm: CPRegister,
+    },
+
+    MCR {
+        opcode1: CPOpcode,
+        crn: CPRegister,
+        rd: Register,
+        cp_num: CPNum,
+        opcode2: CPOpcode,
+        crm: CPRegister,
+    },
+
+    MCRR {
+        rn: BitState,
+        rd: BitState,
+        cp_num: CPNum,
+        opcode: CPOpcode,
+        crm: CPRegister,
+    },
+
+    MRC {
+        opcode1: CPOpcode,
+        crn: CPRegister,
+        rd: Register,
+        cp_num: CPNum,
+        opcode2: CPOpcode,
+        crm: CPRegister,
+    },
+
+    MRRC {
+        rn: Register,
+        rd: Register,
+        cp_num: CPNum,
+        opcode: u8,
+        crm: CPRegister,
     },
 }

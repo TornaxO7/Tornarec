@@ -15,6 +15,9 @@ pub type CPRegister = u8;
 /// coprocessor number
 pub type CPNum = u8;
 
+/// opcode for the coprocessor
+pub type CPOpcode = u8;
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ArmInstruction {
     pub opcode: ArmOpcode,
