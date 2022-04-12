@@ -184,7 +184,8 @@ mod tests {
         encoding_fields::{
             AddressingMode2Offset,
             AddressingMode3Offset,
-            AddressingMode4Offset, AddressingMode5Offset,
+            AddressingMode4Offset,
+            AddressingMode5Offset,
         },
         Register,
     };
@@ -342,7 +343,7 @@ mod tests {
         assert_eq!(
             AddressingMode5Offset::from(word),
             AddressingMode5Offset::ImmediateOffset
-            );
+        );
     }
 
     #[test]
@@ -352,7 +353,7 @@ mod tests {
         assert_eq!(
             AddressingMode5Offset::from(word),
             AddressingMode5Offset::ImmediatePreIndexed
-            );
+        );
     }
 
     #[test]
@@ -362,7 +363,7 @@ mod tests {
         assert_eq!(
             AddressingMode5Offset::from(word),
             AddressingMode5Offset::ImmediatePostIndexed
-            );
+        );
     }
 
     #[test]
@@ -372,6 +373,6 @@ mod tests {
         assert_eq!(
             AddressingMode5Offset::from(word),
             AddressingMode5Offset::Unindexed
-            );
+        );
     }
 }
