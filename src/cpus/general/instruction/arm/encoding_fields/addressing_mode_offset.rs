@@ -164,6 +164,20 @@ pub enum AddressingMode5Offset {
     Unindexed,
 }
 
+impl From<Word> for AddressingMode5Offset {
+    fn from(word: Word) -> Self {
+        let p_flag = (word >> 24) & 0b1;
+        let w_flag = (word >> 21) & 0b1;
+
+        match (p_flag, w_flag) {
+            (1, 0) => Self::ImmediateOffset,
+            (1, 1) => Self::ImmediatePreIndexed,
+            (0, 1) => Self::ImmediatePostIndexed,
+            (0, 0) => Self::Unindexed,
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::cpus::general::instruction::arm::{
@@ -171,6 +185,7 @@ mod tests {
             AddressingMode2Offset,
             AddressingMode3Offset,
             AddressingMode4Offset,
+            AddressingMode5Offset,
         },
         Register,
     };
@@ -318,6 +333,46 @@ mod tests {
         assert_eq!(
             AddressingMode4Offset::from(word),
             AddressingMode4Offset::DecrementBefore
+        );
+    }
+
+    #[test]
+    fn addressing_mode_5_immediate_offset() {
+        let word = 0b0000_1101_0000_0000_0000_0000_0000_0000;
+
+        assert_eq!(
+            AddressingMode5Offset::from(word),
+            AddressingMode5Offset::ImmediateOffset
+        );
+    }
+
+    #[test]
+    fn addressing_mode_5_immediate_pre_indexed() {
+        let word = 0b0000_1101_0010_0000_0000_0000_0000_0000;
+
+        assert_eq!(
+            AddressingMode5Offset::from(word),
+            AddressingMode5Offset::ImmediatePreIndexed
+        );
+    }
+
+    #[test]
+    fn addressing_mode_5_immediate_post_indexed() {
+        let word = 0b0000_1100_0010_0000_0000_0000_0000_0000;
+
+        assert_eq!(
+            AddressingMode5Offset::from(word),
+            AddressingMode5Offset::ImmediatePostIndexed
+        );
+    }
+
+    #[test]
+    fn addressing_mode_5_unindexed() {
+        let word = 0b0000_1100_0000_0000_0000_0000_0000_0000;
+
+        assert_eq!(
+            AddressingMode5Offset::from(word),
+            AddressingMode5Offset::Unindexed
         );
     }
 }
