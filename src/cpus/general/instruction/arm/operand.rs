@@ -208,7 +208,7 @@ impl ArmOperand {
         let rm = Register::try_from(value & 0b1111).unwrap();
 
         if sbz != 0 {
-            todo!("SBZ, see A4.1.40");
+            todo!("SBZ, see A4.1.40 (page 230)");
         }
 
         Self::NormalMultiply { s, rd, rs, rm }
@@ -232,7 +232,7 @@ impl ArmOperand {
         let rm = Register::try_from(value & 0b1111).unwrap();
 
         if sbz != 0 {
-            todo!("[SBZ] A4.1.86");
+            todo!("[SBZ] A4.1.86 (page 316)");
         }
 
         Self::HalfwordMultiply { rd, rs, y, x, rm }
@@ -246,7 +246,7 @@ impl ArmOperand {
         let rm = Register::try_from(value & 0b1111).unwrap();
 
         if sbz != 0 {
-            todo!("[SBZ] A4.1.88");
+            todo!("[SBZ] A4.1.88 (page 320)");
         }
 
         Self::WordHalfwordMultiply { rd, rs, y, rm }
@@ -277,14 +277,32 @@ impl ArmOperand {
         let rm = Register::try_from(value & 0b1111).unwrap();
 
         if sbo1 != 0b1111 {
-            todo!("[SBO 1] A4.1.13");
+            todo!("[SBO 1] A4.1.13 (page 175)");
         } else if sbo2 != 0b1111 {
-            todo!("[SBO 2] A4.1.13");
+            todo!("[SBO 2] A4.1.13 (page 175)");
         }
 
         Self::CountLeadingZeros {
             rd,
             rm,
+        }
+    }
+
+    pub fn get_mrs(value: Word) -> Self {
+        let r = BitState::from(((value >> 22) & 0b1) != 0);
+        let sbo = (value >> 16) & 0b1111;
+        let rd = Register::try_from((value >> 12) & 0b1111).unwrap();
+        let sbz = value & 0b1111_1111_1111;
+
+        if sbo != 0b1111 {
+            todo!("[SBO] A4.1.38 (page 224)");
+        } else if sbz != 0 {
+            todo!("[SBZ] A4.1.38 (page 224)");
+        }
+
+        Self::MRS {
+            r,
+            rd
         }
     }
 }
@@ -430,14 +448,43 @@ mod tests {
     }
 
     #[test]
+    #[should_panic]
     fn get_count_leading_zeros_sbo1() {
         let word = 0b0000_0001_0110_0000_1111_1111_0001_1111;
         ArmOperand::get_count_leading_zeros(word);
     }
 
     #[test]
+    #[should_panic]
     fn get_count_leading_zeros_sbo2() {
         let word = 0b0000_0001_0110_1111_1111_0000_0001_1111;
         ArmOperand::get_count_leading_zeros(word);
+    }
+
+    #[test]
+    fn get_mrs() {
+        let word = 0b0000_0001_0100_1111_1111_0000_0000_0000;
+
+        assert_eq!(
+            ArmOperand::get_mrs(word),
+            ArmOperand::MRS {
+                r: BitState::from(true),
+                rd: Register::from(0b1111),
+            }
+        );
+    }
+
+    #[test]
+    #[should_panic]
+    fn get_mrs_sbo() {
+        let word = 0b0000_0001_0100_0000_1111_0000_0000_0000;
+        ArmOperand::get_mrs(word);
+    }
+
+    #[test]
+    #[should_panic]
+    fn get_mrs_sbz() {
+        let word = 0b0000_0001_0100_1111_1111_1111_1111_1111;
+        ArmOperand::get_mrs(word);
     }
 }
