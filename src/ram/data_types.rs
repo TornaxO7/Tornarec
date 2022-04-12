@@ -46,26 +46,4 @@ impl DataType {
             Err(_) => Err(DataTypeError::WordError(slice.to_vec())),
         }
     }
-
-    pub fn get_value_as_u32(&self) -> u32 {
-        match self {
-            Self::Byte(val) => u32::from(*val),
-            Self::Halfword(val) => u32::from(*val),
-            Self::Word(val) => *val,
-        }
-    }
-
-    pub fn get_size(&self) -> u32 {
-        match self {
-            Self::Byte(_) => Self::BYTE_SIZE,
-            Self::Halfword(_) => Self::HALFWORD_SIZE,
-            Self::Word(_) => Self::WORD_SIZE,
-        }
-    }
-}
-
-impl Default for DataType {
-    fn default() -> Self {
-        Self::Word(0)
-    }
 }
