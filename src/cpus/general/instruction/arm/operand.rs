@@ -1,4 +1,7 @@
-use crate::cpus::general::OperatingMode;
+use crate::{
+    cpus::general::OperatingMode,
+    ram::Word,
+};
 
 use super::{
     encoding_fields::{
@@ -187,4 +190,27 @@ pub enum ArmOperand {
     },
 
     NOOP,
+}
+
+impl ArmOperand {
+    pub fn get_branch(value: Word) -> Self {
+        let immed = value & 0b1111_1111_1111_1111_1111_1111;
+        Self::Branch(immed)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+
+    use super::ArmOperand;
+
+    #[test]
+    fn get_branch() {
+        let word = 0b0000_0000_1111_1111_1111_1111_1111_1111;
+
+        assert_eq!(
+            ArmOperand::get_branch(word),
+            ArmOperand::Branch(0b1111_1111_1111_1111_1111_1111)
+        );
+    }
 }
