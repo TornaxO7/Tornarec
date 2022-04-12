@@ -338,7 +338,7 @@ mod tests {
     #[test]
     fn addressing_mode_5_immediate_offset() {
         let word = 0b0000_1101_0000_0000_0000_0000_0000_0000;
-        
+
         assert_eq!(
             AddressingMode5Offset::from(word),
             AddressingMode5Offset::ImmediateOffset

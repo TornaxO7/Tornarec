@@ -1,5 +1,5 @@
 use crate::{
-    cpus::general::register::Registers,
+    cpus::general::{register::Registers, condition_code_flag::ConditionCodeFlag},
     ram::{
         Address,
         Word,
@@ -8,7 +8,7 @@ use crate::{
 
 use super::{
     ArmInstruction,
-    BitState,
+    BitState, opcode::ArmOpcode, operand::ArmOperand, encoding_fields::AddressingMode1Offset,
 };
 
 pub fn get_arm_instruction(
@@ -69,7 +69,6 @@ fn data_processing_immediate_shift(
     value: &Word,
     registers: &Registers,
 ) -> ArmInstruction {
-
 }
 
 fn miscellaneous_instructions1(
@@ -99,4 +98,29 @@ fn multiplies_and_extra_load_store(
     value: &Word,
     regisers: &Registers,
 ) -> ArmInstruction {
+}
+
+/// HELPER FUNCTIONS
+fn get_data_processing_operand(value: &Word) -> ArmOpcode {
+    let opcode = (value >> 21) & 0b1111;
+
+    match opcode {
+        0b0000 => ArmOpcode::AND,
+        0b0001 => ArmOpcode::EOR,
+        0b0010 => ArmOpcode::SUB,
+        0b0011 => ArmOpcode::RSB,
+        0b0100 => ArmOpcode::ADD,
+        0b0101 => ArmOpcode::ADC,
+        0b0110 => ArmOpcode::SBC,
+        0b0111 => ArmOpcode::RSC,
+        0b1000 => ArmOpcode::TST,
+        0b1001 => ArmOpcode::TEQ,
+        0b1010 => ArmOpcode::CMP,
+        0b1011 => ArmOpcode::CMN,
+        0b1100 => ArmOpcode::ORR,
+        0b1101 => ArmOpcode::MOV,
+        0b1110 => ArmOpcode::BIC,
+        0b1111 => ArmOpcode::MVN,
+        _ => unreachable!("Unknown opcode: {}", opcode),
+    }
 }
