@@ -235,20 +235,31 @@ impl ArmOperand {
             todo!("[SBZ] A4.1.86");
         }
 
-        Self::HalfwordMultiply {
-            rd,
-            rs,
-            y,
-            x,
-            rm
+        Self::HalfwordMultiply { rd, rs, y, x, rm }
+    }
+
+    pub fn get_word_halfword_multiply(value: Word) -> Self {
+        let rd = Register::try_from((value >> 16) & 0b1111).unwrap();
+        let sbz = (value >> 12) & 0b1111;
+        let rs = Register::try_from((value >> 8) & 0b1111).unwrap();
+        let y = BitState::from(((value >> 6) & 0b1) != 0);
+        let rm = Register::try_from(value & 0b1111).unwrap();
+
+        if sbz != 0 {
+            todo!("[SBZ] A4.1.88");
         }
+
+        Self::WordHalfwordMultiply { rd, rs, y, rm }
     }
 }
 
 #[cfg(test)]
 mod tests {
 
-    use crate::cpus::general::instruction::arm::Register;
+    use crate::cpus::general::instruction::arm::{
+        BitState,
+        Register,
+    };
 
     use super::ArmOperand;
 
@@ -313,7 +324,7 @@ mod tests {
                 x: BitState::from(true),
                 rm: Register::from(0b1111)
             }
-            );
+        );
     }
 
     #[test]
@@ -322,5 +333,20 @@ mod tests {
         let word = 0b0000_0000_0000_0000_1111_0000_0000_0000;
 
         ArmOperand::get_halfword_multiply(word);
+    }
+
+    #[test]
+    fn get_word_halfword_multiply() {
+        let word = 0b0000_0001_0010_1111_0000_1111_1110_1111;
+
+        assert_eq!(
+            ArmOperand::get_word_halfword_multiply(word),
+            ArmOperand::WordHalfwordMultiply {
+                rd: Register::from(0b1111),
+                rs: Register::from(0b1111),
+                rm: Register::from(0b1111),
+                y: BitState::from(true),
+            }
+        );
     }
 }
