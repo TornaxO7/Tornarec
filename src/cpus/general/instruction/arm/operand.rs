@@ -282,10 +282,7 @@ impl ArmOperand {
             todo!("[SBO 2] A4.1.13 (page 175)");
         }
 
-        Self::CountLeadingZeros {
-            rd,
-            rm,
-        }
+        Self::CountLeadingZeros { rd, rm }
     }
 
     pub fn get_mrs(value: Word) -> Self {
@@ -300,9 +297,31 @@ impl ArmOperand {
             todo!("[SBZ] A4.1.38 (page 224)");
         }
 
-        Self::MRS {
+        Self::MRS { r, rd }
+    }
+
+    pub fn get_msr(value: Word) -> Self {
+        let r = BitState::from(((value >> 22) & 0b1) != 0);
+        let field_mask = u8::try_from((value >> 16) & 0b1111).unwrap();
+        let sbo = (value >> 12) & 0b1111;
+        let msr_type = {
+            let should_immediate = ((value >> 25) & 0b1) != 0;
+
+            if should_immediate {
+                MSRType::get_immediate(value)
+            } else {
+                MSRType::get_register(value)
+            }
+        };
+
+        if sbo != 0b1111 {
+            todo!("[SBO] A4.1.39 (page 226)");
+        }
+
+        Self::MSR {
             r,
-            rd
+            field_mask,
+            msr_type,
         }
     }
 }
@@ -311,6 +330,7 @@ impl ArmOperand {
 mod tests {
 
     use crate::cpus::general::instruction::arm::{
+        encoding_fields::MSRType,
         BitState,
         Register,
     };
@@ -486,5 +506,57 @@ mod tests {
     fn get_mrs_sbz() {
         let word = 0b0000_0001_0100_1111_1111_1111_1111_1111;
         ArmOperand::get_mrs(word);
+    }
+
+    #[test]
+    fn get_msr_immediate() {
+        let word = 0b0000_0011_0110_1111_1111_1111_1111_1111;
+
+        assert_eq!(
+            ArmOperand::get_msr(word),
+            ArmOperand::MSR {
+                r: BitState::from(true),
+                field_mask: 0b1111,
+                msr_type: MSRType::Immediate {
+                    rotate_imm: 0b1111,
+                    immediate: 0b1111_1111
+                }
+            }
+        );
+    }
+
+    #[test]
+    fn get_msr_register() {
+        let word = 0b0000_0001_0110_1111_1111_00000_0000_1111;
+
+        assert_eq!(
+            ArmOperand::get_msr(word),
+            ArmOperand::MSR {
+                r: BitState::from(true),
+                field_mask: 0b1111,
+                msr_type: MSRType::Register(0b1111),
+            }
+        );
+    }
+
+    #[test]
+    #[should_panic]
+    fn get_msr_immediate_sbo() {
+        let word = 0b0000_0011_0110_1111_0000_1111_1111_1111;
+        ArmOperand::get_msr(word);
+    }
+
+    #[test]
+    #[should_panic]
+    fn get_msr_register_sbo() {
+        let word = 0b0000_0001_0110_1111_0000_0000_0000_1111;
+        ArmOperand::get_msr(word);
+    }
+
+    #[test]
+    #[should_panic]
+    fn get_msr_register_sbz() {
+        let word = 0b0000_0001_0110_1111_1111_0000_0000_1111;
+        ArmOperand::get_msr(word);
     }
 }
