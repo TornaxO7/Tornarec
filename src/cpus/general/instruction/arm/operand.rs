@@ -187,7 +187,7 @@ pub enum ArmOperand {
         rn: Register,
         rd: Register,
         cp_num: CPNum,
-        opcode: u8,
+        opcode: CPOpcode,
         crm: CPRegister,
     },
 
@@ -439,6 +439,22 @@ impl ArmOperand {
             rd,
             cp_num,
             opcode2,
+            crm,
+        }
+    }
+
+    pub fn get_mrrc(value: Word) -> Self {
+        let rn = Register::try_from((value >> 16) & 0b1111).unwrap();
+        let rd = Register::try_from((value >> 12) & 0b1111).unwrap();
+        let cp_num = CPNum::try_from((value >> 8) & 0b1111).unwrap();
+        let opcode = CPOpcode::try_from((value >> 4) & 0b1111).unwrap();
+        let crm = CPRegister::try_from(value & 0b1111).unwrap();
+
+        Self::MRRC {
+            rn,
+            rd,
+            cp_num,
+            opcode,
             crm,
         }
     }
@@ -815,6 +831,22 @@ mod tests {
                 opcode2: CPOpcode::from(0b1111),
                 crm: CPRegister::from(0b1111),
             },
+        );
+    }
+
+    #[test]
+    fn get_mrrc() {
+        let word = 0b0000_1100_0101_1111_1111_1111_1111_1111;
+
+        assert_eq!(
+            ArmOperand::get_mrrc(word),
+            ArmOperand::MRRC {
+                rn: Register::from(0b1111),
+                rd: Register::from(0b1111),
+                cp_num: CPNum::from(0b1111),
+                opcode: CPOpcode::from(0b1111),
+                crm: CPRegister::from(0b1111),
+            }
         );
     }
 }
