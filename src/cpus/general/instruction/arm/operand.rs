@@ -42,9 +42,9 @@ pub enum ArmOperand {
     HalfwordMultiply {
         rd: Register,
         rs: Register,
-        rm: Register,
         y: BitState,
         x: BitState,
+        rm: Register,
     },
     WordHalfwordMultiply {
         rd: Register,
@@ -222,6 +222,27 @@ impl ArmOperand {
 
         Self::LongMultiply { rdhi, rdlo, rs, rm }
     }
+
+    pub fn get_halfword_multiply(value: Word) -> Self {
+        let rd = Register::try_from((value >> 16) & 0b1111).unwrap();
+        let sbz = (value >> 12) & 0b1111;
+        let rs = Register::try_from((value >> 8) & 0b1111).unwrap();
+        let y = BitState::from(((value >> 6) & 0b1) != 0);
+        let x = BitState::from(((value >> 5) & 0b1) != 0);
+        let rm = Register::try_from(value & 0b1111).unwrap();
+
+        if sbz != 0 {
+            todo!("[SBZ] A4.1.86");
+        }
+
+        Self::HalfwordMultiply {
+            rd,
+            rs,
+            y,
+            x,
+            rm
+        }
+    }
 }
 
 #[cfg(test)]
@@ -277,5 +298,29 @@ mod tests {
                 rm: Register::from(0b1111),
             }
         );
+    }
+
+    #[test]
+    fn get_halfword_multiply() {
+        let word = 0b0000_0000_0000_1111_0000_1111_1110_1111;
+
+        assert_eq!(
+            ArmOperand::get_halfword_multiply(word),
+            ArmOperand::HalfwordMultiply {
+                rd: Register::from(0b1111),
+                rs: Register::from(0b1111),
+                y: BitState::from(true),
+                x: BitState::from(true),
+                rm: Register::from(0b1111)
+            }
+            );
+    }
+
+    #[test]
+    #[should_panic]
+    fn get_halfword_multiply_sbz() {
+        let word = 0b0000_0000_0000_0000_1111_0000_0000_0000;
+
+        ArmOperand::get_halfword_multiply(word);
     }
 }
