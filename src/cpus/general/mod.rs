@@ -1,11 +1,12 @@
 mod bit_mask_constants;
-pub mod condition_code_flag;
-pub mod condition_flag;
+mod condition_code_flag;
+mod condition_flag;
+mod interruption;
+mod operating_mode;
+mod operating_state;
+
 pub mod exception;
 pub mod instruction;
-pub mod interruption;
-pub mod operating_mode;
-pub mod operating_state;
 pub mod pipeline;
 pub mod register;
 
