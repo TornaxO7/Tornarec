@@ -59,6 +59,7 @@ pub enum ArmOpcode {
     SBC,
     SEL,
     SMLAXY,
+    SMLALXY,
     SMLALD,
     SMLAWY,
     SMLSD,

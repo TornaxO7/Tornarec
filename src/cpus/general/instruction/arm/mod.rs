@@ -1,9 +1,9 @@
 pub mod encoding_fields;
-mod map;
 pub mod opcode;
 pub mod operand;
+mod instruction_set;
 
-pub use map::get_arm_instruction;
+pub use decode::get_arm_instruction;
 
 use opcode::ArmOpcode;
 use operand::ArmOperand;

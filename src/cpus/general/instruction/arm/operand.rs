@@ -25,6 +25,7 @@ use super::{
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ArmOperand {
     Branch(u32),
+    BX(Register),
 
     // Multiply stuff
     NormalMultiply {
@@ -41,6 +42,8 @@ pub enum ArmOperand {
     },
     HalfwordMultiply {
         rd: Register,
+        // this field isn't needed for all opcodes
+        rn: Register,
         rs: Register,
         y: BitState,
         x: BitState,
@@ -48,9 +51,10 @@ pub enum ArmOperand {
     },
     WordHalfwordMultiply {
         rd: Register,
+        rn: Register,
         rs: Register,
-        rm: Register,
         y: BitState,
+        rm: Register,
     },
     MostSignificantWordMultiply {
         rd: Register,

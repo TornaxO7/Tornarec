@@ -19,8 +19,8 @@ pub enum ConditionCodeFlag {
     AL,
 }
 
-impl From<&Word> for ConditionCodeFlag {
-    fn from(word: &Word) -> Self {
+impl From<Word> for ConditionCodeFlag {
+    fn from(word: Word) -> Self {
         let condition = word >> 28;
 
         match condition {
