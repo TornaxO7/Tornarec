@@ -2,19 +2,11 @@ pub mod error;
 
 use crate::{
     cpus::general::{
-        bit_state::BitState,
         exception::{
             Exception,
             ExceptionStack,
             ExceptionVector,
         },
-        instruction::executer::{
-            ArmExecuter,
-            ThumbExecuter,
-        },
-        interruption::Interruption,
-        operating_mode::OperatingMode,
-        operating_state::OperatingState,
         pipeline::Pipeline,
         register::{
             Cpsr,
@@ -23,13 +15,16 @@ use crate::{
         },
     },
     ram::{
-        data_types::DataTypeSize,
+        data_types::DataType,
         Address,
         Ram,
     },
 };
 
-use super::Architecture;
+use super::general::{
+    OperatingMode,
+    OperatingState, Interruption, instruction::arm::BitState,
+};
 
 #[derive(Debug, Default)]
 pub struct Arm7TDMI {
@@ -55,8 +50,8 @@ impl Arm7TDMI {
         let pc = Address::from(self.registers.get_reg(RegisterName::Pc));
 
         match cpsr.get_operating_state() {
-            OperatingState::Arm => self.pipeline.fetch(ram, pc, DataTypeSize::Word),
-            OperatingState::Thumb => self.pipeline.fetch(ram, pc, DataTypeSize::Halfword),
+            OperatingState::Arm => self.pipeline.fetch(ram, pc, DataType::Word),
+            OperatingState::Thumb => self.pipeline.fetch(ram, pc, DataType::Halfword),
         };
     }
 
@@ -66,9 +61,6 @@ impl Arm7TDMI {
 
     pub fn execute(&mut self, _ram: &mut Ram) {
         let _decoded_instruction = self.pipeline.get_decoded_instruction();
-
-        let _arm = ArmExecuter::new(&mut self.registers, Architecture::ARMv4T);
-        let _thumb = ThumbExecuter::new();
 
         // match decoded_instruction {
         //     InstructionMap::Arm(arm_instruction) => match arm_instruction {
@@ -129,90 +121,91 @@ impl Arm7TDMI {
     }
 
     pub fn enter_exception(&mut self, exception: Exception) {
-        if self.exception_stack.push(exception.clone()).is_some() {
-            let pc_val = self.registers.get_reg(RegisterName::Pc);
-            let cpsr = self.registers.get_ref_cpsr().clone();
-
-            let in_arm_state = cpsr.get_operating_state() == OperatingState::Arm;
-
-            match exception {
-                Exception::Swi => {
-                    if in_arm_state {
-                        self.registers.set_reg(RegisterName::LrSvc, pc_val + 2);
-                    } else {
-                        self.registers.set_reg(RegisterName::LrSvc, pc_val + 4);
-                    }
-
-                    self.registers
-                        .set_reg(RegisterName::SpsrSvc, cpsr.get_as_u32());
-                    self.registers
-                        .set_reg(RegisterName::Pc, ExceptionVector::SWI);
-                }
-                Exception::Udef => {
-                    if in_arm_state {
-                        self.registers.set_reg(RegisterName::LrUnd, pc_val + 2);
-                    } else {
-                        self.registers.set_reg(RegisterName::LrUnd, pc_val + 4);
-                    }
-
-                    self.registers
-                        .set_reg(RegisterName::SpsrUnd, cpsr.get_as_u32());
-                    self.registers
-                        .set_reg(RegisterName::Pc, ExceptionVector::UDEF);
-                }
-                Exception::Pabt => {
-                    self.registers.set_reg(RegisterName::LrAbt, pc_val + 4);
-                    self.registers
-                        .set_reg(RegisterName::SpsrAbt, cpsr.get_as_u32());
-                    self.registers
-                        .set_reg(RegisterName::Pc, ExceptionVector::PABT);
-                }
-                Exception::Fiq => {
-                    self.registers.set_reg(RegisterName::LrFiq, pc_val + 4);
-                    self.registers
-                        .set_reg(RegisterName::SpsrFiq, cpsr.get_as_u32());
-                    self.registers
-                        .set_reg(RegisterName::Pc, ExceptionVector::FIQ);
-                }
-                Exception::Irq => {
-                    self.registers.set_reg(RegisterName::LrIrq, pc_val + 4);
-                    self.registers
-                        .set_reg(RegisterName::SpsrIrq, cpsr.get_as_u32());
-                    self.registers
-                        .set_reg(RegisterName::Pc, ExceptionVector::FIQ);
-                }
-                Exception::Dabt => {
-                    self.registers.set_reg(RegisterName::LrAbt, pc_val + 8);
-                    self.registers
-                        .set_reg(RegisterName::SpsrAbt, cpsr.get_as_u32());
-                    self.registers
-                        .set_reg(RegisterName::Pc, ExceptionVector::DABT);
-                }
-                Exception::Reset => self
-                    .registers
-                    .set_reg(RegisterName::Pc, ExceptionVector::RESET),
-            };
-
-            // update the cpsr
-            let cpsr: &mut Cpsr = self.registers.get_mut_cpsr();
-
-            match exception {
-                Exception::Swi => cpsr.set_operating_mode(OperatingMode::Svc),
-                Exception::Udef => cpsr.set_operating_mode(OperatingMode::Und),
-                Exception::Pabt | Exception::Dabt => cpsr.set_operating_mode(OperatingMode::Abt),
-                Exception::Fiq => {
-                    cpsr.set_operating_mode(OperatingMode::Fiq);
-                    cpsr.set_interrupt_bit(Interruption::Fiq, BitState::Set);
-                }
-                Exception::Irq => cpsr.set_operating_mode(OperatingMode::Irq),
-                Exception::Reset => {
-                    cpsr.set_operating_mode(OperatingMode::Svc);
-                    cpsr.set_interrupt_bit(Interruption::Fiq, BitState::Set);
-                }
-            };
-
-            cpsr.set_interrupt_bit(Interruption::Irq, BitState::Set);
-            cpsr.set_operating_state(OperatingState::Arm);
+        if self.exception_stack.push(exception.clone()).is_none() {
+            return;
         }
+        let pc_val = self.registers.get_reg(RegisterName::Pc);
+        let cpsr = self.registers.get_ref_cpsr().clone();
+
+        let in_arm_state = cpsr.get_operating_state() == OperatingState::Arm;
+
+        match exception {
+            Exception::Swi => {
+                if in_arm_state {
+                    self.registers.set_reg(RegisterName::LrSvc, pc_val + 2);
+                } else {
+                    self.registers.set_reg(RegisterName::LrSvc, pc_val + 4);
+                }
+
+                self.registers
+                    .set_reg(RegisterName::SpsrSvc, cpsr.get_as_u32());
+                self.registers
+                    .set_reg(RegisterName::Pc, ExceptionVector::SWI);
+            }
+            Exception::Udef => {
+                if in_arm_state {
+                    self.registers.set_reg(RegisterName::LrUnd, pc_val + 2);
+                } else {
+                    self.registers.set_reg(RegisterName::LrUnd, pc_val + 4);
+                }
+
+                self.registers
+                    .set_reg(RegisterName::SpsrUnd, cpsr.get_as_u32());
+                self.registers
+                    .set_reg(RegisterName::Pc, ExceptionVector::UDEF);
+            }
+            Exception::Pabt => {
+                self.registers.set_reg(RegisterName::LrAbt, pc_val + 4);
+                self.registers
+                    .set_reg(RegisterName::SpsrAbt, cpsr.get_as_u32());
+                self.registers
+                    .set_reg(RegisterName::Pc, ExceptionVector::PABT);
+            }
+            Exception::Fiq => {
+                self.registers.set_reg(RegisterName::LrFiq, pc_val + 4);
+                self.registers
+                    .set_reg(RegisterName::SpsrFiq, cpsr.get_as_u32());
+                self.registers
+                    .set_reg(RegisterName::Pc, ExceptionVector::FIQ);
+            }
+            Exception::Irq => {
+                self.registers.set_reg(RegisterName::LrIrq, pc_val + 4);
+                self.registers
+                    .set_reg(RegisterName::SpsrIrq, cpsr.get_as_u32());
+                self.registers
+                    .set_reg(RegisterName::Pc, ExceptionVector::FIQ);
+            }
+            Exception::Dabt => {
+                self.registers.set_reg(RegisterName::LrAbt, pc_val + 8);
+                self.registers
+                    .set_reg(RegisterName::SpsrAbt, cpsr.get_as_u32());
+                self.registers
+                    .set_reg(RegisterName::Pc, ExceptionVector::DABT);
+            }
+            Exception::Reset => self
+                .registers
+                .set_reg(RegisterName::Pc, ExceptionVector::RESET),
+        };
+
+        // update the cpsr
+        let cpsr: &mut Cpsr = self.registers.get_mut_cpsr();
+
+        match exception {
+            Exception::Swi => cpsr.set_operating_mode(OperatingMode::Svc),
+            Exception::Udef => cpsr.set_operating_mode(OperatingMode::Und),
+            Exception::Pabt | Exception::Dabt => cpsr.set_operating_mode(OperatingMode::Abt),
+            Exception::Fiq => {
+                cpsr.set_operating_mode(OperatingMode::Fiq);
+                cpsr.set_interrupt_bit(Interruption::Fiq, BitState::from(true));
+            }
+            Exception::Irq => cpsr.set_operating_mode(OperatingMode::Irq),
+            Exception::Reset => {
+                cpsr.set_operating_mode(OperatingMode::Svc);
+                cpsr.set_interrupt_bit(Interruption::Fiq, BitState::from(true));
+            }
+        };
+
+        cpsr.set_interrupt_bit(Interruption::Irq, BitState::from(true));
+        cpsr.set_operating_state(OperatingState::Arm);
     }
 }

@@ -1,6 +1,6 @@
 use std::convert::From;
 
-use super::BitState;
+use super::instruction::arm::BitState;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum OperatingState {
@@ -11,8 +11,8 @@ pub enum OperatingState {
 impl From<BitState> for OperatingState {
     fn from(bitstate: BitState) -> Self {
         match bitstate {
-            BitState::Set => OperatingState::Thumb,
-            BitState::Unset => OperatingState::Arm,
+            true => OperatingState::Thumb,
+            false => OperatingState::Arm,
         }
     }
 }

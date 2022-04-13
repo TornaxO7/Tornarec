@@ -1,4 +1,28 @@
-use self::miscellaneous1::{get_mrs, get_msr, branch_exchange_instruction_set_thumb, signed_multiplies_type2};
+use crate::{
+    cpus::general::{
+        condition_code_flag::ConditionCodeFlag,
+        instruction::arm::{
+            encoding_fields::AddressingMode1Offset,
+            operand::ArmOperand,
+            ArmInstruction,
+            BitState,
+            Register, opcode::ArmOpcode,
+        },
+    },
+    ram::{
+        Address,
+        Word,
+    },
+};
+
+use std::convert::TryFrom;
+
+use self::miscellaneous1::{
+    get_bx,
+    get_mrs,
+    get_msr,
+    get_signed_multiplies_type2,
+};
 
 mod miscellaneous1;
 
@@ -42,8 +66,8 @@ fn miscellaneous_instructions1(address: Address, value: Word) -> ArmInstruction 
     match (bit21, bit7, bit5, bit4) {
         (0, 0, 0, 0) => get_mrs(address, value),
         (1, 0, 0, 0) => get_msr(address, value),
-        (1, 0, 1, 0) => branch_exchange_instruction_set_thumb(address, value),
-        (1, 1, _, 0) => signed_multiplies_type2(address, value),
+        (1, 0, 1, 0) => get_bx(address, value),
+        (1, 1, _, 0) => get_signed_multiplies_type2(address, value),
         (_, _, _, _) => todo!("[Unknown Misc] Figure A3-4 (page 145). Value: {}", value),
     }
 }

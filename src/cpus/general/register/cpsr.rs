@@ -1,5 +1,4 @@
 use crate::cpus::general::{
-    bit_state::BitState,
     condition_code_flag::ConditionCodeFlag,
     interruption::Interruption,
     operating_mode::OperatingMode,
@@ -7,7 +6,7 @@ use crate::cpus::general::{
     register::types::{
         ConditionBit,
         ConditionBits,
-    },
+    }, instruction::arm::BitState,
 };
 
 use core::convert::From;
@@ -70,12 +69,12 @@ impl Cpsr {
     pub fn set_interrupt_bit(&mut self, interrupt: Interruption, state: BitState) {
         match interrupt {
             Interruption::Irq => match state {
-                BitState::Unset => self.0 &= !(1 << 7),
-                BitState::Set => self.0 |= 1 << 7,
+                false => self.0 &= !(1 << 7),
+                true => self.0 |= 1 << 7,
             },
             Interruption::Fiq => match state {
-                BitState::Unset => self.0 &= !(1 << 6),
-                BitState::Set => self.0 |= 1 << 6,
+                false => self.0 &= !(1 << 6),
+                true => self.0 |= 1 << 6,
             },
         }
     }
@@ -84,16 +83,16 @@ impl Cpsr {
         match interrupt {
             Interruption::Irq => {
                 if (self.0 >> 7) & 1 == 1 {
-                    BitState::Set
+                    BitState::from(true)
                 } else {
-                    BitState::Unset
+                    BitState::from(false)
                 }
             }
             Interruption::Fiq => {
                 if (self.0 >> 6) & 1 == 1 {
-                    BitState::Set
+                    BitState::from(true)
                 } else {
-                    BitState::Unset
+                    BitState::from(false)
                 }
             }
         }
