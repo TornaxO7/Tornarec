@@ -42,6 +42,7 @@ pub fn get_mrs(address: Address, value: Word) -> ArmInstruction {
     }
 }
 
+// Move register to CPSR
 pub fn get_msr(address: Address, value: Word) -> ArmInstruction {
     let bit25 = BitState::from(((value >> 25) & 0b1) != 0);
     let sbo = (value >> 12) & 0b1111;
@@ -103,6 +104,18 @@ pub fn get_bx(address: Address, value: Word) -> ArmInstruction {
         cond: ConditionCodeFlag::from(value),
         address,
     }
+}
+
+pub fn get_clz(address: Address, value: Word) -> ArmInstruction {
+}
+
+pub fn get_blx(address: Address, value: Word) -> ArmInstruction {
+}
+
+pub fn get_saturating_add_subtract(address: Address, value: Word) -> ArmInstruction {
+}
+
+pub fn get_bkpt(address: Address, value: Word) -> ArmInstruction {
 }
 
 // Differ bettwen halfwor multiply and word+halfword multiply
