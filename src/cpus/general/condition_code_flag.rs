@@ -40,6 +40,7 @@ impl From<Word> for ConditionCodeFlag {
             0b1101 => Self::LE,
             0b1110 => Self::AL,
             0b1111 => todo!("Manual Page 112 (A3.2.1)!"),
+            _ => unreachable!(),
         }
     }
 }

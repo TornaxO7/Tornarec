@@ -1,10 +1,7 @@
 pub mod arm;
 pub mod thumb;
 
-use crate::{
-    cpus::general::condition_code_flag::ConditionCodeFlag,
-    ram::Address,
-};
+use crate::ram::Address;
 
 pub type InstructionValue = u32;
 

@@ -1,9 +1,8 @@
-pub mod encoding_fields;
 pub mod opcode;
 pub mod operand;
 mod instruction_set;
 
-pub use decode::get_arm_instruction;
+pub use instruction_set::get_arm_instruction;
 
 use opcode::ArmOpcode;
 use operand::ArmOperand;
@@ -58,7 +57,7 @@ impl ArmInstruction {
 }
 
 impl Instruction for ArmInstruction {
-    fn execute() {
+    fn execute(&self) {
         todo!()
     }
 

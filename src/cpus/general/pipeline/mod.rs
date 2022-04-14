@@ -17,10 +17,7 @@ use crate::{
 };
 
 use super::{
-    instruction::{
-        arm::get_arm_instruction,
-        thumb::get_thumb_instruction,
-    },
+    instruction::arm::get_arm_instruction,
     Instruction,
 };
 
@@ -71,10 +68,13 @@ impl<'a> Pipeline {
         let decoded_instruction = match &self.prefetch {
             Prefetch::Success { address, value } => match cpsr.get_operating_state() {
                 OperatingState::Arm => {
-                    Box::new(get_arm_instruction(address, value, registers)) as Box<dyn Instruction>
+                    Box::new(get_arm_instruction(*address, *value)) as Box<dyn Instruction>
                 }
-                OperatingState::Thumb => Box::new(get_thumb_instruction(address, value, registers))
-                    as Box<dyn Instruction>,
+                OperatingState::Thumb => {
+                    todo!("Implement thumb instructions");
+                    // Box::new(get_thumb_instruction(address, value)) as
+                    // Box<dyn Instruction>
+                }
             },
             Prefetch::Invalid => panic!("Houston, we've a little problem..."),
         };
@@ -83,6 +83,6 @@ impl<'a> Pipeline {
     }
 
     pub fn get_decoded_instruction(&self) -> Option<Box<dyn Instruction>> {
-        self.decoded_instruction
+        todo!();
     }
 }

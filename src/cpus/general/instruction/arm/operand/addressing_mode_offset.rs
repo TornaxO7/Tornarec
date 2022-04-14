@@ -116,40 +116,57 @@ impl AddressingMode2Offset {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum AddressingMode3Offset {
-    Immediate {
-        immed_h: u8,
-        s: BitState,
-        h: BitState,
-        immed_l: u8,
-    },
-    Register {
-        s: BitState,
-        h: BitState,
-        rm: Register,
-    },
+    // stores the `l` flag
+    Halfword(BitState),
+    // stores the `H` flag
+    LoadSigned(BitState),
+    // stores the `ST` flag
+    Doubleword(BitState),
 }
 
 impl AddressingMode3Offset {
-    pub fn get_immediate_offset(value: Word) -> Self {
-        let immed_h = u8::try_from((value >> 8) & 0b1111).unwrap();
-        let s = BitState::from(((value >> 6) & 1) != 0);
-        let h = BitState::from(((value >> 5) & 1) != 0);
-        let immed_l = u8::try_from(value & 0b1111).unwrap();
+    pub fn get_halfword_flag(value: Word) -> Self {
+        let l = BitState::from(((value >> 20) & 0b1) != 0);
+        Self::Halfword(l)
+    }
 
+    pub fn get_load_signed_flag(value: Word) -> Self {
+        let h = BitState::from(((value >> 5) & 0b1) != 0);
+        Self::LoadSigned(h)
+    }
+
+    pub fn get_doubleword_flag(value: Word) -> Self {
+        let st = BitState::from(((value >> 5) & 0b1) != 0);
+        Self::Doubleword(st)
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum AddressingMode3OffsetMode {
+    Immediate {
+        h_offset: u8,
+        l_offset: u8,
+    },
+    // stores `rm` register
+    Register(Register),
+}
+
+impl AddressingMode3OffsetMode {
+    pub fn get_immediate_offset(value: Word) -> Self {
         Self::Immediate {
-            immed_h,
-            s,
-            h,
-            immed_l,
+            h_offset: u8::try_from((value >> 8) & 0b1111).unwrap(),
+            l_offset: u8::try_from(value & 0b1111).unwrap(),
         }
     }
 
     pub fn get_register_offset(value: Word) -> Self {
-        let s = BitState::from(((value >> 6) & 1) != 0);
-        let h = BitState::from(((value >> 5) & 1) != 0);
         let rm = Register::try_from(value & 0b1111).unwrap();
+        Self::Register(rm)
+    }
 
-        Self::Register { s, h, rm }
+    pub fn is_immediate(value: Word) -> bool {
+        let bit22 = BitState::from(((value >> 22) & 0b1) != 0);
+        bit22
     }
 }
 
@@ -171,6 +188,7 @@ impl From<Word> for AddressingMode4Offset {
             (1, 1) => Self::IncrementBefore,
             (0, 0) => Self::DecrementAfter,
             (1, 0) => Self::DecrementBefore,
+            (_, _) => unreachable!(),
         }
     }
 }
@@ -194,6 +212,7 @@ impl From<Word> for AddressingMode5Offset {
             (1, 1) => Self::ImmediatePreIndexed,
             (0, 1) => Self::ImmediatePostIndexed,
             (0, 0) => Self::Unindexed,
+            (_, _) => unreachable!(),
         }
     }
 }

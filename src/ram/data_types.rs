@@ -50,4 +50,12 @@ impl DataType {
             Err(_) => Err(DataTypeError::WordError(slice.to_vec())),
         }
     }
+
+    pub fn get_size(&self) -> u32 {
+        match self {
+            Self::Byte => Self::BYTE_SIZE,
+            Self::Halfword => Self::HALFWORD_SIZE,
+            Self::Word => Self::WORD_SIZE,
+        }
+    }
 }

@@ -17,6 +17,13 @@ use instruction101::handle101;
 use instruction110::handle110;
 use instruction111::handle111;
 
+use crate::ram::{
+    Address,
+    Word,
+};
+
+use super::ArmInstruction;
+
 pub fn get_arm_instruction(address: Address, value: Word) -> ArmInstruction {
     let bit25_27 = (value >> 25) & 0b111;
 
@@ -29,5 +36,6 @@ pub fn get_arm_instruction(address: Address, value: Word) -> ArmInstruction {
         0b101 => handle101(address, value),
         0b110 => handle110(address, value),
         0b111 => handle111(address, value),
+        _ => unreachable!(),
     }
 }

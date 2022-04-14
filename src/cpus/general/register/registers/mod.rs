@@ -11,8 +11,7 @@ use crate::{
         OperatingMode,
     },
     ram::{
-        data_types::DataTypeSize,
-        Address,
+        Address, data_types::DataType,
     },
 };
 
@@ -163,28 +162,26 @@ impl Registers {
     }
 
     pub fn set_lr(&mut self, new_address: Address) {
-        let new_val = new_address.get_as_u32();
-
         let cpsr = self.get_ref_cpsr();
         match cpsr.get_operating_mode().unwrap() {
-            OperatingMode::Usr | OperatingMode::Sys => self.set_reg(RegisterName::Lr, new_val),
-            OperatingMode::Fiq => self.set_reg(RegisterName::LrFiq, new_val),
-            OperatingMode::Irq => self.set_reg(RegisterName::LrIrq, new_val),
-            OperatingMode::Svc => self.set_reg(RegisterName::LrSvc, new_val),
-            OperatingMode::Abt => self.set_reg(RegisterName::LrAbt, new_val),
-            OperatingMode::Und => self.set_reg(RegisterName::LrUnd, new_val),
+            OperatingMode::Usr | OperatingMode::Sys => self.set_reg(RegisterName::Lr, new_address),
+            OperatingMode::Fiq => self.set_reg(RegisterName::LrFiq, new_address),
+            OperatingMode::Irq => self.set_reg(RegisterName::LrIrq, new_address),
+            OperatingMode::Svc => self.set_reg(RegisterName::LrSvc, new_address),
+            OperatingMode::Abt => self.set_reg(RegisterName::LrAbt, new_address),
+            OperatingMode::Und => self.set_reg(RegisterName::LrUnd, new_address),
         }
     }
 
     pub fn get_adjusted_pc(&self) -> Address {
-        Address::from(self.get_reg(RegisterName::Pc) - DataTypeSize::Halfword)
+        Address::from(self.get_reg(RegisterName::Pc) - DataType::HALFWORD_SIZE)
     }
 
     pub fn move_pc_to_lr(&mut self) {
         let lr_val = {
             let pc_val = self.get_adjusted_pc();
-            let lr_address = pc_val + DataTypeSize::Halfword;
-            lr_address.get_as_u32()
+            let lr_address = pc_val + DataType::HALFWORD_SIZE;
+            lr_address
         };
 
         let cpsr = self.get_ref_cpsr();

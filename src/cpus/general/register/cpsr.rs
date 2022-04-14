@@ -36,20 +36,20 @@ impl Cpsr {
         let cb = self.get_condition_bits();
 
         match condition {
-            ConditionCodeFlag::EQ => cb.z.is_set(),
-            ConditionCodeFlag::NE => cb.z.is_unset(),
-            ConditionCodeFlag::CS => cb.c.is_set(),
-            ConditionCodeFlag::CC => cb.c.is_unset(),
-            ConditionCodeFlag::MI => cb.n.is_set(),
-            ConditionCodeFlag::PL => cb.n.is_unset(),
-            ConditionCodeFlag::VS => cb.v.is_set(),
-            ConditionCodeFlag::VC => cb.v.is_unset(),
-            ConditionCodeFlag::HI => cb.c.is_set() && cb.z.is_unset(),
-            ConditionCodeFlag::LS => cb.c.is_unset() && cb.z.is_set(),
+            ConditionCodeFlag::EQ => cb.z,
+            ConditionCodeFlag::NE => !cb.z,
+            ConditionCodeFlag::CS => cb.c,
+            ConditionCodeFlag::CC => !cb.c,
+            ConditionCodeFlag::MI => cb.n,
+            ConditionCodeFlag::PL => !cb.n,
+            ConditionCodeFlag::VS => cb.v,
+            ConditionCodeFlag::VC => !cb.v,
+            ConditionCodeFlag::HI => cb.c && !cb.z,
+            ConditionCodeFlag::LS => !cb.c && cb.z,
             ConditionCodeFlag::GE => cb.n == cb.v,
             ConditionCodeFlag::LT => cb.n != cb.v,
-            ConditionCodeFlag::GT => cb.z.is_unset() && cb.n == cb.v,
-            ConditionCodeFlag::LE => cb.z.is_set() || cb.n != cb.v,
+            ConditionCodeFlag::GT => !cb.z && cb.n == cb.v,
+            ConditionCodeFlag::LE => cb.z || cb.n != cb.v,
             ConditionCodeFlag::AL => true,
         }
     }
@@ -140,7 +140,7 @@ impl Cpsr {
     }
 
     pub fn set_condition_bit(&mut self, condition_bit: ConditionBit, state: BitState) {
-        let state_val = state.get_as_u32();
+        let state_val = u32::from(state);
         match condition_bit {
             ConditionBit::N => self.0 = (self.0 & !(1 << 31)) | (state_val << 31),
             ConditionBit::Z => self.0 = (self.0 & !(1 << 30)) | (state_val << 30),
@@ -152,11 +152,11 @@ impl Cpsr {
 
     pub fn get_condition_bit(&self, condition_bit: ConditionBit) -> BitState {
         match condition_bit {
-            ConditionBit::N => BitState::from(self.0 >> 31),
-            ConditionBit::Z => BitState::from(self.0 >> 30),
-            ConditionBit::C => BitState::from(self.0 >> 29),
-            ConditionBit::V => BitState::from(self.0 >> 28),
-            ConditionBit::Q => BitState::from(self.0 >> 27),
+            ConditionBit::N => BitState::from(((self.0 >> 31) & 0b1) != 0),
+            ConditionBit::Z => BitState::from(((self.0 >> 30) & 0b1) != 0),
+            ConditionBit::C => BitState::from(((self.0 >> 29) & 0b1) != 0),
+            ConditionBit::V => BitState::from(((self.0 >> 28) & 0b1) != 0),
+            ConditionBit::Q => BitState::from(((self.0 >> 27) & 0b1) != 0),
         }
     }
 
@@ -217,11 +217,11 @@ mod tests {
         let mut cpsr_fiq_set = Cpsr::from(0);
         let mut cpsr_fiq_unset = Cpsr::from(0);
 
-        cpsr_irq_set.set_interrupt_bit(Interruption::Irq, BitState::Set);
-        cpsr_irq_unset.set_interrupt_bit(Interruption::Irq, BitState::Unset);
+        cpsr_irq_set.set_interrupt_bit(Interruption::Irq, BitState::from(true));
+        cpsr_irq_unset.set_interrupt_bit(Interruption::Irq, BitState::from(false));
 
-        cpsr_fiq_set.set_interrupt_bit(Interruption::Fiq, BitState::Set);
-        cpsr_fiq_unset.set_interrupt_bit(Interruption::Fiq, BitState::Unset);
+        cpsr_fiq_set.set_interrupt_bit(Interruption::Fiq, BitState::from(true));
+        cpsr_fiq_unset.set_interrupt_bit(Interruption::Fiq, BitState::from(false));
 
         assert_eq!(cpsr_irq_set, Cpsr::from(0b1000_0000));
         assert_eq!(cpsr_irq_unset, Cpsr::from(0b0000_0000));
@@ -238,20 +238,20 @@ mod tests {
 
         assert_eq!(
             cpsr_irq_set.get_interrrupt_bit_state(Interruption::Irq),
-            BitState::Set
+            BitState::from(true)
         );
         assert_eq!(
             cpsr_fiq_set.get_interrrupt_bit_state(Interruption::Fiq),
-            BitState::Set
+            BitState::from(true)
         );
 
         assert_eq!(
             cpsr_irq_unset.get_interrrupt_bit_state(Interruption::Irq),
-            BitState::Unset
+            BitState::from(false)
         );
         assert_eq!(
             cpsr_fiq_unset.get_interrrupt_bit_state(Interruption::Fiq),
-            BitState::Unset
+            BitState::from(false)
         );
     }
 
@@ -332,7 +332,7 @@ mod tests {
     #[test]
     fn set_condition_bit_n() {
         let mut cpsr = Cpsr::from(0b00000_00_0_0000_0000_000000_00000_00000);
-        cpsr.set_condition_bit(ConditionBit::N, BitState::Set);
+        cpsr.set_condition_bit(ConditionBit::N, BitState::from(true));
 
         let expected_result = Cpsr::from(0b10000_00_0_0000_0000_000000_00000_00000);
         assert_eq!(
@@ -341,7 +341,7 @@ mod tests {
             &cpsr, &expected_result
         );
 
-        cpsr.set_condition_bit(ConditionBit::N, BitState::Unset);
+        cpsr.set_condition_bit(ConditionBit::N, BitState::from(false));
         let expected_result = Cpsr::from(0b00000_00_0_0000_0000_000000_00000_00000);
         assert_eq!(
             cpsr, expected_result,
@@ -353,7 +353,7 @@ mod tests {
     #[test]
     fn set_condition_bit_z() {
         let mut cpsr = Cpsr::from(0b00000_00_0_0000_0000_000000_00000_00000);
-        cpsr.set_condition_bit(ConditionBit::Z, BitState::Set);
+        cpsr.set_condition_bit(ConditionBit::Z, BitState::from(true));
 
         let expected_result = Cpsr::from(0b01000_00_0_0000_0000_000000_00000_00000);
         assert_eq!(
@@ -362,7 +362,7 @@ mod tests {
             &cpsr, &expected_result
         );
 
-        cpsr.set_condition_bit(ConditionBit::Z, BitState::Unset);
+        cpsr.set_condition_bit(ConditionBit::Z, BitState::from(false));
         let expected_result = Cpsr::from(0b00000_00_0_0000_0000_000000_00000_00000);
         assert_eq!(
             cpsr, expected_result,
@@ -374,7 +374,7 @@ mod tests {
     #[test]
     fn set_condition_bit_c() {
         let mut cpsr = Cpsr::from(0b00000_00_0_0000_0000_000000_00000_00000);
-        cpsr.set_condition_bit(ConditionBit::C, BitState::Set);
+        cpsr.set_condition_bit(ConditionBit::C, BitState::from(true));
 
         let expected_result = Cpsr::from(0b00100_00_0_0000_0000_000000_00000_00000);
         assert_eq!(
@@ -383,7 +383,7 @@ mod tests {
             &cpsr, &expected_result
         );
 
-        cpsr.set_condition_bit(ConditionBit::C, BitState::Unset);
+        cpsr.set_condition_bit(ConditionBit::C, BitState::from(false));
         let expected_result = Cpsr::from(0b00000_00_0_0000_0000_000000_00000_00000);
         assert_eq!(
             cpsr, expected_result,
@@ -395,7 +395,7 @@ mod tests {
     #[test]
     fn set_condition_bit_v() {
         let mut cpsr = Cpsr::from(0b00000_00_0_0000_0000_000000_00000_00000);
-        cpsr.set_condition_bit(ConditionBit::V, BitState::Set);
+        cpsr.set_condition_bit(ConditionBit::V, BitState::from(true));
 
         let expected_result = Cpsr::from(0b00010_00_0_0000_0000_000000_00000_00000);
         assert_eq!(
@@ -404,7 +404,7 @@ mod tests {
             &cpsr, &expected_result
         );
 
-        cpsr.set_condition_bit(ConditionBit::V, BitState::Unset);
+        cpsr.set_condition_bit(ConditionBit::V, BitState::from(false));
         let expected_result = Cpsr::from(0b00000_00_0_0000_0000_000000_00000_00000);
         assert_eq!(
             cpsr, expected_result,

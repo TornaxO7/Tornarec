@@ -4,7 +4,8 @@ use crate::{
         instruction::arm::{
             opcode::ArmOpcode,
             operand::ArmOperand,
-            ArmInstruction, BitState,
+            ArmInstruction,
+            BitState,
         },
     },
     ram::{
@@ -14,7 +15,8 @@ use crate::{
 };
 
 mod miscellaneous;
-mod multiplies;
+mod multiply;
+mod extra_load_store;
 
 pub fn handle000(address: Address, value: Word) -> ArmInstruction {
     let bit24 = (value >> 23) & 0b1;
@@ -24,7 +26,7 @@ pub fn handle000(address: Address, value: Word) -> ArmInstruction {
     let bit4 = (value >> 4) & 0b1;
 
     match (bit24, bit23, bit20, bit7, bit4) {
-        (_, _, _, _, 0) | (_, _, _, 0, 1) => get_data_processing(address, value),
+        (_, _, _, _, 0) | (_, _, _, 0, 1) => get_data_processing_instruction(address, value),
         (1, 0, 0, 0, 1) | (1, 0, 0, _, 0) => get_miscellaneous_instruction(address, value),
         (_, _, _, 1, 1) => multiplies_and_extra_load_store(address, value),
         (_, _, _, _, _) => todo!("Unknown [000] instruction: {:#034b}", value),
@@ -32,10 +34,10 @@ pub fn handle000(address: Address, value: Word) -> ArmInstruction {
 }
 
 /// ARM INSTRUCTIONS
-fn get_data_processing(address: Address, value: Word) -> ArmInstruction {
+fn get_data_processing_instruction(address: Address, value: Word) -> ArmInstruction {
     ArmInstruction {
-        opcode: ArmOpcode::get_data_processing_operand(value),
-        operand: ArmOperand::get_addressing_mode1(value),
+        opcode: ArmOpcode::get_data_processing_opcode(value),
+        operand: ArmOperand::get_data_processing(value),
         address,
         cond: ConditionCodeFlag::from(value),
     }
@@ -71,11 +73,12 @@ fn get_miscellaneous_instruction(address: Address, value: Word) -> ArmInstructio
 }
 
 fn multiplies_and_extra_load_store(address: Address, value: Word) -> ArmInstruction {
-    let bit23 = BitState::from(((value >> 23) & 0b1) != 0);
-
-    if bit23 {
-        multiplies::get_multiply_long(address, value)
+    if multiply::is_multiply_instruction(value) {
+        multiply::get_multiply_instruction(address, value)
+    } else if extra_load_store::is_extra_load_store_instruction(value) {
+        extra_load_store::get_extra_load_store_instruction(address, value)
     } else {
-        multiplies::get_multiply(address, value)
+        unreachable!("Non-Multiply and None-Load-and-Store instruction: {:#034b}", value);
     }
 }
+

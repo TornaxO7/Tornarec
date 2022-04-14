@@ -1,21 +1,29 @@
+mod addressing_mode_offset;
+mod blx_type;
+mod msr_operand;
+mod register_list;
+
+pub use blx_type::BLXType;
+pub use msr_operand::MSRType;
+pub use register_list::RegisterList;
+
+use std::convert::TryFrom;
+
 use crate::{
     cpus::general::OperatingMode,
     ram::Word,
 };
 
-use std::convert::TryFrom;
+use self::addressing_mode_offset::{
+    AddressingMode1Offset,
+    AddressingMode2Offset,
+    AddressingMode3Offset,
+    AddressingMode3OffsetMode,
+    AddressingMode4Offset,
+    AddressingMode5Offset,
+};
 
 use super::{
-    encoding_fields::{
-        AddressingMode1Offset,
-        AddressingMode2Offset,
-        AddressingMode3Offset,
-        AddressingMode4Offset,
-        AddressingMode5Offset,
-        BLXType,
-        MSRType,
-        RegisterList,
-    },
     BitState,
     CPNum,
     CPOpcode,
@@ -116,16 +124,17 @@ pub enum ArmOperand {
         l: BitState,
         rn: Register,
         rd: Register,
+        rs: Register,
         offset: AddressingMode2Offset,
     },
     AddressingMode3 {
         p: BitState,
         u: BitState,
         w: BitState,
-        l: BitState,
         rn: Register,
         rd: Register,
         offset: AddressingMode3Offset,
+        mode: AddressingMode3OffsetMode,
     },
     AddressingMode4 {
         s: BitState,
@@ -402,10 +411,10 @@ impl ArmOperand {
         }
     }
 
-    pub fn get_addressing_mode1(value: Word) -> Self {
+    pub fn get_data_processing(value: Word) -> Self {
         let s = BitState::from(((value >> 20) & 0b1) != 0);
         let rn = Register::try_from((value >> 16) & 0b1111).unwrap();
-        let rd = Register::try_from((value >> 12) &0b1111).unwrap();
+        let rd = Register::try_from((value >> 12) & 0b1111).unwrap();
 
         let offset = if AddressingMode1Offset::is_immediate(value) {
             AddressingMode1Offset::get_immediate(value)
@@ -414,15 +423,29 @@ impl ArmOperand {
         } else if AddressingMode1Offset::is_register_shift(value) {
             AddressingMode1Offset::get_register_shift(value)
         } else {
-            unreachable!("[Unknown offset] Unknown addressing mode 1 offset: {:#032b}", value);
+            unreachable!(
+                "[Unknown offset] Unknown addressing mode 1 offset: {:#032b}",
+                value
+            );
         };
 
-        ArmOperand::AddressingMode1 {
-            s,
-            rn,
-            rd,
-            offset,
-        }
+        ArmOperand::AddressingMode1 { s, rn, rd, offset }
+    }
+
+    pub fn get_extra_load_store(value: Word) -> Self {
+        let p = BitState::from(((value >> 24) & 0b1) != 0);
+        let u = BitState::from(((value >> 23) & 0b1) != 0);
+        let b = BitState::from(((value >> 22) & 0b1) != 0);
+        let w = BitState::from(((value >> 21) & 0b1) != 0);
+        let l = BitState::from(((value >> 20) & 0b1) != 0);
+        let rn = Register::try_from((value >> 16) & 0b1111).unwrap();
+        let rd = Register::try_from((value >> 12) & 0b1111).unwrap();
+        let rs = Register::try_from((value >> 8) & 0b1111).unwrap();
+        let op = (value >> 5) & 0b11;
+        let rm = Register::try_from(value & 0b1111).unwrap();
+
+        // TODO: HERE
+        todo!();
     }
 
     pub fn get_semaphore(value: Word) -> Self {
@@ -555,7 +578,7 @@ mod tests {
 
     use crate::cpus::general::{
         instruction::arm::{
-            encoding_fields::{
+            operand::{
                 BLXType,
                 MSRType,
             },
@@ -1001,7 +1024,7 @@ mod tests {
                 rm: Register::from(0b1111),
             },
             ArmOperand::get_saturating_add_subtract(value)
-            );
+        );
     }
 
     #[test]

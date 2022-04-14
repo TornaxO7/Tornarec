@@ -112,9 +112,8 @@ pub enum ArmOpcode {
 }
 
 impl ArmOpcode {
-    pub fn get_data_processing_operand(value: Word) -> Self {
+    pub fn get_data_processing_opcode(value: Word) -> Self {
         let opcode = (value >> 21) & 0b1111;
-
         match opcode {
             0b0000 => ArmOpcode::AND,
             0b0001 => ArmOpcode::EOR,
@@ -137,13 +136,6 @@ impl ArmOpcode {
     }
 
     pub fn get_multiply(value: Word) -> Self {
-        let bit27_22 = (value >> 22) & 0b1111_11;
-        let bit7_4 = (value >> 4) & 0b111;
-
-        if bit27_22 != 0 && bit7_4 != 0b1001 {
-            unreachable!("[ArmOpcode] Unknown multiply opcode: {:#034b}", value);
-        }
-
         let bit21_20 = (value >> 20) & 0b11;
         match bit21_20 {
             0b00 => Self::MUL,
@@ -155,13 +147,6 @@ impl ArmOpcode {
     }
 
     pub fn get_multiply_long(value: Word) -> Self {
-        let bit27_23 = (value >> 23) & 0b1111_1;
-        let bit7_4 = (value >> 4) & 0b1111;
-
-        if bit27_23 != 0b0000_1 || bit7_4 != 0b1001 {
-            todo!("[Long multiply] Unknown long multiply: {:#034b}", value);
-        }
-
         let bit22_20 = (value >> 20) & 0b111;
         match bit22_20 {
             0b000 => Self::SMULL,
