@@ -17,25 +17,23 @@ use instruction101::handle101;
 use instruction110::handle110;
 use instruction111::handle111;
 
-use crate::ram::{
+use crate::{ram::{
     Address,
     Word,
-};
+}, cpus::general::condition_code_flag::ConditionCodeFlag};
 
-use super::ArmInstruction;
+use super::{ArmInstruction, opcode::ArmOpcode};
 
 pub fn get_arm_instruction(address: Address, value: Word) -> ArmInstruction {
-    let bit25_27 = (value >> 25) & 0b111;
+    let cond = ConditionCodeFlag::from(value);
 
-    match bit25_27 {
-        0b000 => handle000(address, value),
-        0b001 => handle001(address, value),
-        0b010 => handle010(address, value),
-        0b011 => handle011(address, value),
-        0b100 => handle100(address, value),
-        0b101 => handle101(address, value),
-        0b110 => handle110(address, value),
-        0b111 => handle111(address, value),
-        _ => unreachable!(),
+    let opcode = ArmOpcode::from(value);
+    let operand = ArmOperand::parse_operand(opcode, value);
+
+    ArmInstruction {
+        opcode,
+        operand,
+        cond,
+        address,
     }
 }

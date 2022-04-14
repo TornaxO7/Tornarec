@@ -33,6 +33,13 @@ pub struct ArmInstruction {
     pub address: Address,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ArmDecode {
+    pub opcode: ArmOpcode,
+    pub operand: ArmOperand,
+    pub cond: ConditionCodeFlag,
+}
+
 impl ArmInstruction {
     pub fn get_condition_flag(&self) -> ConditionCodeFlag {
         self.cond
