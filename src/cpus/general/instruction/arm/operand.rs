@@ -398,6 +398,29 @@ impl ArmOperand {
         }
     }
 
+    pub fn get_addressing_mode1(value: Word) -> Self {
+        let s = BitState::from(((value >> 20) & 0b1) != 0);
+        let rn = Register::try_from((value >> 16) & 0b1111).unwrap();
+        let rd = Register::try_from((value >> 12) &0b1111).unwrap();
+
+        let offset = if AddressingMode1Offset::is_immediate(value) {
+            AddressingMode1Offset::get_immediate(value)
+        } else if AddressingMode1Offset::is_immediate_shift(value) {
+            AddressingMode1Offset::get_register_shift(value)
+        } else if AddressingMode1Offset::is_register_shift(value) {
+            AddressingMode1Offset::get_register_shift(value)
+        } else {
+            unreachable!("[Unknown offset] Unknown addressing mode 1 offset: {:#032b}", value);
+        };
+
+        ArmOperand::AddressingMode1 {
+            s,
+            rn,
+            rd,
+            offset,
+        }
+    }
+
     pub fn get_semaphore(value: Word) -> Self {
         let rn = Register::try_from((value >> 16) & 0b1111).unwrap();
         let rd = Register::try_from((value >> 12) & 0b1111).unwrap();

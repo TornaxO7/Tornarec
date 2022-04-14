@@ -1,3 +1,5 @@
+use crate::ram::Word;
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ArmOpcode {
     ADC,
@@ -100,4 +102,30 @@ pub enum ArmOpcode {
     USAT,
     USAT16,
     NOOP,
+}
+
+impl ArmOpcode {
+    pub fn get_data_processing_operand(value: Word) -> Self {
+        let opcode = (value >> 21) & 0b1111;
+
+        match opcode {
+            0b0000 => ArmOpcode::AND,
+            0b0001 => ArmOpcode::EOR,
+            0b0010 => ArmOpcode::SUB,
+            0b0011 => ArmOpcode::RSB,
+            0b0100 => ArmOpcode::ADD,
+            0b0101 => ArmOpcode::ADC,
+            0b0110 => ArmOpcode::SBC,
+            0b0111 => ArmOpcode::RSC,
+            0b1000 => ArmOpcode::TST,
+            0b1001 => ArmOpcode::TEQ,
+            0b1010 => ArmOpcode::CMP,
+            0b1011 => ArmOpcode::CMN,
+            0b1100 => ArmOpcode::ORR,
+            0b1101 => ArmOpcode::MOV,
+            0b1110 => ArmOpcode::BIC,
+            0b1111 => ArmOpcode::MVN,
+            _ => unreachable!("Non-Dataprocessing-Operand: {}", opcode),
+        }
+    }
 }

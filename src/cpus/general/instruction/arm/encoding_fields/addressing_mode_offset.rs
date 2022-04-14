@@ -30,17 +30,17 @@ pub enum AddressingMode1Offset {
 }
 
 impl AddressingMode1Offset {
-    pub fn get_immediate(word: Word) -> Self {
-        let rotate_imm = u8::try_from((word >> 8) & 0b1111).unwrap();
-        let immed8 = u8::try_from(word & 0b1111_1111).unwrap();
+    pub fn get_immediate(value: Word) -> Self {
+        let rotate_imm = u8::try_from((value >> 8) & 0b1111).unwrap();
+        let immed8 = u8::try_from(value & 0b1111_1111).unwrap();
 
         Self::Immediate { rotate_imm, immed8 }
     }
 
-    pub fn get_immediate_shift(word: Word) -> Self {
-        let shift_imm = u8::try_from((word >> 7) & 0b11111).unwrap();
-        let shift = u8::try_from((word >> 5) & 0b11).unwrap();
-        let rm = u8::try_from(word & 0b1111).unwrap();
+    pub fn get_immediate_shift(value: Word) -> Self {
+        let shift_imm = u8::try_from((value >> 7) & 0b11111).unwrap();
+        let shift = u8::try_from((value >> 5) & 0b11).unwrap();
+        let rm = u8::try_from(value & 0b1111).unwrap();
 
         Self::ImmediateShift {
             shift_imm,
@@ -49,12 +49,32 @@ impl AddressingMode1Offset {
         }
     }
 
-    pub fn get_register_shift(word: Word) -> Self {
-        let rs = u8::try_from((word >> 8) & 0b1111).unwrap();
-        let shift = u8::try_from((word >> 5) & 0b11).unwrap();
-        let rm = u8::try_from(word & 0b1111).unwrap();
+    pub fn get_register_shift(value: Word) -> Self {
+        let rs = u8::try_from((value >> 8) & 0b1111).unwrap();
+        let shift = u8::try_from((value >> 5) & 0b11).unwrap();
+        let rm = u8::try_from(value & 0b1111).unwrap();
 
         Self::RegisterShift { rs, shift, rm }
+    }
+
+    pub fn is_immediate(value: Word) -> bool {
+        let bit25 = BitState::from(((value >> 25) & 0b1) != 0);
+
+        bit25
+    }
+
+    pub fn is_immediate_shift(value: Word) -> bool {
+        let bit4 = BitState::from(((value >> 4) & 0b1) != 0);
+
+        !AddressingMode1Offset::is_immediate(value) && !bit4
+    }
+
+    pub fn is_register_shift(value: Word) -> bool {
+        let bit7 = BitState::from(((value >> 7) & 0b1) != 0);
+
+        !AddressingMode1Offset::is_immediate(value)
+            && !bit7
+            && AddressingMode1Offset::is_immediate_shift(value)
     }
 }
 
@@ -70,21 +90,21 @@ pub enum AddressingMode2Offset {
 }
 
 impl AddressingMode2Offset {
-    pub fn get_immediate_offset(word: Word) -> Self {
-        let immed_offset = u16::try_from(word & 0b1111_1111_1111).unwrap();
+    pub fn get_immediate_offset(value: Word) -> Self {
+        let immed_offset = u16::try_from(value & 0b1111_1111_1111).unwrap();
         Self::ImmediateOffset(immed_offset)
     }
 
-    pub fn get_register_offset(word: Word) -> Self {
-        let rm = Register::try_from(word & 0b1111).unwrap();
+    pub fn get_register_offset(value: Word) -> Self {
+        let rm = Register::try_from(value & 0b1111).unwrap();
 
         Self::RegisterOffset(rm)
     }
 
-    pub fn get_scaled_register_offset(word: Word) -> Self {
-        let shift_imm = u8::try_from((word >> 7) & 0b1111).unwrap();
-        let shift = u8::try_from((word >> 5) & 0b11).unwrap();
-        let rm = Register::try_from(word & 0b1111).unwrap();
+    pub fn get_scaled_register_offset(value: Word) -> Self {
+        let shift_imm = u8::try_from((value >> 7) & 0b1111).unwrap();
+        let shift = u8::try_from((value >> 5) & 0b11).unwrap();
+        let rm = Register::try_from(value & 0b1111).unwrap();
 
         Self::ScaledRegisterOffset {
             shift_imm,
@@ -110,11 +130,11 @@ pub enum AddressingMode3Offset {
 }
 
 impl AddressingMode3Offset {
-    pub fn get_immediate_offset(word: Word) -> Self {
-        let immed_h = u8::try_from((word >> 8) & 0b1111).unwrap();
-        let s = BitState::from(((word >> 6) & 1) != 0);
-        let h = BitState::from(((word >> 5) & 1) != 0);
-        let immed_l = u8::try_from(word & 0b1111).unwrap();
+    pub fn get_immediate_offset(value: Word) -> Self {
+        let immed_h = u8::try_from((value >> 8) & 0b1111).unwrap();
+        let s = BitState::from(((value >> 6) & 1) != 0);
+        let h = BitState::from(((value >> 5) & 1) != 0);
+        let immed_l = u8::try_from(value & 0b1111).unwrap();
 
         Self::Immediate {
             immed_h,
@@ -124,10 +144,10 @@ impl AddressingMode3Offset {
         }
     }
 
-    pub fn get_register_offset(word: Word) -> Self {
-        let s = BitState::from(((word >> 6) & 1) != 0);
-        let h = BitState::from(((word >> 5) & 1) != 0);
-        let rm = Register::try_from(word & 0b1111).unwrap();
+    pub fn get_register_offset(value: Word) -> Self {
+        let s = BitState::from(((value >> 6) & 1) != 0);
+        let h = BitState::from(((value >> 5) & 1) != 0);
+        let rm = Register::try_from(value & 0b1111).unwrap();
 
         Self::Register { s, h, rm }
     }
@@ -142,9 +162,9 @@ pub enum AddressingMode4Offset {
 }
 
 impl From<Word> for AddressingMode4Offset {
-    fn from(word: Word) -> Self {
-        let p_flag = (word >> 24) & 0b1;
-        let u_flag = (word >> 23) & 0b1;
+    fn from(value: Word) -> Self {
+        let p_flag = (value >> 24) & 0b1;
+        let u_flag = (value >> 23) & 0b1;
 
         match (p_flag, u_flag) {
             (0, 1) => Self::IncrementAfter,
@@ -165,9 +185,9 @@ pub enum AddressingMode5Offset {
 }
 
 impl From<Word> for AddressingMode5Offset {
-    fn from(word: Word) -> Self {
-        let p_flag = (word >> 24) & 0b1;
-        let w_flag = (word >> 21) & 0b1;
+    fn from(value: Word) -> Self {
+        let p_flag = (value >> 24) & 0b1;
+        let w_flag = (value >> 21) & 0b1;
 
         match (p_flag, w_flag) {
             (1, 0) => Self::ImmediateOffset,
@@ -194,20 +214,20 @@ mod tests {
 
     #[test]
     fn addressing_mode_1_offset_immediate() {
-        let word = 0b0000_0000_0000_0000_0000_1111_1111_1111;
+        let value = 0b0000_0000_0000_0000_0000_1111_1111_1111;
 
         assert_eq!(
             AddressingMode1Offset::Immediate {
                 rotate_imm: 0b1111_1111,
                 immed8: 0b1111
             },
-            AddressingMode1Offset::get_immediate(word)
+            AddressingMode1Offset::get_immediate(value)
         );
     }
 
     #[test]
     fn addressing_mode_1_offset_immediate_shift() {
-        let word = 0b0000_0000_0000_0000_0000_1111_110_1111;
+        let value = 0b0000_0000_0000_0000_0000_1111_110_1111;
 
         assert_eq!(
             AddressingMode1Offset::ImmediateShift {
@@ -215,13 +235,13 @@ mod tests {
                 shift: 0b11,
                 rm: 0b1111
             },
-            AddressingMode1Offset::get_immediate_shift(word)
+            AddressingMode1Offset::get_immediate_shift(value)
         );
     }
 
     #[test]
     fn addressing_mode_1_offset_register_shift() {
-        let word = 0b0000_0000_0000_0000_0000_1111_0_11_1_1111;
+        let value = 0b0000_0000_0000_0000_0000_1111_0_11_1_1111;
 
         assert_eq!(
             AddressingMode1Offset::RegisterShift {
@@ -229,13 +249,13 @@ mod tests {
                 shift: 0b11,
                 rm: 0b1111,
             },
-            AddressingMode1Offset::get_register_shift(word)
+            AddressingMode1Offset::get_register_shift(value)
         );
     }
 
     #[test]
     fn addresing_mode_2_immediate_offset() {
-        let word = 0b0000_0000_0000_0000_0000_1111_1111_1111;
+        let value = 0b0000_0000_0000_0000_0000_1111_1111_1111;
 
         assert_eq!(
             AddressingMode2Offset::get_immediate_offset(0b1111_1111_1111),
@@ -245,20 +265,20 @@ mod tests {
 
     #[test]
     fn addressing_mode_2_register_offset() {
-        let word = 0b0000_0000_0000_0000_0000_0000_0000_1111;
+        let value = 0b0000_0000_0000_0000_0000_0000_0000_1111;
 
         assert_eq!(
-            AddressingMode2Offset::get_register_offset(word),
+            AddressingMode2Offset::get_register_offset(value),
             AddressingMode2Offset::RegisterOffset(Register::from(0b1111))
         );
     }
 
     #[test]
     fn addressing_mode_2_scaled_register_offset() {
-        let word = 0b0000_0000_0000_0000_0000_1111_1110_1111;
+        let value = 0b0000_0000_0000_0000_0000_1111_1110_1111;
 
         assert_eq!(
-            AddressingMode2Offset::get_scaled_register_offset(word),
+            AddressingMode2Offset::get_scaled_register_offset(value),
             AddressingMode2Offset::ScaledRegisterOffset {
                 shift_imm: 0b11111,
                 shift: 0b11,
@@ -269,10 +289,10 @@ mod tests {
 
     #[test]
     fn addressing_mode_3_immediate() {
-        let word = 0b0000_0000_0000_0000_0000_1111_1_11_1_1111;
+        let value = 0b0000_0000_0000_0000_0000_1111_1_11_1_1111;
 
         assert_eq!(
-            AddressingMode3Offset::get_immediate_offset(word),
+            AddressingMode3Offset::get_immediate_offset(value),
             AddressingMode3Offset::Immediate {
                 immed_h: 0b1111,
                 s: true,
@@ -284,10 +304,10 @@ mod tests {
 
     #[test]
     fn addressing_mode_3_register() {
-        let word = 0b0000_0000_0000_0000_0000_0000_1_11_1_1111;
+        let value = 0b0000_0000_0000_0000_0000_0000_1_11_1_1111;
 
         assert_eq!(
-            AddressingMode3Offset::get_register_offset(word),
+            AddressingMode3Offset::get_register_offset(value),
             AddressingMode3Offset::Register {
                 s: true,
                 h: true,
@@ -298,80 +318,80 @@ mod tests {
 
     #[test]
     fn addressing_mode_4_increment_after() {
-        let word = 0b0000_1000_1000_0000_0000_0000_0000_0000;
+        let value = 0b0000_1000_1000_0000_0000_0000_0000_0000;
 
         assert_eq!(
-            AddressingMode4Offset::from(word),
+            AddressingMode4Offset::from(value),
             AddressingMode4Offset::IncrementAfter
         );
     }
 
     #[test]
     fn addressing_mode_4_increment_before() {
-        let word = 0b0000_1001_1000_0000_0000_0000_0000_0000;
+        let value = 0b0000_1001_1000_0000_0000_0000_0000_0000;
 
         assert_eq!(
-            AddressingMode4Offset::from(word),
+            AddressingMode4Offset::from(value),
             AddressingMode4Offset::IncrementBefore
         );
     }
 
     #[test]
     fn addressing_mode_4_decrement_after() {
-        let word = 0b0000_1000_0000_0000_0000_0000_0000_0000;
+        let value = 0b0000_1000_0000_0000_0000_0000_0000_0000;
 
         assert_eq!(
-            AddressingMode4Offset::from(word),
+            AddressingMode4Offset::from(value),
             AddressingMode4Offset::DecrementAfter
         );
     }
 
     #[test]
     fn addressing_mode_4_decrement_before() {
-        let word = 0b0000_1001_0000_0000_0000_0000_0000_0000;
+        let value = 0b0000_1001_0000_0000_0000_0000_0000_0000;
 
         assert_eq!(
-            AddressingMode4Offset::from(word),
+            AddressingMode4Offset::from(value),
             AddressingMode4Offset::DecrementBefore
         );
     }
 
     #[test]
     fn addressing_mode_5_immediate_offset() {
-        let word = 0b0000_1101_0000_0000_0000_0000_0000_0000;
+        let value = 0b0000_1101_0000_0000_0000_0000_0000_0000;
 
         assert_eq!(
-            AddressingMode5Offset::from(word),
+            AddressingMode5Offset::from(value),
             AddressingMode5Offset::ImmediateOffset
         );
     }
 
     #[test]
     fn addressing_mode_5_immediate_pre_indexed() {
-        let word = 0b0000_1101_0010_0000_0000_0000_0000_0000;
+        let value = 0b0000_1101_0010_0000_0000_0000_0000_0000;
 
         assert_eq!(
-            AddressingMode5Offset::from(word),
+            AddressingMode5Offset::from(value),
             AddressingMode5Offset::ImmediatePreIndexed
         );
     }
 
     #[test]
     fn addressing_mode_5_immediate_post_indexed() {
-        let word = 0b0000_1100_0010_0000_0000_0000_0000_0000;
+        let value = 0b0000_1100_0010_0000_0000_0000_0000_0000;
 
         assert_eq!(
-            AddressingMode5Offset::from(word),
+            AddressingMode5Offset::from(value),
             AddressingMode5Offset::ImmediatePostIndexed
         );
     }
 
     #[test]
     fn addressing_mode_5_unindexed() {
-        let word = 0b0000_1100_0000_0000_0000_0000_0000_0000;
+        let value = 0b0000_1100_0000_0000_0000_0000_0000_0000;
 
         assert_eq!(
-            AddressingMode5Offset::from(word),
+            AddressingMode5Offset::from(value),
             AddressingMode5Offset::Unindexed
         );
     }
