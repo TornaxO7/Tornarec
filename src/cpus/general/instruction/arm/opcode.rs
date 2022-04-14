@@ -5,6 +5,7 @@ pub enum ArmOpcode {
     AND,
     B,
     BL,
+    BLX,
     BIC,
     BKPT,
     BLX1,

@@ -12,6 +12,7 @@ use super::{
         AddressingMode3Offset,
         AddressingMode4Offset,
         AddressingMode5Offset,
+        BLXType,
         MSRType,
         RegisterList,
     },
@@ -26,6 +27,7 @@ use super::{
 pub enum ArmOperand {
     Branch(u32),
     BX(Register),
+    BLX(BLXType),
 
     // Multiply stuff
     NormalMultiply {
@@ -40,6 +42,8 @@ pub enum ArmOperand {
         rs: Register,
         rm: Register,
     },
+    // Some fields aren't used by some instructions
+    // just ignore the fields which you don't need
     HalfwordMultiply {
         rd: Register,
         // this field isn't needed for all opcodes
@@ -69,7 +73,7 @@ pub enum ArmOperand {
         rm: Register,
     },
 
-    CountLeadingZeros {
+    CLZ {
         rd: Register,
         rm: Register,
     },
@@ -195,6 +199,12 @@ pub enum ArmOperand {
         crm: CPRegister,
     },
 
+    SaturatingAddSubtract {
+        rn: Register,
+        rd: Register,
+        rm: Register,
+    },
+
     NOOP,
 }
 
@@ -202,6 +212,31 @@ impl ArmOperand {
     pub fn get_branch(value: Word) -> Self {
         let immed = value & 0b1111_1111_1111_1111_1111_1111;
         Self::Branch(immed)
+    }
+
+    pub fn get_bx(value: Word) -> Self {
+        let rm = Register::try_from(value & 0b1111).unwrap();
+        let sbo = (value >> 8) & 0b1111_1111_1111;
+
+        if sbo != 0b1111_1111_1111 {
+            todo!("[SBO] A4.1.10 (page 170)");
+        }
+
+        Self::BX(rm)
+    }
+
+    pub fn get_blx(value: Word) -> Self {
+        let bit31_25 = (value >> 25) & 0b1111_111;
+
+        if bit31_25 == 0b1111_101 {
+            return Self::BLX(BLXType::get_immediate(value));
+        }
+
+        let sbo = (value >> 8) & 0b1111_1111_1111;
+        if sbo != 0b1111_1111_1111 {
+            todo!("[SBO] A4.1.9 (page 168)");
+        }
+        Self::BLX(BLXType::get_register(value))
     }
 
     pub fn get_normal_multiply(value: Word) -> Self {
@@ -229,31 +264,42 @@ impl ArmOperand {
 
     pub fn get_halfword_multiply(value: Word) -> Self {
         let rd = Register::try_from((value >> 16) & 0b1111).unwrap();
-        let sbz = (value >> 12) & 0b1111;
+        let rn = Register::try_from((value >> 12) & 0b1111).unwrap();
         let rs = Register::try_from((value >> 8) & 0b1111).unwrap();
         let y = BitState::from(((value >> 6) & 0b1) != 0);
         let x = BitState::from(((value >> 5) & 0b1) != 0);
         let rm = Register::try_from(value & 0b1111).unwrap();
 
-        if sbz != 0 {
+        // SMUL needs rn as SBZ
+        let op = (value >> 21) & 0b11;
+        if op == 0b11 && rn != 0 {
             todo!("[SBZ] A4.1.86 (page 316)");
         }
 
-        Self::HalfwordMultiply { rd, rs, y, x, rm }
+        Self::HalfwordMultiply {
+            rd,
+            rn,
+            rs,
+            y,
+            x,
+            rm,
+        }
     }
 
     pub fn get_word_halfword_multiply(value: Word) -> Self {
         let rd = Register::try_from((value >> 16) & 0b1111).unwrap();
-        let sbz = (value >> 12) & 0b1111;
+        let rn = Register::try_from((value >> 12) & 0b1111).unwrap();
         let rs = Register::try_from((value >> 8) & 0b1111).unwrap();
         let y = BitState::from(((value >> 6) & 0b1) != 0);
         let rm = Register::try_from(value & 0b1111).unwrap();
 
-        if sbz != 0 {
+        // for SMLUW<y>: rn == sbz
+        let bit5 = BitState::from(((value >> 5) & 0b1) != 0);
+        if bit5 && rn != 0 {
             todo!("[SBZ] A4.1.88 (page 320)");
         }
 
-        Self::WordHalfwordMultiply { rd, rs, y, rm }
+        Self::WordHalfwordMultiply { rd, rn, rs, y, rm }
     }
 
     pub fn get_most_significant_word_multiply(value: Word) -> Self {
@@ -274,7 +320,7 @@ impl ArmOperand {
         Self::DualHalfwordMultiply { rd, rs, x, rm }
     }
 
-    pub fn get_count_leading_zeros(value: Word) -> Self {
+    pub fn get_clz(value: Word) -> Self {
         let sbo1 = (value >> 16) & 0b1111;
         let rd = Register::try_from((value >> 12) & 0b1111).unwrap();
         let sbo2 = (value >> 8) & 0b1111;
@@ -286,7 +332,7 @@ impl ArmOperand {
             todo!("[SBO 2] A4.1.13 (page 175)");
         }
 
-        Self::CountLeadingZeros { rd, rm }
+        Self::CLZ { rd, rm }
     }
 
     pub fn get_mrs(value: Word) -> Self {
@@ -309,9 +355,9 @@ impl ArmOperand {
         let field_mask = u8::try_from((value >> 16) & 0b1111).unwrap();
         let sbo = (value >> 12) & 0b1111;
         let msr_type = {
-            let should_immediate = ((value >> 25) & 0b1) != 0;
+            let bit25 = ((value >> 25) & 0b1) != 0;
 
-            if should_immediate {
+            if bit25 {
                 MSRType::get_immediate(value)
             } else {
                 MSRType::get_register(value)
@@ -462,6 +508,19 @@ impl ArmOperand {
             crm,
         }
     }
+
+    pub fn get_saturating_add_subtract(value: Word) -> Self {
+        let rn = Register::try_from((value >> 16) & 0b1111).unwrap();
+        let rd = Register::try_from((value >> 12) & 0b1111).unwrap();
+        let sbz = (value >> 8) & 0b1111;
+        let rm = Register::try_from(value & 0b1111).unwrap();
+
+        if sbz != 0 {
+            todo!("[SBZ] A4.1.46 (for example) (page 242)");
+        }
+
+        Self::SaturatingAddSubtract { rn, rd, rm }
+    }
 }
 
 #[cfg(test)]
@@ -469,7 +528,10 @@ mod tests {
 
     use crate::cpus::general::{
         instruction::arm::{
-            encoding_fields::MSRType,
+            encoding_fields::{
+                BLXType,
+                MSRType,
+            },
             BitState,
             CPNum,
             CPOpcode,
@@ -482,7 +544,7 @@ mod tests {
     use super::ArmOperand;
 
     #[test]
-    fn get_branch() {
+    fn test_get_branch() {
         let word = 0b0000_0000_1111_1111_1111_1111_1111_1111;
 
         assert_eq!(
@@ -492,11 +554,48 @@ mod tests {
     }
 
     #[test]
-    fn get_normal_multiply() {
-        let word = 0b0000_0000_0000_1_1111_0000_1111_1001_1111;
+    fn test_get_bx() {
+        let value = 0b0000_0001_0010_1111_1111_1111_0001_1111;
 
         assert_eq!(
-            ArmOperand::get_normal_multiply(word),
+            ArmOperand::BX(Register::from(0b1111)),
+            ArmOperand::get_bx(value)
+        );
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_get_bx_sbo() {
+        let value = 0b0000_0001_0010_0000_0000_0000_0001_1111;
+        ArmOperand::get_bx(value);
+    }
+
+    #[test]
+    fn test_get_blx_immediate() {
+        let value = 0b1111_1011_1111_1111_1111_1111_1111_1111;
+
+        assert_eq!(
+            ArmOperand::BLX(BLXType::Immediate {
+                h: BitState::from(true),
+                immed: 0b1111_1111_1111_1111_1111_1111
+            }),
+            ArmOperand::get_blx(value)
+        );
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_get_blx_register_sbo() {
+        let value = 0b0000_0001_0010_0000_0000_0000_0011_1111;
+        ArmOperand::get_blx(value);
+    }
+
+    #[test]
+    fn test_get_normal_multiply() {
+        let value = 0b0000_0000_0000_1_1111_0000_1111_1001_1111;
+
+        assert_eq!(
+            ArmOperand::get_normal_multiply(value),
             ArmOperand::NormalMultiply {
                 s: true,
                 rd: Register::from(0b1111),
@@ -508,18 +607,18 @@ mod tests {
 
     #[test]
     #[should_panic]
-    fn get_normal_multiply_sbz() {
-        let word = 0b0000_0000_0000_0_0000_1111_0000_0000_0000;
+    fn test_get_normal_multiply_sbz() {
+        let value = 0b0000_0000_0000_0_0000_1111_0000_0000_0000;
 
-        ArmOperand::get_normal_multiply(word);
+        ArmOperand::get_normal_multiply(value);
     }
 
     #[test]
-    fn get_long_multiply() {
-        let word = 0b0000_0000_0000_1111_1111_1111_1001_1111;
+    fn test_get_long_multiply() {
+        let value = 0b0000_0000_0000_1111_1111_1111_1001_1111;
 
         assert_eq!(
-            ArmOperand::get_long_multiply(word),
+            ArmOperand::get_long_multiply(value),
             ArmOperand::LongMultiply {
                 rdhi: 0b1111,
                 rdlo: 0b1111,
@@ -530,13 +629,14 @@ mod tests {
     }
 
     #[test]
-    fn get_halfword_multiply() {
-        let word = 0b0000_0000_0000_1111_0000_1111_1110_1111;
+    fn test_get_halfword_multiply() {
+        let value = 0b0000_0000_0000_1111_0000_1111_1110_1111;
 
         assert_eq!(
-            ArmOperand::get_halfword_multiply(word),
+            ArmOperand::get_halfword_multiply(value),
             ArmOperand::HalfwordMultiply {
                 rd: Register::from(0b1111),
+                rn: Register::from(0b0000),
                 rs: Register::from(0b1111),
                 y: BitState::from(true),
                 x: BitState::from(true),
@@ -547,20 +647,21 @@ mod tests {
 
     #[test]
     #[should_panic]
-    fn get_halfword_multiply_sbz() {
-        let word = 0b0000_0000_0000_0000_1111_0000_0000_0000;
+    fn test_get_halfword_multiply_sbz() {
+        let value = 0b0000_0000_0000_0000_1111_0000_0000_0000;
 
-        ArmOperand::get_halfword_multiply(word);
+        ArmOperand::get_halfword_multiply(value);
     }
 
     #[test]
-    fn get_word_halfword_multiply() {
-        let word = 0b0000_0001_0010_1111_0000_1111_1110_1111;
+    fn test_get_value_halfword_multiply() {
+        let value = 0b0000_0001_0010_1111_0000_1111_1110_1111;
 
         assert_eq!(
-            ArmOperand::get_word_halfword_multiply(word),
+            ArmOperand::get_word_halfword_multiply(value),
             ArmOperand::WordHalfwordMultiply {
                 rd: Register::from(0b1111),
+                rn: Register::from(0b0000),
                 rs: Register::from(0b1111),
                 rm: Register::from(0b1111),
                 y: BitState::from(true),
@@ -569,11 +670,18 @@ mod tests {
     }
 
     #[test]
-    fn get_most_significant_word_multiply() {
-        let word = 0b0000_0111_0101_1111_1111_1111_0011_1111;
+    #[should_panic]
+    fn test_get_value_halfword_multiply_sbz() {
+        let value = 0b0000_0001_0010_1111_1111_1111_1110_1111;
+        ArmOperand::get_word_halfword_multiply(value);
+    }
+
+    #[test]
+    fn test_get_most_significant_value_multiply() {
+        let value = 0b0000_0111_0101_1111_1111_1111_0011_1111;
 
         assert_eq!(
-            ArmOperand::get_most_significant_word_multiply(word),
+            ArmOperand::get_most_significant_word_multiply(value),
             ArmOperand::MostSignificantWordMultiply {
                 rd: Register::from(0b1111),
                 rs: Register::from(0b1111),
@@ -584,11 +692,11 @@ mod tests {
     }
 
     #[test]
-    fn get_dual_halfword_multiply() {
-        let word = 0b0000_0111_0000_1111_1111_1111_0011_1111;
+    fn test_get_dual_halfword_multiply() {
+        let value = 0b0000_0111_0000_1111_1111_1111_0011_1111;
 
         assert_eq!(
-            ArmOperand::get_dual_halfword_multiply(word),
+            ArmOperand::get_dual_halfword_multiply(value),
             ArmOperand::DualHalfwordMultiply {
                 rd: Register::from(0b1111),
                 rs: Register::from(0b1111),
@@ -599,12 +707,12 @@ mod tests {
     }
 
     #[test]
-    fn get_count_leading_zeros() {
-        let word = 0b0000_0001_0110_1111_1111_1111_0001_1111;
+    fn test_get_count_leading_zeros() {
+        let value = 0b0000_0001_0110_1111_1111_1111_0001_1111;
 
         assert_eq!(
-            ArmOperand::get_count_leading_zeros(word),
-            ArmOperand::CountLeadingZeros {
+            ArmOperand::get_clz(value),
+            ArmOperand::CLZ {
                 rd: Register::from(0b1111),
                 rm: Register::from(0b1111),
             }
@@ -613,24 +721,24 @@ mod tests {
 
     #[test]
     #[should_panic]
-    fn get_count_leading_zeros_sbo1() {
-        let word = 0b0000_0001_0110_0000_1111_1111_0001_1111;
-        ArmOperand::get_count_leading_zeros(word);
+    fn test_get_count_leading_zeros_sbo1() {
+        let value = 0b0000_0001_0110_0000_1111_1111_0001_1111;
+        ArmOperand::get_clz(value);
     }
 
     #[test]
     #[should_panic]
-    fn get_count_leading_zeros_sbo2() {
-        let word = 0b0000_0001_0110_1111_1111_0000_0001_1111;
-        ArmOperand::get_count_leading_zeros(word);
+    fn test_get_count_leading_zeros_sbo2() {
+        let value = 0b0000_0001_0110_1111_1111_0000_0001_1111;
+        ArmOperand::get_clz(value);
     }
 
     #[test]
-    fn get_mrs() {
-        let word = 0b0000_0001_0100_1111_1111_0000_0000_0000;
+    fn test_get_mrs() {
+        let value = 0b0000_0001_0100_1111_1111_0000_0000_0000;
 
         assert_eq!(
-            ArmOperand::get_mrs(word),
+            ArmOperand::get_mrs(value),
             ArmOperand::MRS {
                 r: BitState::from(true),
                 rd: Register::from(0b1111),
@@ -640,24 +748,24 @@ mod tests {
 
     #[test]
     #[should_panic]
-    fn get_mrs_sbo() {
-        let word = 0b0000_0001_0100_0000_1111_0000_0000_0000;
-        ArmOperand::get_mrs(word);
+    fn test_get_mrs_sbo() {
+        let value = 0b0000_0001_0100_0000_1111_0000_0000_0000;
+        ArmOperand::get_mrs(value);
     }
 
     #[test]
     #[should_panic]
-    fn get_mrs_sbz() {
-        let word = 0b0000_0001_0100_1111_1111_1111_1111_1111;
-        ArmOperand::get_mrs(word);
+    fn test_get_mrs_sbz() {
+        let value = 0b0000_0001_0100_1111_1111_1111_1111_1111;
+        ArmOperand::get_mrs(value);
     }
 
     #[test]
-    fn get_msr_immediate() {
-        let word = 0b0000_0011_0110_1111_1111_1111_1111_1111;
+    fn test_get_msr_immediate() {
+        let value = 0b0000_0011_0110_1111_1111_1111_1111_1111;
 
         assert_eq!(
-            ArmOperand::get_msr(word),
+            ArmOperand::get_msr(value),
             ArmOperand::MSR {
                 r: BitState::from(true),
                 field_mask: 0b1111,
@@ -670,11 +778,11 @@ mod tests {
     }
 
     #[test]
-    fn get_msr_register() {
-        let word = 0b0000_0001_0110_1111_1111_00000_0000_1111;
+    fn test_get_msr_register() {
+        let value = 0b0000_0001_0110_1111_1111_00000_0000_1111;
 
         assert_eq!(
-            ArmOperand::get_msr(word),
+            ArmOperand::get_msr(value),
             ArmOperand::MSR {
                 r: BitState::from(true),
                 field_mask: 0b1111,
@@ -685,31 +793,31 @@ mod tests {
 
     #[test]
     #[should_panic]
-    fn get_msr_immediate_sbo() {
-        let word = 0b0000_0011_0110_1111_0000_1111_1111_1111;
-        ArmOperand::get_msr(word);
+    fn test_test_get_msr_immediate_sbo() {
+        let value = 0b0000_0011_0110_1111_0000_1111_1111_1111;
+        ArmOperand::get_msr(value);
     }
 
     #[test]
     #[should_panic]
-    fn get_msr_register_sbo() {
-        let word = 0b0000_0001_0110_1111_0000_0000_0000_1111;
-        ArmOperand::get_msr(word);
+    fn test_get_msr_register_sbo() {
+        let value = 0b0000_0001_0110_1111_0000_0000_0000_1111;
+        ArmOperand::get_msr(value);
     }
 
     #[test]
     #[should_panic]
-    fn get_msr_register_sbz() {
-        let word = 0b0000_0001_0110_1111_1111_0000_0000_1111;
-        ArmOperand::get_msr(word);
+    fn test_get_msr_register_sbz() {
+        let value = 0b0000_0001_0110_1111_1111_0000_0000_1111;
+        ArmOperand::get_msr(value);
     }
 
     #[test]
-    fn get_cps() {
-        let word = 0b1111_0001_0000_1110_0000_0001_1100_0000;
+    fn test_get_cps() {
+        let value = 0b1111_0001_0000_1110_0000_0001_1100_0000;
 
         assert_eq!(
-            ArmOperand::get_cps(word),
+            ArmOperand::get_cps(value),
             ArmOperand::CPS {
                 imod: 0b11,
                 mmod: BitState::from(true),
@@ -722,17 +830,17 @@ mod tests {
     }
 
     #[test]
-    fn get_cps_sbz() {
-        let word = 0b1111_0001_0000_1110_1111_1111_1100_0000;
-        ArmOperand::get_cps(word);
+    fn test_get_cps_sbz() {
+        let value = 0b1111_0001_0000_1110_1111_1111_1100_0000;
+        ArmOperand::get_cps(value);
     }
 
     #[test]
-    fn get_semaphore() {
-        let word = 0b1111_0001_0000_1111_1111_0000_1001_1111;
+    fn test_get_semaphore() {
+        let value = 0b1111_0001_0000_1111_1111_0000_1001_1111;
 
         assert_eq!(
-            ArmOperand::get_semaphore(word),
+            ArmOperand::get_semaphore(value),
             ArmOperand::Semaphore {
                 rn: Register::from(0b1111),
                 rd: Register::from(0b1111),
@@ -743,27 +851,27 @@ mod tests {
 
     #[test]
     #[should_panic]
-    fn get_semphore_sbz() {
-        let word = 0b0000_0001_0000_1111_1111_1111_1001_1111;
-        ArmOperand::get_semaphore(word);
+    fn test_get_semphore_sbz() {
+        let value = 0b0000_0001_0000_1111_1111_1111_1001_1111;
+        ArmOperand::get_semaphore(value);
     }
 
     #[test]
-    fn get_swi() {
-        let word = 0b0000_1111_1111_0000_1111_0000_1111_0000;
+    fn test_get_swi() {
+        let value = 0b0000_1111_1111_0000_1111_0000_1111_0000;
 
         assert_eq!(
-            ArmOperand::get_swi(word),
+            ArmOperand::get_swi(value),
             ArmOperand::SWI(0b1111_0000_1111_0000_1111_0000)
         );
     }
 
     #[test]
-    fn get_bkpt() {
-        let word = 0b1110_0001_0010_1111_1111_1111_0111_1111;
+    fn test_get_bkpt() {
+        let value = 0b1110_0001_0010_1111_1111_1111_0111_1111;
 
         assert_eq!(
-            ArmOperand::get_bkpt(word),
+            ArmOperand::get_bkpt(value),
             ArmOperand::BKPT {
                 immed1: 0b1111_1111_1111,
                 immed2: 0b1111,
@@ -772,11 +880,11 @@ mod tests {
     }
 
     #[test]
-    fn get_cpd() {
-        let word = 0b0000_1110_1111_1111_1111_1111_1110_1111;
+    fn test_get_cpd() {
+        let value = 0b0000_1110_1111_1111_1111_1111_1110_1111;
 
         assert_eq!(
-            ArmOperand::get_cpd(word),
+            ArmOperand::get_cpd(value),
             ArmOperand::CPD {
                 opcode1: CPOpcode::from(0b1111),
                 crn: CPRegister::from(0b1111),
@@ -789,11 +897,11 @@ mod tests {
     }
 
     #[test]
-    fn get_mcr() {
-        let word = 0b0000_1110_1110_1111_1111_1111_1111_1111;
+    fn test_get_mcr() {
+        let value = 0b0000_1110_1110_1111_1111_1111_1111_1111;
 
         assert_eq!(
-            ArmOperand::get_mcr(word),
+            ArmOperand::get_mcr(value),
             ArmOperand::MCR {
                 opcode1: CPOpcode::from(0b111),
                 crn: CPRegister::from(0b1111),
@@ -806,11 +914,11 @@ mod tests {
     }
 
     #[test]
-    fn get_mcrr() {
-        let word = 0b0000_1100_0100_1111_1111_1111_1111_1111;
+    fn test_get_mcrr() {
+        let value = 0b0000_1100_0100_1111_1111_1111_1111_1111;
 
         assert_eq!(
-            ArmOperand::get_mcrr(word),
+            ArmOperand::get_mcrr(value),
             ArmOperand::MCRR {
                 rn: Register::from(0b1111),
                 rd: Register::from(0b1111),
@@ -822,11 +930,11 @@ mod tests {
     }
 
     #[test]
-    fn get_mrc() {
-        let word = 0b0000_1110_1111_1111_1111_1111_1111_1111;
+    fn test_get_mrc() {
+        let value = 0b0000_1110_1111_1111_1111_1111_1111_1111;
 
         assert_eq!(
-            ArmOperand::get_mrc(word),
+            ArmOperand::get_mrc(value),
             ArmOperand::MRC {
                 opcode1: CPOpcode::from(0b111),
                 crn: CPRegister::from(0b1111),
@@ -839,11 +947,11 @@ mod tests {
     }
 
     #[test]
-    fn get_mrrc() {
-        let word = 0b0000_1100_0101_1111_1111_1111_1111_1111;
+    fn test_get_mrrc() {
+        let value = 0b0000_1100_0101_1111_1111_1111_1111_1111;
 
         assert_eq!(
-            ArmOperand::get_mrrc(word),
+            ArmOperand::get_mrrc(value),
             ArmOperand::MRRC {
                 rn: Register::from(0b1111),
                 rd: Register::from(0b1111),
@@ -852,5 +960,26 @@ mod tests {
                 crm: CPRegister::from(0b1111),
             }
         );
+    }
+
+    #[test]
+    fn test_get_saturating_add_subtract() {
+        let value = 0b0000_0001_0000_1111_1111_0000_0101_1111;
+
+        assert_eq!(
+            ArmOperand::SaturatingAddSubtract {
+                rn: Register::from(0b1111),
+                rd: Register::from(0b1111),
+                rm: Register::from(0b1111),
+            },
+            ArmOperand::get_saturating_add_subtract(value)
+            );
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_get_saturating_add_subtract_sbz() {
+        let value = 0b0000_0001_0000_1111_1111_1111_0101_1111;
+        ArmOperand::get_saturating_add_subtract(value);
     }
 }
