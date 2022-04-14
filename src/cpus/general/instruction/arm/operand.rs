@@ -30,13 +30,15 @@ pub enum ArmOperand {
     BLX(BLXType),
 
     // Multiply stuff
-    NormalMultiply {
+    Multiply {
         s: BitState,
         rd: Register,
+        rn: Register,
         rs: Register,
         rm: Register,
     },
-    LongMultiply {
+
+    MultiplyLong {
         rdhi: u8,
         rdlo: u8,
         rs: Register,
@@ -239,27 +241,29 @@ impl ArmOperand {
         Self::BLX(BLXType::get_register(value))
     }
 
-    pub fn get_normal_multiply(value: Word) -> Self {
+    pub fn get_multiply(value: Word) -> Self {
         let s = BitState::from(((value >> 20) & 0b1) != 0);
         let rd = Register::try_from((value >> 16) & 0b1111).unwrap();
-        let sbz = (value >> 12) & 0b1111;
+        let rn = Register::try_from((value >> 12) & 0b1111).unwrap();
         let rs = Register::try_from((value >> 8) & 0b1111).unwrap();
         let rm = Register::try_from(value & 0b1111).unwrap();
 
-        if sbz != 0 {
-            todo!("SBZ, see A4.1.40 (page 230)");
+        // for MUL(S): rn == sbz
+        let a = BitState::from(((value >> 21) & 0b1) != 0);
+        if !a && rn != 0 {
+            todo!("[SBZ] A4.1.40 (page 143)");
         }
 
-        Self::NormalMultiply { s, rd, rs, rm }
+        Self::Multiply { s, rd, rn, rs, rm }
     }
 
-    pub fn get_long_multiply(value: Word) -> Self {
+    pub fn get_multiply_long(value: Word) -> Self {
         let rdhi = u8::try_from((value >> 16) & 0b1111).unwrap();
         let rdlo = u8::try_from((value >> 12) & 0b1111).unwrap();
         let rs = Register::try_from((value >> 8) & 0b1111).unwrap();
         let rm = Register::try_from(value & 0b1111).unwrap();
 
-        Self::LongMultiply { rdhi, rdlo, rs, rm }
+        Self::MultiplyLong { rdhi, rdlo, rs, rm }
     }
 
     pub fn get_halfword_multiply(value: Word) -> Self {
@@ -618,10 +622,11 @@ mod tests {
         let value = 0b0000_0000_0000_1_1111_0000_1111_1001_1111;
 
         assert_eq!(
-            ArmOperand::get_normal_multiply(value),
-            ArmOperand::NormalMultiply {
+            ArmOperand::get_multiply(value),
+            ArmOperand::Multiply {
                 s: true,
                 rd: Register::from(0b1111),
+                rn: Register::from(0b0000),
                 rs: Register::from(0b1111),
                 rm: Register::from(0b1111),
             }
@@ -633,7 +638,7 @@ mod tests {
     fn test_get_normal_multiply_sbz() {
         let value = 0b0000_0000_0000_0_0000_1111_0000_0000_0000;
 
-        ArmOperand::get_normal_multiply(value);
+        ArmOperand::get_multiply(value);
     }
 
     #[test]
@@ -641,8 +646,8 @@ mod tests {
         let value = 0b0000_0000_0000_1111_1111_1111_1001_1111;
 
         assert_eq!(
-            ArmOperand::get_long_multiply(value),
-            ArmOperand::LongMultiply {
+            ArmOperand::get_multiply_long(value),
+            ArmOperand::MultiplyLong {
                 rdhi: 0b1111,
                 rdlo: 0b1111,
                 rs: Register::from(0b1111),

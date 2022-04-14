@@ -4,7 +4,7 @@ use crate::{
         instruction::arm::{
             opcode::ArmOpcode,
             operand::ArmOperand,
-            ArmInstruction,
+            ArmInstruction, BitState,
         },
     },
     ram::{
@@ -14,6 +14,7 @@ use crate::{
 };
 
 mod miscellaneous;
+mod multiplies;
 
 pub fn handle000(address: Address, value: Word) -> ArmInstruction {
     let bit24 = (value >> 23) & 0b1;
@@ -69,4 +70,12 @@ fn get_miscellaneous_instruction(address: Address, value: Word) -> ArmInstructio
     }
 }
 
-fn multiplies_and_extra_load_store(address: Address, value: Word) -> ArmInstruction {}
+fn multiplies_and_extra_load_store(address: Address, value: Word) -> ArmInstruction {
+    let bit23 = BitState::from(((value >> 23) & 0b1) != 0);
+
+    if bit23 {
+        multiplies::get_multiply_long(address, value)
+    } else {
+        multiplies::get_multiply(address, value)
+    }
+}
