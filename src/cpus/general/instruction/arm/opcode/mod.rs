@@ -66,6 +66,7 @@ pub enum ArmOpcode {
     SMLAWY,
     SMULL,
     SMULXY,
+    SMULWY,
     STC,
     STC2,
     STM,
@@ -84,6 +85,32 @@ pub enum ArmOpcode {
     UMLAL,
     UMULL,
     NOOP,
+}
+
+impl ArmOpcode {
+    pub fn get_data_processing(value: Word) -> Self {
+        let bit24_21 = (value >> 21) & 0b1111;
+
+        match bit24_21 {
+            0b0000 => Self::AND,
+            0b0001 => Self::EOR,
+            0b0010 => Self::SUB,
+            0b0011 => Self::RSB,
+            0b0100 => Self::ADD,
+            0b0101 => Self::ADC,
+            0b0110 => Self::SBC,
+            0b0111 => Self::RSC,
+            0b1000 => Self::TST,
+            0b1001 => Self::TEQ,
+            0b1010 => Self::CMP,
+            0b1011 => Self::CMN,
+            0b1100 => Self::ORR,
+            0b1101 => Self::MOV,
+            0b1110 => Self::BIC,
+            0b1111 => Self::MVN,
+            _ => unreachable!("Unknown data-processing instruction: {:#034b}", value),
+        }
+    }
 }
 
 impl From<Word> for ArmOpcode {
