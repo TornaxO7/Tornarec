@@ -12,7 +12,7 @@ pub fn handle(value: Word) -> ArmOpcode {
     } else if is_extra_load_store_instruction(value) {
         handle_extra_load_store_instruction(value)
     } else {
-        unreachable!();
+        ArmOpcode::unknown_opcode(value)
     }
 }
 
@@ -41,7 +41,7 @@ fn handle_control_or_dsp_instruction(value: Word) -> ArmOpcode {
         (0, 1, 1, _, 1, 0) => ArmOpcode::SMULWY,
         (1, 0, 1, _, _, 0) => ArmOpcode::SMLALXY,
         (1, 1, 1, _, _, 0) => ArmOpcode::SMULXY,
-        (_, _, _, _, _, _) => unreachable!(),
+        (_, _, _, _, _, _) => ArmOpcode::unknown_opcode(value),
     }
 }
 
@@ -55,7 +55,7 @@ fn handle_multiply_instruction(value: Word) -> ArmOpcode {
         match (bit21, bit20) {
             (0, _) => ArmOpcode::MUL,
             (1, _) => ArmOpcode::MLA,
-            (_, _) => unreachable!(),
+            (_, _) => ArmOpcode::unknown_opcode(value),
         }
     } else if bit23 == 1 {
         match (bit22, bit21, bit20) {
@@ -63,16 +63,34 @@ fn handle_multiply_instruction(value: Word) -> ArmOpcode {
             (0, 1, _) => ArmOpcode::UMLAL,
             (1, 0, _) => ArmOpcode::SMULL,
             (1, 1, _) => ArmOpcode::SMLAL,
-            (_, _, _) => unreachable!(),
+            (_, _, _) => ArmOpcode::unknown_opcode(value),
         }
     } else {
-        unreachable!()
+        ArmOpcode::unknown_opcode(value)
     }
 
 }
 
 fn handle_extra_load_store_instruction(value: Word) -> ArmOpcode {
-    todo!("HERE");
+    let bit24 = (value >> 24) & 0b1;
+    let bit23 = (value >> 23) & 0b1;
+    let bit22 = (value >> 22) & 0b1;
+    let bit21 = (value >> 21) & 0b1;
+    let bit20 = (value >> 20) & 0b1;
+    let bit6 = (value >> 6) & 0b1;
+    let bit5 = (value >> 5) & 0b1;
+
+    match (bit24, bit23, bit22, bit21, bit20, bit6, bit5) {
+        (1, 0, 0, 0, 0, 0, 0) => ArmOpcode::SWP,
+        (1, 0, 1, 0, 0, 0, 0) => ArmOpcode::SWPB,
+        (_, _, _, _, 0, 0, 1) => ArmOpcode::STRH,
+        (_, _, _, _, 0, 1, 0) => ArmOpcode::LDRD,
+        (_, _, _, _, 0, 1, 1) => ArmOpcode::STRD,
+        (_, _, _, _, 1, 0, 1) => ArmOpcode::LDRH,
+        (_, _, _, _, 1, 1, 0) => ArmOpcode::LDRSB,
+        (_, _, _, _, 1, 1, 1) => ArmOpcode::LDRSH,
+        (_, _, _, _, _, _, _) => ArmOpcode::unknown_opcode(value),
+    }
 }
 
 // see page 144

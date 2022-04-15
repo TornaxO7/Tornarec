@@ -111,6 +111,10 @@ impl ArmOpcode {
             _ => unreachable!("Unknown data-processing instruction: {:#034b}", value),
         }
     }
+
+    pub fn unknown_opcode(value: Word) -> ! {
+        unreachable!("Unknown opcode: {:#034b}", value);
+    }
 }
 
 impl From<Word> for ArmOpcode {
