@@ -344,13 +344,13 @@ mod tests {
 
     #[test]
     fn test_mcr() {
-        let value = 0b0000_1110_1110_1111_1111_1111_1111_11111;
+        let value = 0b0000_1110_1110_1111_1111_1111_1111_1111;
         assert_eq!(ArmOpcode::MCR, ArmOpcode::from(value));
     }
 
     #[test]
     fn test_mcr2() {
-        let value = 0b1111_1110_1110_1111_1111_1111_1111_11111;
+        let value = 0b1111_1110_1110_1111_1111_1111_1111_1111;
         assert_eq!(ArmOpcode::MCR, ArmOpcode::from(value));
     }
 
@@ -499,9 +499,9 @@ mod tests {
     }
 
     #[test]
-    fn test_smulXY() {
+    fn test_smulxy() {
         let value = 0b0000_0001_0110_1111_0000_1111_1110_1111;
-        assert_eq!(ArmOpcode::SMALXY, ArmOpcode::from(value));
+        assert_eq!(ArmOpcode::SMLAXY, ArmOpcode::from(value));
     }
 
     #[test]
@@ -591,7 +591,7 @@ mod tests {
     #[test]
     fn test_swp() {
         let value = 0b0000_0001_0000_1111_1111_0000_1001_1111;
-        assert_eq!(ArmOpcode::SWP, ArmOpcode::from(value)));
+        assert_eq!(ArmOpcode::SWP, ArmOpcode::from(value));
     }
 
     #[test]
@@ -621,6 +621,6 @@ mod tests {
     #[test]
     fn test_umull() {
         let value = 0b0000_0000_1001_1111_1111_1111_1001_1111;
-        assert_eq!(ArmOpcode:UMULL, ArmOpcode::from(value));
+        assert_eq!(ArmOpcode::UMULL, ArmOpcode::from(value));
     }
 }
