@@ -1,8 +1,5 @@
 pub mod opcode;
 pub mod operand;
-mod instruction_set;
-
-pub use instruction_set::get_arm_instruction;
 
 use opcode::ArmOpcode;
 use operand::ArmOperand;
