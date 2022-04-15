@@ -17,12 +17,19 @@ use instruction101::handle101;
 use instruction110::handle110;
 use instruction111::handle111;
 
-use crate::{ram::{
-    Address,
-    Word,
-}, cpus::general::condition_code_flag::ConditionCodeFlag};
+use crate::{
+    cpus::general::condition_code_flag::ConditionCodeFlag,
+    ram::{
+        Address,
+        Word,
+    },
+};
 
-use super::{ArmInstruction, opcode::ArmOpcode};
+use super::{
+    opcode::ArmOpcode,
+    operand::ArmOperand,
+    ArmInstruction,
+};
 
 pub fn get_arm_instruction(address: Address, value: Word) -> ArmInstruction {
     let cond = ConditionCodeFlag::from(value);
