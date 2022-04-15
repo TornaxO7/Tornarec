@@ -68,7 +68,6 @@ fn handle_multiply_instruction(value: Word) -> ArmOpcode {
     } else {
         ArmOpcode::unknown_opcode(value)
     }
-
 }
 
 fn handle_extra_load_store_instruction(value: Word) -> ArmOpcode {

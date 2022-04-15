@@ -22,8 +22,10 @@ use crate::{
 };
 
 use super::general::{
+    instruction::arm::BitState,
+    Interruption,
     OperatingMode,
-    OperatingState, Interruption, instruction::arm::BitState,
+    OperatingState,
 };
 
 #[derive(Debug, Default)]

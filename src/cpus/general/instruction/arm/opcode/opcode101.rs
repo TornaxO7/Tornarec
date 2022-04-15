@@ -1,5 +1,7 @@
-
-use crate::{ram::Word, cpus::general::instruction::arm::BitState};
+use crate::{
+    cpus::general::instruction::arm::BitState,
+    ram::Word,
+};
 
 use super::ArmOpcode;
 

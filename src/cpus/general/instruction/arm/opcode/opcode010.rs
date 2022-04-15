@@ -9,14 +9,14 @@ pub fn handle(value: Word) -> ArmOpcode {
     let bit20 = (value >> 20) & 0b1;
 
     match (bit24, bit22, bit21, bit20) {
-        (_, 0, _, 1) => ArmOpcode::LDR,
-        (_, 1, _, 1) => ArmOpcode::LDRB,
         (0, 0, 1, 1) => ArmOpcode::LDRT,
         (0, 1, 1, 1) => ArmOpcode::LDRBT,
-        (_, 0, _, 0) => ArmOpcode::STR,
-        (0, 1, _, 0) => ArmOpcode::STRB,
         (0, 0, 1, 0) => ArmOpcode::STRT,
         (0, 1, 1, 0) => ArmOpcode::STRBT,
+        (_, 0, _, 1) => ArmOpcode::LDR,
+        (_, 1, _, 1) => ArmOpcode::LDRB,
+        (_, 0, _, 0) => ArmOpcode::STR,
+        (0, 1, _, 0) => ArmOpcode::STRB,
         _ => ArmOpcode::unknown_opcode(value),
     }
 }

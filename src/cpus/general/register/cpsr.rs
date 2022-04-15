@@ -1,12 +1,13 @@
 use crate::cpus::general::{
     condition_code_flag::ConditionCodeFlag,
+    instruction::arm::BitState,
     interruption::Interruption,
     operating_mode::OperatingMode,
     operating_state::OperatingState,
     register::types::{
         ConditionBit,
         ConditionBits,
-    }, instruction::arm::BitState,
+    },
 };
 
 use core::convert::From;

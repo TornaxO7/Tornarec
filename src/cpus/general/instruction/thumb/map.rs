@@ -5,6 +5,6 @@ use crate::ram::{
 
 use super::ThumbInstruction;
 
-pub fn get_thumb_instruction(address: &Address, value: &Word) -> ThumbInstruction {
+pub fn get_thumb_instruction(_address: &Address, _value: &Word) -> ThumbInstruction {
     todo!();
 }

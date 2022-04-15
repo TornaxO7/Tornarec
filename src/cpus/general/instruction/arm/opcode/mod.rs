@@ -153,7 +153,7 @@ fn get_unconditional_instruction(value: Word) -> ArmOpcode {
                 false => ArmOpcode::STC2,
                 true => ArmOpcode::LDC2,
             }
-        },
+        }
         (0b11, 1) => {
             let bit20 = (value >> 20) & 0b1;
             let bit4 = (value >> 4) & 0b1;
@@ -172,10 +172,8 @@ fn get_unconditional_instruction(value: Word) -> ArmOpcode {
 #[cfg(test)]
 mod tests {
 
-    use super::ArmOpcode;
+    // use super::ArmOpcode;
 
     #[test]
-    fn test_adc() {
-
-    }
+    fn test_adc() {}
 }

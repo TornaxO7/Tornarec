@@ -1,5 +1,4 @@
 use crate::ram::{
-    data_types::DataType,
     Address,
     Word,
 };

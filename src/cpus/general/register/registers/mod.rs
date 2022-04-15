@@ -11,7 +11,8 @@ use crate::{
         OperatingMode,
     },
     ram::{
-        Address, data_types::DataType,
+        data_types::DataType,
+        Address,
     },
 };
 

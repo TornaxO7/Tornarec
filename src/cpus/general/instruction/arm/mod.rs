@@ -6,7 +6,10 @@ use operand::ArmOperand;
 
 use crate::{
     cpus::general::condition_code_flag::ConditionCodeFlag,
-    ram::Address,
+    ram::{
+        Address,
+        Word,
+    },
 };
 
 use super::Instruction;
@@ -21,6 +24,10 @@ pub type CPNum = u8;
 
 /// opcode for the coprocessor
 pub type CPOpcode = u8;
+
+pub fn get_arm_instruction(_address: Address, _value: Word) -> ArmInstruction {
+    todo!();
+}
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ArmInstruction {

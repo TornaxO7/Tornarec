@@ -1,4 +1,7 @@
-use crate::{cpus::general::instruction::arm::Register, ram::Word};
+use crate::{
+    cpus::general::instruction::arm::Register,
+    ram::Word,
+};
 
 use std::convert::TryFrom;
 
@@ -15,7 +18,7 @@ impl MSRType {
 
         Self::Immediate {
             rotate_imm,
-            immediate
+            immediate,
         }
     }
 

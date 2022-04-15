@@ -30,7 +30,7 @@ pub enum PipelineError {
 #[derive(Debug, Default)]
 pub struct Pipeline {
     prefetch: Prefetch,
-    decoded_instruction: Option<Box<dyn Instruction>>,
+    _decoded_instruction: Option<Box<dyn Instruction>>,
 }
 
 impl<'a> Pipeline {
@@ -65,7 +65,7 @@ impl<'a> Pipeline {
     pub fn decode(&mut self, registers: &'a Registers) {
         let cpsr = registers.get_ref_cpsr();
 
-        let decoded_instruction = match &self.prefetch {
+        let _decoded_instruction = match &self.prefetch {
             Prefetch::Success { address, value } => match cpsr.get_operating_state() {
                 OperatingState::Arm => {
                     Box::new(get_arm_instruction(*address, *value)) as Box<dyn Instruction>
@@ -78,8 +78,6 @@ impl<'a> Pipeline {
             },
             Prefetch::Invalid => panic!("Houston, we've a little problem..."),
         };
-
-        self.decoded_instruction = Some(decoded_instruction);
     }
 
     pub fn get_decoded_instruction(&self) -> Option<Box<dyn Instruction>> {

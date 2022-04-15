@@ -122,7 +122,7 @@ mod tests {
         };
 
         let data = DataBlock::from(vec![0x1, 0x2, 0x3, 0x4]);
-        let start = Address::from(10);
+        let start = Address::from(10 as u32);
 
         ram.load_data(data, start).unwrap();
 
@@ -132,15 +132,15 @@ mod tests {
     #[test]
     fn fail_load_data_due_to_max_size() {
         let mut ram = Ram::new();
-        ram.set_max_address(Address::from(5));
+        ram.set_max_address(Address::from(5 as u32));
 
-        let result = ram.load_data(DataBlock::from(vec![1]), Address::from(6));
+        let result = ram.load_data(DataBlock::from(vec![1]), Address::from(6 as u32));
 
         assert_eq!(
             result,
             Err(RamError::RamIndexOverflow(
-                Address::from(7),
-                Address::from(5)
+                Address::from(7 as u32),
+                Address::from(5 as u32)
             ))
         );
     }
@@ -154,8 +154,8 @@ mod tests {
 
         let expected_output: [u8; 2] = [0x2, 0x3];
 
-        let start = Address::from(1);
-        let end = Address::from(3);
+        let start = Address::from(1 as u32);
+        let end = Address::from(3 as u32);
 
         assert_eq!(ram[start..end], expected_output);
     }
