@@ -168,3 +168,14 @@ fn get_unconditional_instruction(value: Word) -> ArmOpcode {
         (_, _) => unreachable!(),
     }
 }
+
+#[cfg(test)]
+mod tests {
+
+    use super::ArmOpcode;
+
+    #[test]
+    fn test_adc() {
+
+    }
+}
