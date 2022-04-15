@@ -134,6 +134,7 @@ impl From<Word> for ArmOpcode {
                 0b101 => opcode101::handle(value),
                 0b110 => opcode110::handle(value),
                 0b111 => opcode111::handle(value),
+                _ => unreachable!(),
             }
         }
     }
