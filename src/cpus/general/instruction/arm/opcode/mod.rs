@@ -17,9 +17,9 @@ pub enum ArmOpcode {
     ADD,
     AND,
     B,
+    BL,
     BIC,
     BKPT,
-    BL,
     BLX,
     BX,
     CDP,
@@ -33,8 +33,8 @@ pub enum ArmOpcode {
     LDM,
     LDR,
     LDRB,
-    LDRD,
     LDRBT,
+    LDRD,
     LDRH,
     LDRSB,
     LDRSH,
@@ -60,12 +60,12 @@ pub enum ArmOpcode {
     RSB,
     RSC,
     SBC,
-    SMLAL,
     SMLAXY,
+    SMLAL,
     SMLALXY,
     SMLAWY,
-    SMULL,
     SMULXY,
+    SMULL,
     SMULWY,
     STC,
     STC2,
@@ -172,8 +172,455 @@ fn get_unconditional_instruction(value: Word) -> ArmOpcode {
 #[cfg(test)]
 mod tests {
 
-    // use super::ArmOpcode;
+    use super::ArmOpcode;
 
     #[test]
-    fn test_adc() {}
+    fn test_adc() {
+        let value = 0b0000_0010_1011_1111_1111_1111_1111_1111;
+        assert_eq!(ArmOpcode::ADC, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_add() {
+        let value = 0b0000_0010_1001_1111_1111_1111_1111_1111;
+        assert_eq!(ArmOpcode::ADD, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_and() {
+        let value = 0b0000_0010_0001_1111_1111_1111_1111_1111;
+        assert_eq!(ArmOpcode::AND, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_b() {
+        let value = 0b0000_1010_1111_1111_1111_1111_1111_1111;
+        assert_eq!(ArmOpcode::B, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_bl() {
+        let value = 0b0000_1011_1111_1111_1111_1111_1111_1111;
+        assert_eq!(ArmOpcode::BL, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_bic() {
+        let value = 0b0000_0011_1101_1111_1111_1111_1111_1111;
+        assert_eq!(ArmOpcode::BIC, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_bkpt() {
+        let value = 0b1110_0001_0010_1111_1111_1111_0111_1111;
+        assert_eq!(ArmOpcode::BKPT, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_blx1() {
+        let value = 0b1111_1011_1111_1111_1111_1111_1111_1111;
+        assert_eq!(ArmOpcode::BLX, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_blx2() {
+        let value = 0b0000_0001_0010_1111_1111_1111_0011_1111;
+        assert_eq!(ArmOpcode::BLX, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_bx() {
+        let value = 0b0000_0001_0010_1111_1111_1111_0001_1111;
+        assert_eq!(ArmOpcode::BX, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_cdp() {
+        let value = 0b0000_1110_1111_1111_1111_1111_1110_1111;
+        assert_eq!(ArmOpcode::CDP, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_clz() {
+        let value = 0b0000_0001_0110_1111_1111_1111_0001_1111;
+        assert_eq!(ArmOpcode::CLZ, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_cmn() {
+        let value = 0b0000_0011_0111_1111_0000_1111_1111_1111;
+        assert_eq!(ArmOpcode::CMN, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_cmp() {
+        let value = 0b0000_0011_0101_1111_0000_1111_1111_1111;
+        assert_eq!(ArmOpcode::CMP, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_eor() {
+        let value = 0b0000_0010_0011_1111_1111_1111_1111_1111;
+        assert_eq!(ArmOpcode::EOR, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_ldc() {
+        let value = 0b0000_1101_1111_1111_1111_1111_1111_1111;
+        assert_eq!(ArmOpcode::LDC, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_ldc2() {
+        let value = 0b1111_1101_1111_1111_1111_1111_1111_1111;
+        assert_eq!(ArmOpcode::LDC2, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_ldm1() {
+        let value = 0b0000_1001_1011_1111_1111_1111_1111_1111;
+        assert_eq!(ArmOpcode::LDM, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_ldm2() {
+        let value = 0b0000_1001_1101_1111_0111_1111_1111_1111;
+        assert_eq!(ArmOpcode::LDM, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_ldm3() {
+        let value = 0b0000_1001_1111_1111_1111_1111_1111_1111;
+        assert_eq!(ArmOpcode::LDM, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_ldr() {
+        let value = 0b0000_0111_1011_1111_1111_1111_1111_1111;
+        assert_eq!(ArmOpcode::LDR, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_ldrb() {
+        let value = 0b0000_0111_1111_1111_1111_1111_1111_1111;
+        assert_eq!(ArmOpcode::LDRB, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_ldrbt() {
+        let value = 0b0000_0110_1111_1111_1111_1111_1111_1111;
+        assert_eq!(ArmOpcode::LDRBT, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_ldrd() {
+        let value = 0b0000_0001_1110_1111_1111_1111_1101_1111;
+        assert_eq!(ArmOpcode::LDRD, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_ldrh() {
+        let value = 0b0000_0001_1111_1111_1111_1111_1011_1111;
+        assert_eq!(ArmOpcode::LDRH, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_ldrsb() {
+        let value = 0b0000_0001_1111_1111_1111_1111_1101_1111;
+        assert_eq!(ArmOpcode::LDRSB, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_ldrsh() {
+        let value = 0b0000_0001_1111_1111_1111_1111_1111_1111;
+        assert_eq!(ArmOpcode::LDRSH, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_ldrt() {
+        let value = 0b0000_0110_1011_1111_1111_1111_1111_1111;
+        assert_eq!(ArmOpcode::LDRT, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_mcr() {
+        let value = 0b0000_1110_1110_1111_1111_1111_1111_11111;
+        assert_eq!(ArmOpcode::MCR, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_mcr2() {
+        let value = 0b1111_1110_1110_1111_1111_1111_1111_11111;
+        assert_eq!(ArmOpcode::MCR, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_mcrr() {
+        let value = 0b0000_1100_0100_1111_1111_1111_1111_1111;
+        assert_eq!(ArmOpcode::MCRR, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_mla() {
+        let value = 0b0000_0000_0011_1111_1111_1111_1001_1111;
+        assert_eq!(ArmOpcode::MLA, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_mov() {
+        let value = 0b0000_0011_1011_0000_1111_1111_1111_1111;
+        assert_eq!(ArmOpcode::MOV, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_mrc() {
+        let value = 0b0000_1110_1111_1111_1111_1111_1111_1111;
+        assert_eq!(ArmOpcode::MRC, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_mrc2() {
+        let value = 0b1111_1110_1111_1111_1111_1111_1111_1111;
+        assert_eq!(ArmOpcode::MRC, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_mrrc() {
+        let value = 0b0000_1100_0101_1111_1111_1111_1111_1111;
+        assert_eq!(ArmOpcode::MRRC, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_mrs() {
+        let value = 0b0000_0001_0100_1111_1111_0000_0000_0000;
+        assert_eq!(ArmOpcode::MRS, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_msr_immediate() {
+        let value = 0b0000_0011_0110_1111_1111_1111_1111_1111;
+        assert_eq!(ArmOpcode::MSR, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_msr_register() {
+        let value = 0b0000_0001_0110_1111_1111_0000_0000_1111;
+        assert_eq!(ArmOpcode::MSR, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_mul() {
+        let value = 0b0000_0000_0001_1111_0000_1111_1001_1111;
+        assert_eq!(ArmOpcode::MUL, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_mvn() {
+        let value = 0b0000_0011_1111_0000_1111_1111_1111_1111;
+        assert_eq!(ArmOpcode::MVN, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_orr() {
+        let value = 0b0000_0011_1001_1111_1111_1111_1111_1111;
+        assert_eq!(ArmOpcode::ORR, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_pld() {
+        let value = 0b1111_0111_1101_1111_1111_1111_1111_1111;
+        assert_eq!(ArmOpcode::PLD, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_qadd() {
+        let value = 0b0000_0001_0000_1111_1111_0000_0101_1111;
+        assert_eq!(ArmOpcode::QADD, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_qdadd() {
+        let value = 0b0000_0001_0100_1111_1111_0000_0101_1111;
+        assert_eq!(ArmOpcode::QDADD, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_qdsub() {
+        let value = 0b0000_0001_0110_1111_1111_0000_0101_1111;
+        assert_eq!(ArmOpcode::QDSUB, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_qsub() {
+        let value = 0b0000_0001_0010_1111_1111_0000_0101_1111;
+        assert_eq!(ArmOpcode::QSUB, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_rsb() {
+        let value = 0b0000_0010_0111_1111_1111_1111_1111_1111;
+        assert_eq!(ArmOpcode::RSB, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_rsc() {
+        let value = 0b0000_0010_1111_1111_1111_1111_1111_1111;
+        assert_eq!(ArmOpcode::RSC, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_sbc() {
+        let value = 0b0000_0010_1101_1111_1111_1111_1111_1111;
+        assert_eq!(ArmOpcode::SBC, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_smla_xy() {
+        let value = 0b0000_0001_0000_1111_1111_1111_1110_1111;
+        assert_eq!(ArmOpcode::SMLAXY, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_smlal() {
+        let value = 0b0000_0000_1111_1111_1111_1111_1001_1111;
+        assert_eq!(ArmOpcode::SMLAL, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_smlalxy() {
+        let value = 0b0000_0001_0100_1111_1111_1111_1110_1111;
+        assert_eq!(ArmOpcode::SMLALXY, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_smlawy() {
+        let value = 0b0000_0001_0010_1111_1111_1111_1100_1111;
+        assert_eq!(ArmOpcode::SMLAWY, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_smulXY() {
+        let value = 0b0000_0001_0110_1111_0000_1111_1110_1111;
+        assert_eq!(ArmOpcode::SMALXY, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_smull() {
+        let value = 0b0000_0000_1101_1111_1111_1111_1001_1111;
+        assert_eq!(ArmOpcode::SMULL, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_smulwy() {
+        let value = 0b0000_0001_0010_1111_0000_1111_1110_1111;
+        assert_eq!(ArmOpcode::SMULWY, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_stc() {
+        let value = 0b0000_1101_1110_1111_1111_1111_1111_1111;
+        assert_eq!(ArmOpcode::STC, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_stc2() {
+        let value = 0b1111_1101_1110_1111_1111_1111_1111_1111;
+        assert_eq!(ArmOpcode::STC, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_stm1() {
+        let value = 0b0000_1001_1010_1111_1111_1111_1111_1111;
+        assert_eq!(ArmOpcode::STM, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_stm2() {
+        let value = 0b0000_1001_1100_1111_1111_1111_1111_1111;
+        assert_eq!(ArmOpcode::STM, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_str() {
+        let value = 0b0000_0111_1010_1111_1111_1111_1111_1111;
+        assert_eq!(ArmOpcode::STR, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_strb() {
+        let value = 0b0000_0111_1110_1111_1111_1111_1111_1111;
+        assert_eq!(ArmOpcode::STRB, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_strbt() {
+        let value = 0b0000_0110_1110_1111_1111_1111_1111_1111;
+        assert_eq!(ArmOpcode::STRBT, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_strd() {
+        let value = 0b0000_0001_1110_1111_1111_1111_1111_1111;
+        assert_eq!(ArmOpcode::STRD, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_strh() {
+        let value = 0b0000_0001_1110_1111_1111_1111_1011_1111;
+        assert_eq!(ArmOpcode::STRH, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_strt() {
+        let value = 0b0000_0110_1010_1111_1111_1111_1111_1111;
+        assert_eq!(ArmOpcode::STRT, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_sub() {
+        let value = 0b0000_0010_0101_1111_1111_1111_1111_1111;
+        assert_eq!(ArmOpcode::SUB, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_swi() {
+        let value = 0b0000_1111_1111_1111_1111_1111_1111_1111;
+        assert_eq!(ArmOpcode::SWI, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_swp() {
+        let value = 0b0000_0001_0000_1111_1111_0000_1001_1111;
+        assert_eq!(ArmOpcode::SWP, ArmOpcode::from(value)));
+    }
+
+    #[test]
+    fn test_swpb() {
+        let value = 0b0000_0001_0100_1111_1111_0000_1001_1111;
+        assert_eq!(ArmOpcode::SWPB, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_teq() {
+        let value = 0b0000_0011_0011_1111_0000_1111_1111_1111;
+        assert_eq!(ArmOpcode::TEQ, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_tst() {
+        let value = 0b0000_0011_0001_1111_0000_1111_1111_1111;
+        assert_eq!(ArmOpcode::TST, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_umlal() {
+        let value = 0b0000_0000_1011_1111_1111_1111_1001_1111;
+        assert_eq!(ArmOpcode::UMLAL, ArmOpcode::from(value));
+    }
+
+    #[test]
+    fn test_umull() {
+        let value = 0b0000_0000_1001_1111_1111_1111_1001_1111;
+        assert_eq!(ArmOpcode:UMULL, ArmOpcode::from(value));
+    }
 }
