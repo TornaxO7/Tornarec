@@ -10,7 +10,7 @@ use super::ArmOperand;
 
 use std::convert::TryFrom;
 
-pub fn get_ldc_operand(value: Word) -> ArmOperand {
+pub fn get_ldc_stc_operand(value: Word) -> ArmOperand {
     let u = BitState::new(value, 23);
     let n = BitState::new(value, 22);
     let rn = Register::new(value, 16, 0b1111);
@@ -18,7 +18,7 @@ pub fn get_ldc_operand(value: Word) -> ArmOperand {
     let cp_num = u8::try_from((value >> 8) & 0b1111).unwrap();
     let immed8 = u8::try_from(value & 0b1111_1111).unwrap();
 
-    ArmOperand::LDC {
+    ArmOperand::LDCandSTC {
         u,
         n,
         rn,
@@ -29,13 +29,23 @@ pub fn get_ldc_operand(value: Word) -> ArmOperand {
     }
 }
 
-pub fn get_mcr_operand(value: Word) -> ArmOperand {
-    ArmOperand::MCR {
+pub fn getd_mcr_mrc_operand(value: Word) -> ArmOperand {
+    ArmOperand::MCRandMRC {
         opcode1: u8::try_from((value >> 21) & 0b111).unwrap(),
         crn: Register::new(value, 16, 0b1111),
         rd: Register::new(value, 12, 0b1111),
         cp_num: u8::try_from((value >> 8) & 0b1111).unwrap(),
         opcode2: u8::try_from((value >> 5) & 0b111).unwrap(),
+        crm: Register::new(value, 0, 0b1111),
+    }
+}
+
+pub fn get_mcrr_mrrc_operand(value: Word) -> ArmOperand {
+    ArmOperand::MCRRandMRRC {
+        rn: Register::new(value, 16, 0b1111),
+        rd: Register::new(value, 12, 0b1111),
+        cp_num: u8::try_from((value >> 8) & 0b1111).unwrap(),
+        opcode: u8::try_from((value >> 4) & 0b1111).unwrap(),
         crm: Register::new(value, 0, 0b1111),
     }
 }
