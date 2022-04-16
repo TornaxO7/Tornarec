@@ -13,7 +13,7 @@ pub fn handle(value: Word) -> ArmOpcode {
     } else if is_coprocessor_register_transfers(value) {
         handle_coprocessor_register_transfers(value)
     } else {
-        ArmOpcode::unknown_opcode(value)
+        unreachable!()
     }
 }
 

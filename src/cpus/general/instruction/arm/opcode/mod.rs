@@ -1,5 +1,7 @@
 use crate::ram::Word;
 
+
+
 use super::BitState;
 
 mod opcode000;
@@ -110,10 +112,6 @@ impl ArmOpcode {
             0b1111 => Self::MVN,
             _ => unreachable!("Unknown data-processing instruction: {:#034b}", value),
         }
-    }
-
-    pub fn unknown_opcode(value: Word) -> ! {
-        unreachable!("Unknown opcode: {:#034b}", value);
     }
 }
 
@@ -296,19 +294,34 @@ mod tests {
 
     #[test]
     fn test_ldr() {
-        let value = 0b0000_0111_1011_1111_1111_1111_1111_1111;
+        // register offset
+        let value = 0b0000_0111_1011_1111_1111_1111_1110_1111;
+        assert_eq!(ArmOpcode::LDR, ArmOpcode::from(value));
+
+        // immediate offset
+        let value = 0b0000_0101_1011_1111_1111_1111_1111_1111;
         assert_eq!(ArmOpcode::LDR, ArmOpcode::from(value));
     }
 
     #[test]
     fn test_ldrb() {
-        let value = 0b0000_0111_1111_1111_1111_1111_1111_1111;
+        // register offset
+        let value = 0b0000_0111_1111_1111_1111_1111_1110_1111;
+        assert_eq!(ArmOpcode::LDRB, ArmOpcode::from(value));
+
+        // immediate offset
+        let value = 0b0000_0101_1111_1111_1111_1111_1111_1111;
         assert_eq!(ArmOpcode::LDRB, ArmOpcode::from(value));
     }
 
     #[test]
     fn test_ldrbt() {
-        let value = 0b0000_0110_1111_1111_1111_1111_1111_1111;
+        // register offset
+        let value = 0b0000_0110_1111_1111_1111_1111_1110_1111;
+        assert_eq!(ArmOpcode::LDRBT, ArmOpcode::from(value));
+
+        // immediate offset
+        let value = 0b0000_0100_1111_1111_1111_1111_1111_1111;
         assert_eq!(ArmOpcode::LDRBT, ArmOpcode::from(value));
     }
 
@@ -338,7 +351,7 @@ mod tests {
 
     #[test]
     fn test_ldrt() {
-        let value = 0b0000_0110_1011_1111_1111_1111_1111_1111;
+        let value = 0b0000_0110_1011_1111_1111_1111_1110_1111;
         assert_eq!(ArmOpcode::LDRT, ArmOpcode::from(value));
     }
 
@@ -351,7 +364,7 @@ mod tests {
     #[test]
     fn test_mcr2() {
         let value = 0b1111_1110_1110_1111_1111_1111_1111_1111;
-        assert_eq!(ArmOpcode::MCR, ArmOpcode::from(value));
+        assert_eq!(ArmOpcode::MCR2, ArmOpcode::from(value));
     }
 
     #[test]
@@ -381,7 +394,7 @@ mod tests {
     #[test]
     fn test_mrc2() {
         let value = 0b1111_1110_1111_1111_1111_1111_1111_1111;
-        assert_eq!(ArmOpcode::MRC, ArmOpcode::from(value));
+        assert_eq!(ArmOpcode::MRC2, ArmOpcode::from(value));
     }
 
     #[test]
@@ -475,7 +488,7 @@ mod tests {
     }
 
     #[test]
-    fn test_smla_xy() {
+    fn test_smlaxy() {
         let value = 0b0000_0001_0000_1111_1111_1111_1110_1111;
         assert_eq!(ArmOpcode::SMLAXY, ArmOpcode::from(value));
     }
@@ -501,7 +514,7 @@ mod tests {
     #[test]
     fn test_smulxy() {
         let value = 0b0000_0001_0110_1111_0000_1111_1110_1111;
-        assert_eq!(ArmOpcode::SMLAXY, ArmOpcode::from(value));
+        assert_eq!(ArmOpcode::SMULXY, ArmOpcode::from(value));
     }
 
     #[test]
@@ -525,7 +538,7 @@ mod tests {
     #[test]
     fn test_stc2() {
         let value = 0b1111_1101_1110_1111_1111_1111_1111_1111;
-        assert_eq!(ArmOpcode::STC, ArmOpcode::from(value));
+        assert_eq!(ArmOpcode::STC2, ArmOpcode::from(value));
     }
 
     #[test]
@@ -542,19 +555,34 @@ mod tests {
 
     #[test]
     fn test_str() {
-        let value = 0b0000_0111_1010_1111_1111_1111_1111_1111;
+        // register offset
+        let value = 0b0000_0111_1010_1111_1111_1111_1110_1111;
+        assert_eq!(ArmOpcode::STR, ArmOpcode::from(value));
+
+        // immediate offset
+        let value = 0b0000_0101_1010_1111_1111_1111_1111_1111;
         assert_eq!(ArmOpcode::STR, ArmOpcode::from(value));
     }
 
     #[test]
     fn test_strb() {
-        let value = 0b0000_0111_1110_1111_1111_1111_1111_1111;
+        // register offset
+        let value = 0b0000_0111_1110_1111_1111_1111_1110_1111;
+        assert_eq!(ArmOpcode::STRB, ArmOpcode::from(value));
+
+        // immediate offset
+        let value = 0b0000_0101_1110_1111_1111_1111_1111_1111;
         assert_eq!(ArmOpcode::STRB, ArmOpcode::from(value));
     }
 
     #[test]
     fn test_strbt() {
-        let value = 0b0000_0110_1110_1111_1111_1111_1111_1111;
+        // register offset
+        let value = 0b0000_0110_1110_1111_1111_1111_1110_1111;
+        assert_eq!(ArmOpcode::STRBT, ArmOpcode::from(value));
+
+        // immediate offset
+        let value = 0b0000_0100_1110_1111_1111_1111_1111_1111;
         assert_eq!(ArmOpcode::STRBT, ArmOpcode::from(value));
     }
 
@@ -572,7 +600,12 @@ mod tests {
 
     #[test]
     fn test_strt() {
-        let value = 0b0000_0110_1010_1111_1111_1111_1111_1111;
+        // register offset
+        let value = 0b0000_0110_1010_1111_1111_1111_1110_1111;
+        assert_eq!(ArmOpcode::STRT, ArmOpcode::from(value));
+
+        // immediate offset
+        let value = 0b0000_0100_1010_1111_1111_1111_1111_1111;
         assert_eq!(ArmOpcode::STRT, ArmOpcode::from(value));
     }
 

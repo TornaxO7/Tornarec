@@ -16,7 +16,7 @@ pub fn handle(value: Word) -> ArmOpcode {
         (_, 0, _, 1) => ArmOpcode::LDR,
         (_, 1, _, 1) => ArmOpcode::LDRB,
         (_, 0, _, 0) => ArmOpcode::STR,
-        (0, 1, _, 0) => ArmOpcode::STRB,
-        _ => ArmOpcode::unknown_opcode(value),
+        (_, 1, _, 0) => ArmOpcode::STRB,
+        _ => unreachable!(),
     }
 }
