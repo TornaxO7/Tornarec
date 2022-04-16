@@ -198,16 +198,16 @@ impl Arm7TDMI {
             Exception::Pabt | Exception::Dabt => cpsr.set_operating_mode(OperatingMode::Abt),
             Exception::Fiq => {
                 cpsr.set_operating_mode(OperatingMode::Fiq);
-                cpsr.set_interrupt_bit(Interruption::Fiq, BitState::from(true));
+                cpsr.set_interrupt_bit(Interruption::Fiq, BitState::SET);
             }
             Exception::Irq => cpsr.set_operating_mode(OperatingMode::Irq),
             Exception::Reset => {
                 cpsr.set_operating_mode(OperatingMode::Svc);
-                cpsr.set_interrupt_bit(Interruption::Fiq, BitState::from(true));
+                cpsr.set_interrupt_bit(Interruption::Fiq, BitState::SET);
             }
         };
 
-        cpsr.set_interrupt_bit(Interruption::Irq, BitState::from(true));
+        cpsr.set_interrupt_bit(Interruption::Irq, BitState::SET);
         cpsr.set_operating_state(OperatingState::Arm);
     }
 }

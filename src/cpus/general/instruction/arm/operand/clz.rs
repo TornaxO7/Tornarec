@@ -1,23 +1,21 @@
 use crate::{
-    cpus::general::instruction::arm::Register,
+    cpus::general::instruction::arm::types::{
+        sbo,
+        Register,
+    },
     ram::Word,
 };
 
 use super::ArmOperand;
 
-use std::convert::TryFrom;
-
 pub fn get_operand(value: Word) -> ArmOperand {
-    let sbo1 = (value >> 16) & 0b1111;
-    let rd = Register::try_from((value >> 12) & 0b1111).unwrap();
-    let sbo2 = (value >> 8) & 0b1111;
-    let rm = Register::try_from(value & 0b1111).unwrap();
+    sbo(value, 16, 0b1111);
+    sbo(value, 8, 0b1111);
 
-    if sbo1 != 0b1111 || sbo2 != 0b1111 {
-        unreachable!();
+    ArmOperand::CLZ {
+        rd: Register::new(value, 12, 0b1111),
+        rm: Register::new(value, 0, 0b1111),
     }
-
-    ArmOperand::CLZ { rd, rm }
 }
 
 #[cfg(test)]
@@ -27,7 +25,7 @@ mod tests {
             breakpoint::get_operand,
             ArmOperand,
         },
-        Register,
+        types::Register,
     };
 
     #[test]

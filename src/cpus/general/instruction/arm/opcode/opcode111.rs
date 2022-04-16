@@ -18,29 +18,29 @@ pub fn handle(value: Word) -> ArmOpcode {
 }
 
 fn handle_coprocessor_register_transfers(value: Word) -> ArmOpcode {
-    let bit20 = BitState::from(((value >> 20) & 0b1) != 0);
+    let bit20 = BitState::new(value, 20);
 
     match bit20 {
-        true => ArmOpcode::MRC,
-        false => ArmOpcode::MCR,
+        BitState::SET => ArmOpcode::MRC,
+        BitState::UNSET => ArmOpcode::MCR,
     }
 }
 
 fn is_software_interrupt(value: Word) -> bool {
-    let bit24 = BitState::from(((value >> 24) & 0b1) != 0);
-    bit24
+    let bit24 = BitState::new(value, 24);
+    *bit24
 }
 
 fn is_coprocessor_data_processing(value: Word) -> bool {
-    let bit24 = BitState::from(((value >> 24) & 0b1) != 0);
-    let bit4 = BitState::from(((value >> 4) & 0b1) != 0);
+    let bit24 = BitState::new(value, 24);
+    let bit4 = BitState::new(value, 4);
 
     !bit24 && !bit4
 }
 
 fn is_coprocessor_register_transfers(value: Word) -> bool {
-    let bit24 = BitState::from(((value >> 24) & 0b1) != 0);
-    let bit4 = BitState::from(((value >> 4) & 0b1) != 0);
+    let bit24 = BitState::new(value, 24);
+    let bit4 = BitState::new(value, 4);
 
-    !bit24 && bit4
+    !bit24 && *bit4
 }

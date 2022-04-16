@@ -1,9 +1,5 @@
 use crate::{
-    cpus::general::instruction::arm::{
-        CPNum,
-        CPRegister,
-    },
-    ram::Word,
+    ram::Word, cpus::general::instruction::arm::types::Register,
 };
 
 use super::ArmOperand;
@@ -12,19 +8,16 @@ use std::convert::TryFrom;
 
 pub fn get_operand(value: Word) -> ArmOperand {
     let opcode1 = u8::try_from((value >> 20) & 0b1111).unwrap();
-    let crn = CPRegister::try_from((value >> 16) & 0b1111).unwrap();
-    let crd = CPRegister::try_from((value >> 12) & 0b1111).unwrap();
-    let num = CPNum::try_from((value >> 8) & 0b1111).unwrap();
+    let num = u8::try_from((value >> 8) & 0b1111).unwrap();
     let opcode2 = u8::try_from((value >> 5) & 0b111).unwrap();
-    let crm = CPRegister::try_from(value & 0b1111).unwrap();
 
     ArmOperand::CDP {
         opcode1,
-        crn,
-        crd,
+        crn: Register::new(value, 16, 0b1111),
+        crd: Register::new(value, 12, 0b1111),
         num,
         opcode2,
-        crm,
+        crm: Register::new(value, 0, 0b1111),
     }
 }
 
@@ -34,9 +27,7 @@ mod tests {
         operand::{
             breakpoint::get_operand,
             ArmOperand,
-        },
-        CPNum,
-        CPRegister,
+        }, types::Register,
     };
 
     #[test]
@@ -46,11 +37,11 @@ mod tests {
         assert_eq!(
             ArmOperand::CDP {
                 opcode1: u8::from(0b1111),
-                crn: CPRegister::from(0b1111),
-                crd: CPRegister::from(0b1111),
-                num: CPNum::from(0b1111),
-                opcode2: u8::from(0b111),
-                crm: CPRegister::from(01111),
+                crn: Register::from(0b1111),
+                crd: Register::from(0b1111),
+                num: 0b1111,
+                opcode2: 0b111,
+                crm: Register::from(01111),
             },
             get_operand(value)
         );

@@ -43,15 +43,15 @@ fn handle_media_instruction(_value: Word) -> ArmOpcode {
 }
 
 fn is_load_store_instruction(value: Word) -> bool {
-    let bit4 = BitState::from(((value >> 4) & 0b1) != 0);
+    let bit4 = BitState::new(value, 4);
     !bit4
 }
 
 fn is_media_instruction(value: Word) -> bool {
     let bit27_25 = (value >> 25) & 0b111;
-    let bit4 = BitState::from(((value >> 4) & 0b1) != 0);
+    let bit4 = BitState::new(value, 4);
 
-    bit27_25 == 0b011 && bit4
+    bit27_25 == 0b011 && *bit4
 }
 
 fn is_architecturally_undefined(value: Word) -> bool {

@@ -145,10 +145,10 @@ fn get_unconditional_instruction(value: Word) -> ArmOpcode {
         (0b01, _) => ArmOpcode::PLD,
         (0b10, 1) => ArmOpcode::BLX1,
         (0b11, 0) => {
-            let l_flag = BitState::from(((value >> 20) & 0b1) != 0);
+            let l_flag = BitState::new(value, 20);
             match l_flag {
-                false => ArmOpcode::STC2,
-                true => ArmOpcode::LDC2,
+                BitState::SET => ArmOpcode::LDC2,
+                BitState::UNSET => ArmOpcode::STC2,
             }
         }
         (0b11, 1) => {

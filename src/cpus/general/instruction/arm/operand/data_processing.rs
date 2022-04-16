@@ -2,8 +2,8 @@ use std::convert::TryFrom;
 
 use crate::{
     cpus::general::instruction::arm::{
+        types::Register,
         BitState,
-        Register,
     },
     ram::Word,
 };
@@ -11,18 +11,18 @@ use crate::{
 use super::ArmOperand;
 
 pub fn get_operand(value: Word) -> ArmOperand {
-    let s = BitState::from(((value >> 20) & 0b1) != 0);
-    let rn = Register::try_from((value >> 16) & 0b1111).unwrap();
-    let rd = Register::try_from((value >> 12) & 0b1111).unwrap();
+    let s = BitState::new(value, 20);
+    let rn = Register::new(value, 16, 0b1111);
+    let rd = Register::new(value, 12, 0b1111);
 
-    let bit25 = BitState::from(((value >> 25) & 0b1) != 0);
-    let bit7 = BitState::from(((value >> 7) & 0b1) != 0);
-    let bit4 = BitState::from(((value >> 4) & 0b1) != 0);
-    let shifter_operand = if bit25 {
+    let bit25 = BitState::new(value, 25);
+    let bit7 = BitState::new(value, 7);
+    let bit4 = BitState::new(value, 4);
+    let shifter_operand = if *bit25 {
         ShifterOperand::get_immediate(value)
     } else if !bit4 {
         ShifterOperand::get_immediate_shift(value)
-    } else if !bit7 && bit4 {
+    } else if !bit7 && *bit4 {
         ShifterOperand::get_register_shift(value)
     } else {
         unreachable!()
@@ -66,15 +66,15 @@ impl ShifterOperand {
         Self::ImmediateShift {
             shift_imm: u8::try_from((value >> 7) & 0b1_1111).unwrap(),
             shift: u8::try_from((value >> 5) & 0b11).unwrap(),
-            rm: Register::try_from(value & 0b1111).unwrap(),
+            rm: Register::new(value, 0, 0b1111),
         }
     }
 
     pub fn get_register_shift(value: Word) -> Self {
         Self::RegisterShift {
-            rs: Register::try_from((value >> 8) & 0b1111).unwrap(),
+            rs: Register::new(value, 8, 0b1111),
             shift: u8::try_from((value >> 5) & 0b11).unwrap(),
-            rm: Register::try_from(value & 0b1111).unwrap(),
+            rm: Register::new(value, 0, 0b1111),
         }
     }
 }
@@ -89,8 +89,8 @@ mod tests {
             },
             ArmOperand,
         },
+        types::Register,
         BitState,
-        Register,
     };
 
     #[test]
@@ -126,7 +126,7 @@ mod tests {
 
         assert_eq!(
             ArmOperand::DataProcessing {
-                s: BitState::from(true),
+                s: BitState::SET,
                 rn: Register::from(0b1111),
                 rd: Register::from(0b1111),
                 shifter_operand: ShifterOperand::get_immediate(value),
@@ -141,7 +141,7 @@ mod tests {
 
         assert_eq!(
             ArmOperand::DataProcessing {
-                s: BitState::from(true),
+                s: BitState::SET,
                 rn: Register::from(0b1111),
                 rd: Register::from(0b1111),
                 shifter_operand: ShifterOperand::get_immediate_shift(value),
@@ -156,7 +156,7 @@ mod tests {
 
         assert_eq!(
             ArmOperand::DataProcessing {
-                s: BitState::from(true),
+                s: BitState::SET,
                 rn: Register::from(0b1111),
                 rd: Register::from(0b1111),
                 shifter_operand: ShifterOperand::get_register_shift(value),

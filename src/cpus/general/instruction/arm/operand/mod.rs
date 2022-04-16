@@ -2,7 +2,7 @@ use crate::ram::Word;
 
 use self::data_processing::ShifterOperand;
 
-use super::{opcode::ArmOpcode, Register, BitState, CPRegister, CPNum};
+use super::{types::Register, BitState};
 
 mod branch;
 mod data_processing;
@@ -10,6 +10,7 @@ mod breakpoint;
 mod swi;
 mod cdp;
 mod clz;
+mod load_store_coprocessor;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ArmOperand {
@@ -32,15 +33,25 @@ pub enum ArmOperand {
     SWI(u32),
     CDP {
         opcode1: u8,
-        crn: CPRegister,
-        crd: CPRegister,
-        num: CPNum,
+        crn: Register,
+        crd: Register,
+        num: u8,
         opcode2: u8,
-        crm: CPRegister,
+        crm: Register,
     },
     CLZ {
         rd: Register,
         rm: Register,
+    },
+    LoadStoreCoprocessor {
+        p: BitState,
+        u: BitState,
+        n: BitState,
+        w: BitState,
+        rn: Register,
+        crd: Register,
+        cp_num: u8,
+        immed8: u8
     }
 }
 

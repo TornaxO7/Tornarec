@@ -1,9 +1,10 @@
-use std::convert::TryFrom;
-
 use crate::{
     cpus::general::instruction::arm::{
+        types::{
+            sbo,
+            Register,
+        },
         BitState,
-        Register,
     },
     ram::Word,
 };
@@ -16,20 +17,16 @@ pub fn normal(value: Word) -> ArmOperand {
 }
 
 pub fn register(value: Word) -> ArmOperand {
-    let sbo = (value >> 8) & 0b1111_1111_1111;
-    if sbo != 0b1111_1111_1111 {
-        // example 170
-        // Affected: BX, BLX(2)
-        todo!();
-    }
+    // example 170
+    // Affected: BX, BLX(2)
+    sbo(value, 8, 0b1111_1111_1111);
 
-    let rm = Register::try_from(value & 0b1111).unwrap();
-
+    let rm = Register::new(value, 0, 0b1111);
     ArmOperand::BRegister(rm)
 }
 
 pub fn blx1(value: Word) -> ArmOperand {
-    let h = BitState::from(((value >> 24) & 0b1) != 0);
+    let h = BitState::new(value, 24);
     let immed24 = value & 0b1111_1111_1111_1111_1111_1111;
 
     ArmOperand::BLX1 { h, immed24 }
@@ -46,8 +43,8 @@ mod tests {
             },
             ArmOperand,
         },
+        types::Register,
         BitState,
-        Register,
     };
 
     #[test]
@@ -80,7 +77,7 @@ mod tests {
 
         assert_eq!(
             ArmOperand::BLX1 {
-                h: BitState::from(true),
+                h: BitState::SET,
                 immed24: 0b1111_1111_1111_1111_1111_1111
             },
             blx1(value)

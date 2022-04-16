@@ -1,5 +1,8 @@
 pub mod opcode;
 pub mod operand;
+mod types;
+
+pub use types::BitState;
 
 use opcode::ArmOpcode;
 use operand::ArmOperand;
@@ -13,18 +16,6 @@ use crate::{
 };
 
 use super::Instruction;
-
-pub type BitState = bool;
-pub type Register = u8;
-
-/// coprocessor register
-pub type CPRegister = u8;
-/// coprocessor number
-pub type CPNum = u8;
-
-/// opcode for the coprocessor
-pub type CPOpcode = u8;
-
 pub fn get_arm_instruction(_address: Address, _value: Word) -> ArmInstruction {
     todo!();
 }
@@ -35,13 +26,6 @@ pub struct ArmInstruction {
     pub operand: ArmOperand,
     pub cond: ConditionCodeFlag,
     pub address: Address,
-}
-
-#[derive(Debug, Clone, PartialEq, Eq)]
-pub struct ArmDecode {
-    pub opcode: ArmOpcode,
-    pub operand: ArmOperand,
-    pub cond: ConditionCodeFlag,
 }
 
 impl ArmInstruction {

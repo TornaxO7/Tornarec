@@ -13,9 +13,9 @@ pub fn handle(value: Word) -> ArmOpcode {
         _ => (),
     };
 
-    let bit20 = BitState::from(((value >> 20) & 0b1) != 0);
+    let bit20 = BitState::new(value, 20);
     match bit20 {
-        true => ArmOpcode::LDC,
-        false => ArmOpcode::STC,
+        BitState::SET => ArmOpcode::LDC,
+        BitState::UNSET => ArmOpcode::STC,
     }
 }

@@ -11,8 +11,8 @@ pub enum OperatingState {
 impl From<BitState> for OperatingState {
     fn from(bitstate: BitState) -> Self {
         match bitstate {
-            true => OperatingState::Thumb,
-            false => OperatingState::Arm,
+            BitState::SET => OperatingState::Thumb,
+            BitState::UNSET => OperatingState::Arm,
         }
     }
 }
