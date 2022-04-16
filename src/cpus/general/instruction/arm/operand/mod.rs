@@ -1,8 +1,8 @@
 use crate::ram::Word;
 
-use self::data_processing::ShifterOperand;
+use self::{data_processing::ShifterOperand, load_store_coprocessor::LoadStoreCoprocessorMode};
 
-use super::{types::Register, BitState};
+use super::{types::Register, BitState, opcode::ArmOpcode};
 
 mod branch;
 mod data_processing;
@@ -43,15 +43,14 @@ pub enum ArmOperand {
         rd: Register,
         rm: Register,
     },
-    LoadStoreCoprocessor {
-        p: BitState,
+    LDC {
         u: BitState,
         n: BitState,
-        w: BitState,
         rn: Register,
         crd: Register,
         cp_num: u8,
-        immed8: u8
+        immed8: u8,
+        mode: LoadStoreCoprocessorMode,
     }
 }
 
@@ -74,8 +73,8 @@ impl ArmOperand {
             CMN => data_processing::get_operand(value),
             CMP => data_processing::get_operand(value),
             EOR => data_processing::get_operand(value),
-            LDC => ,
-            LDC2 => ,
+            LDC => load_store_coprocessor::get_ldc_operand(value),
+            LDC2 => load_store_coprocessor::get_ldc_operand(value),
             LDM => ,
             LDR => ,
             LDRB => ,
