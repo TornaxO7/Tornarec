@@ -104,7 +104,7 @@ impl ArmOperand {
             TST => data_processing::get_operand(value),
             UMLAL => ,
             UMULL => ,
-            NOOP => ,
+            _ => unreachable!(),
         }
     }
 }
