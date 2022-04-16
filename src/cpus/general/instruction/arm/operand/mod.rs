@@ -97,7 +97,7 @@ impl ArmOperand {
             STRH => ,
             STRT => ,
             SUB => data_processing::get_operand(value),
-            SWI => ,
+            SWI => get_swi(value),
             SWP => ,
             SWPB => ,
             TEQ => data_processing::get_operand(value),
