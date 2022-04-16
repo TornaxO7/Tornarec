@@ -25,7 +25,8 @@ pub enum ArmOperand {
     BKPT {
         immed1: u16,
         immed2: u8,
-    }
+    },
+    SWI(u32),
 }
 
 impl ArmOperand {
@@ -105,5 +106,25 @@ impl ArmOperand {
             UMULL => ,
             NOOP => ,
         }
+    }
+}
+
+fn get_swi(value: Word) -> ArmOperand {
+    let immed24 = value >> 0b1111_1111_1111_1111_1111_1111;
+    ArmOperand::SWI(immed24)
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::cpus::general::instruction::arm::operand::{ArmOperand, get_swi};
+
+
+    #[test]
+    fn get_swi_operand() {
+        let value = 0b0000_1111_1111_1111_1111_1111_1111_1111;
+
+        assert_eq!(
+            ArmOperand::SWI(0b1111_1111_1111_1111_1111_1111),
+            get_swi(value));
     }
 }
