@@ -9,6 +9,7 @@ mod data_processing;
 mod breakpoint;
 mod swi;
 mod cdp;
+mod clz;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ArmOperand {
@@ -37,6 +38,10 @@ pub enum ArmOperand {
         opcode2: u8,
         crm: CPRegister,
     },
+    CLZ {
+        rd: Register,
+        rm: Register,
+    }
 }
 
 impl ArmOperand {
@@ -54,7 +59,7 @@ impl ArmOperand {
             BX => branch::register(value),
             CDP => cdp::get_operand(value),
             CDP2 => cdp::get_operand(value),
-            CLZ => ,
+            CLZ => clz::get_operand(value),
             CMN => data_processing::get_operand(value),
             CMP => data_processing::get_operand(value),
             EOR => data_processing::get_operand(value),
