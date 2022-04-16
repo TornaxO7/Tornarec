@@ -1,7 +1,5 @@
 use crate::ram::Word;
 
-
-
 use super::BitState;
 
 mod opcode000;
@@ -22,7 +20,8 @@ pub enum ArmOpcode {
     BL,
     BIC,
     BKPT,
-    BLX,
+    BLX1,
+    BLX2,
     BX,
     CDP,
     CDP2,
@@ -144,7 +143,7 @@ fn get_unconditional_instruction(value: Word) -> ArmOpcode {
 
     match (bit27_26, bit25) {
         (0b01, _) => ArmOpcode::PLD,
-        (0b10, 1) => ArmOpcode::BLX,
+        (0b10, 1) => ArmOpcode::BLX1,
         (0b11, 0) => {
             let l_flag = BitState::from(((value >> 20) & 0b1) != 0);
             match l_flag {
@@ -217,13 +216,13 @@ mod tests {
     #[test]
     fn test_blx1() {
         let value = 0b1111_1011_1111_1111_1111_1111_1111_1111;
-        assert_eq!(ArmOpcode::BLX, ArmOpcode::from(value));
+        assert_eq!(ArmOpcode::BLX1, ArmOpcode::from(value));
     }
 
     #[test]
     fn test_blx2() {
         let value = 0b0000_0001_0010_1111_1111_1111_0011_1111;
-        assert_eq!(ArmOpcode::BLX, ArmOpcode::from(value));
+        assert_eq!(ArmOpcode::BLX2, ArmOpcode::from(value));
     }
 
     #[test]

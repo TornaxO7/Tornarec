@@ -30,7 +30,7 @@ fn handle_miscellaneous_instruction(value: Word) -> ArmOpcode {
         (_, 1, 0, 0, 0, 0) => ArmOpcode::MSR,
         (0, 1, 0, 0, 0, 1) => ArmOpcode::BX,
         (1, 1, 0, 0, 0, 1) => ArmOpcode::CLZ,
-        (0, 1, 0, 0, 1, 1) => ArmOpcode::BLX,
+        (0, 1, 0, 0, 1, 1) => ArmOpcode::BLX2,
         (0, 0, 0, 1, 0, 1) => ArmOpcode::QADD,
         (0, 1, 0, 1, 0, 1) => ArmOpcode::QSUB,
         (1, 0, 0, 1, 0, 1) => ArmOpcode::QDADD,
