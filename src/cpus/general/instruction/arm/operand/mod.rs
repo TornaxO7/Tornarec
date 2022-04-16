@@ -2,11 +2,13 @@ use crate::ram::Word;
 
 use self::data_processing::ShifterOperand;
 
-use super::{opcode::ArmOpcode, Register, BitState};
+use super::{opcode::ArmOpcode, Register, BitState, CPRegister, CPNum};
 
 mod branch;
 mod data_processing;
 mod breakpoint;
+mod swi;
+mod cdp;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ArmOperand {
@@ -27,6 +29,14 @@ pub enum ArmOperand {
         immed2: u8,
     },
     SWI(u32),
+    CDP {
+        opcode1: u8,
+        crn: CPRegister,
+        crd: CPRegister,
+        num: CPNum,
+        opcode2: u8,
+        crm: CPRegister,
+    },
 }
 
 impl ArmOperand {
@@ -42,8 +52,8 @@ impl ArmOperand {
             BLX1 => branch::blx1(value),
             BLX2 => branch::register(value),
             BX => branch::register(value),
-            CDP => ,
-            CDP2 => ,
+            CDP => cdp::get_operand(value),
+            CDP2 => cdp::get_operand(value),
             CLZ => ,
             CMN => data_processing::get_operand(value),
             CMP => data_processing::get_operand(value),
@@ -97,7 +107,7 @@ impl ArmOperand {
             STRH => ,
             STRT => ,
             SUB => data_processing::get_operand(value),
-            SWI => get_swi(value),
+            SWI => swi::get_operand(value),
             SWP => ,
             SWPB => ,
             TEQ => data_processing::get_operand(value),
@@ -106,25 +116,5 @@ impl ArmOperand {
             UMULL => ,
             _ => unreachable!(),
         }
-    }
-}
-
-fn get_swi(value: Word) -> ArmOperand {
-    let immed24 = value >> 0b1111_1111_1111_1111_1111_1111;
-    ArmOperand::SWI(immed24)
-}
-
-#[cfg(test)]
-mod tests {
-    use crate::cpus::general::instruction::arm::operand::{ArmOperand, get_swi};
-
-
-    #[test]
-    fn get_swi_operand() {
-        let value = 0b0000_1111_1111_1111_1111_1111_1111_1111;
-
-        assert_eq!(
-            ArmOperand::SWI(0b1111_1111_1111_1111_1111_1111),
-            get_swi(value));
     }
 }
