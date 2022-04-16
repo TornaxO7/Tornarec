@@ -6,6 +6,7 @@ use super::{opcode::ArmOpcode, Register, BitState};
 
 mod branch;
 mod data_processing;
+mod breakpoint;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ArmOperand {
@@ -21,6 +22,10 @@ pub enum ArmOperand {
         rd: Register,
         shifter_operand: ShifterOperand,
     },
+    BKPT {
+        immed1: u16,
+        immed2: u8,
+    }
 }
 
 impl ArmOperand {
@@ -32,7 +37,7 @@ impl ArmOperand {
             B => branch::normal(value),
             BL => branch::normal(value),
             BIC => data_processing::get_operand(value),
-            BKPT => ,
+            BKPT => breakpoint::get_operand(value),
             BLX1 => branch::blx1(value),
             BLX2 => branch::register(value),
             BX => branch::register(value),
