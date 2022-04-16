@@ -29,6 +29,17 @@ pub fn get_ldc_operand(value: Word) -> ArmOperand {
     }
 }
 
+pub fn get_mcr_operand(value: Word) -> ArmOperand {
+    ArmOperand::MCR {
+        opcode1: u8::try_from((value >> 21) & 0b111).unwrap(),
+        crn: Register::new(value, 16, 0b1111),
+        rd: Register::new(value, 12, 0b1111),
+        cp_num: u8::try_from((value >> 8) & 0b1111).unwrap(),
+        opcode2: u8::try_from((value >> 5) & 0b111).unwrap(),
+        crm: Register::new(value, 0, 0b1111),
+    }
+}
+
 /// Also called "Addressing Mode 5" (page 489)
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum LoadStoreCoprocessorMode {

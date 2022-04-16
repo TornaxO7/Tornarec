@@ -51,7 +51,15 @@ pub enum ArmOperand {
         cp_num: u8,
         immed8: u8,
         mode: LoadStoreCoprocessorMode,
-    }
+    },
+    MCR {
+        opcode1: u8,
+        crn: Register,
+        rd: Register,
+        cp_num: u8,
+        opcode2: u8,
+        crm: Register,
+    },
 }
 
 impl ArmOperand {
@@ -84,8 +92,8 @@ impl ArmOperand {
             LDRSB => ,
             LDRSH => ,
             LDRT => ,
-            MCR => ,
-            MCR2 => ,
+            MCR => load_store_coprocessor::get_mcr_operand(value),
+            MCR2 => load_store_coprocessor::get_mcr_operand(value),
             MCRR => ,
             MLA => ,
             MOV => data_processing::get_operand(value),
