@@ -15,6 +15,7 @@ mod load_store_multiple;
 mod load_store_word_byte;
 mod misc_load_store;
 mod mla;
+mod mrs;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ArmOperand {
@@ -104,6 +105,10 @@ pub enum ArmOperand {
         rs: Register,
         rm: Register,
     },
+    MRS {
+        r: BitState,
+        rd: Register,
+    }
 }
 
 impl ArmOperand {
@@ -144,7 +149,7 @@ impl ArmOperand {
             MRC => load_store_coprocessor::get_mcr_mrc_operand(value),
             MRC2 => load_store_coprocessor::get_mcr_mrc_operand(value),
             MRRC => load_store_coprocessor::get_mcrr_mrrc_operand(value),
-            MRS => ,
+            MRS => mrs::get_operand(value),
             MSR => ,
             MUL => ,
             MVN => data_processing::get_operand(value),
