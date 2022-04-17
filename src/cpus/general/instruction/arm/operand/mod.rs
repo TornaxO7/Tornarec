@@ -1,3 +1,5 @@
+use std::intrinsics::saturating_add;
+
 use crate::ram::Word;
 
 use self::{data_processing::ShifterOperand, load_store_coprocessor::LoadStoreCoprocessorMode, load_store_multiple::LoadStoreMultipleMode, load_store_word_byte::AddressingMode2, misc_load_store::AddressingMode3};
@@ -19,6 +21,7 @@ mod mrs;
 mod msr;
 mod mul;
 mod pld;
+mod saturating;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ArmOperand {
@@ -128,6 +131,11 @@ pub enum ArmOperand {
         u: BitState,
         rn: Register,
         addr_mode: AddressingMode2,
+    },
+    Saturating {
+        rn: Register,
+        rd: Register,
+        rm: Register,
     }
 }
 
@@ -175,10 +183,10 @@ impl ArmOperand {
             MVN => data_processing::get_operand(value),
             ORR => data_processing::get_operand(value),
             PLD => pld::get_operand(value),
-            QADD => ,
-            QDADD => ,
-            QDSUB => ,
-            QSUB => ,
+            QADD => saturating::get_operand(value),
+            QDADD => saturating::get_operand(value),
+            QDSUB => saturating::get_operand(value),
+            QSUB => saturating::get_operand(value),
             RSB => data_processing::get_operand(value),
             RSC => data_processing::get_operand(value),
             SBC => data_processing::get_operand(value),
