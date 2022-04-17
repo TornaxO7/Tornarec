@@ -1,8 +1,8 @@
 use crate::ram::Word;
 
-use self::{data_processing::ShifterOperand, load_store_coprocessor::LoadStoreCoprocessorMode};
+use self::{data_processing::ShifterOperand, load_store_coprocessor::LoadStoreCoprocessorMode, load_store_multiple::LoadStoreMultipleMode, load_store_word_byte::AddressingMode2, misc_load_store::AddressingMode3};
 
-use super::{types::Register, BitState, opcode::ArmOpcode};
+use super::{types::{Register, RegisterList}, BitState, opcode::ArmOpcode};
 
 mod branch;
 mod data_processing;
@@ -11,6 +11,10 @@ mod swi;
 mod cdp;
 mod clz;
 mod load_store_coprocessor;
+mod load_store_multiple;
+mod load_store_word_byte;
+mod misc_load_store;
+mod mla;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ArmOperand {
@@ -67,6 +71,39 @@ pub enum ArmOperand {
         opcode: u8,
         crm: Register,
     },
+    LDMandSTM {
+        s: BitState,
+        w: BitState,
+        rn: Register,
+        register_list: RegisterList,
+        mode: LoadStoreMultipleMode,
+    },
+    LoadStoreWordOrByte {
+        p: BitState,
+        u: BitState,
+        b: BitState,
+        w: BitState,
+        rn: Register,
+        rd: Register,
+        offset: AddressingMode2,
+    },
+    MiscLoadStore {
+        p: BitState,
+        u: BitState,
+        w: BitState,
+        rn: Register,
+        rd: Register,
+        s: BitState,
+        h: BitState,
+        offset: AddressingMode3,
+    },
+    MLA {
+        s: BitState,
+        rd: Register,
+        rn: Register,
+        rs: Register,
+        rm: Register,
+    },
 }
 
 impl ArmOperand {
@@ -90,22 +127,22 @@ impl ArmOperand {
             EOR => data_processing::get_operand(value),
             LDC => load_store_coprocessor::get_ldc_stc_operand(value),
             LDC2 => load_store_coprocessor::get_ldc_stc_operand(value),
-            LDM => ,
-            LDR => ,
-            LDRB => ,
-            LDRBT => ,
-            LDRD => ,
-            LDRH => ,
-            LDRSB => ,
-            LDRSH => ,
-            LDRT => ,
-            MCR => load_store_coprocessor::getd_mcr_mrc_operand(value),
-            MCR2 => load_store_coprocessor::getd_mcr_mrc_operand(value),
+            LDM => load_store_multiple::get_ldm_stm_operand(value),
+            LDR => load_store_word_byte::get_operand(value),
+            LDRB => load_store_word_byte::get_operand(value),
+            LDRBT => load_store_word_byte::get_operand(value),
+            LDRD => misc_load_store::get_operand(value),
+            LDRH => misc_load_store::get_operand(value),
+            LDRSB => misc_load_store::get_operand(value),
+            LDRSH => misc_load_store::get_operand(value),
+            LDRT => load_store_word_byte::get_operand(value),
+            MCR => load_store_coprocessor::get_mcr_mrc_operand(value),
+            MCR2 => load_store_coprocessor::get_mcr_mrc_operand(value),
             MCRR => load_store_coprocessor::get_mcrr_mrrc_operand(value),
-            MLA => ,
+            MLA => mla::get_operand(value),
             MOV => data_processing::get_operand(value),
-            MRC => load_store_coprocessor::getd_mcr_mrc_operand(value),
-            MRC2 => load_store_coprocessor::getd_mcr_mrc_operand(value),
+            MRC => load_store_coprocessor::get_mcr_mrc_operand(value),
+            MRC2 => load_store_coprocessor::get_mcr_mrc_operand(value),
             MRRC => load_store_coprocessor::get_mcrr_mrrc_operand(value),
             MRS => ,
             MSR => ,
@@ -129,7 +166,7 @@ impl ArmOperand {
             SMULWY => ,
             STC => load_store_coprocessor::get_ldc_stc_operand(value),
             STC2 => load_store_coprocessor::get_ldc_stc_operand(value),
-            STM => ,
+            STM => load_store_multiple::get_ldm_stm_operand(value),
             STR => ,
             STRB => ,
             STRBT => ,
