@@ -17,6 +17,7 @@ mod misc_load_store;
 mod mla;
 mod mrs;
 mod msr;
+mod mul;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ArmOperand {
@@ -115,7 +116,13 @@ pub enum ArmOperand {
         // Note: Probably using something similar like RegisterList
         field_mask: u8,
         shifter_operand: ShifterOperand,
-    }
+    },
+    MUL {
+        s: BitState,
+        rd: Register,
+        rs: Register,
+        rm: Register,
+    },
 }
 
 impl ArmOperand {
@@ -158,7 +165,7 @@ impl ArmOperand {
             MRRC => load_store_coprocessor::get_mcrr_mrrc_operand(value),
             MRS => mrs::get_operand(value),
             MSR => msr::get_operand(value),
-            MUL => ,
+            MUL => mul::get_operand(value),
             MVN => data_processing::get_operand(value),
             ORR => data_processing::get_operand(value),
             PLD => ,
