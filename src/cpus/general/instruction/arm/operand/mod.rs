@@ -20,6 +20,7 @@ mod normal_multiply;
 mod pld;
 mod saturating;
 mod halfword_multiply;
+mod long_multiply;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ArmOperand {
@@ -136,6 +137,13 @@ pub enum ArmOperand {
         rm: Register,
         mul_type: HalfwordMultiplyType,
     },
+    LongMultiply {
+        s: BitState,
+        rdhi: u8,
+        rdlo: u8,
+        rs: Register,
+        rm: Register,
+    }
 }
 
 impl ArmOperand {
@@ -190,11 +198,11 @@ impl ArmOperand {
             RSC => data_processing::get_operand(value),
             SBC => data_processing::get_operand(value),
             SMLAXY => halfword_multiply::get_operand(value),
-            SMLAL => ,
+            SMLAL => long_multiply::get_operand(value),
             SMLALXY => halfword_multiply::get_operand(value),
             SMLAWY => ,
             SMULXY => halfword_multiply::get_operand(value),
-            SMULL => ,
+            SMULL => long_multiply::get_operand(value),
             SMULWY => ,
             STC => load_store_coprocessor::get_ldc_stc_operand(value),
             STC2 => load_store_coprocessor::get_ldc_stc_operand(value),
