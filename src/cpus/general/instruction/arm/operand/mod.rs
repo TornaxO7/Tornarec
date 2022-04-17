@@ -2,7 +2,7 @@ use std::intrinsics::saturating_add;
 
 use crate::ram::Word;
 
-use self::{data_processing::ShifterOperand, load_store_coprocessor::LoadStoreCoprocessorMode, load_store_multiple::LoadStoreMultipleMode, load_store_word_byte::AddressingMode2, misc_load_store::AddressingMode3};
+use self::{data_processing::ShifterOperand, load_store_coprocessor::LoadStoreCoprocessorMode, load_store_multiple::LoadStoreMultipleMode, load_store_word_byte::AddressingMode2, misc_load_store::AddressingMode3, normal_multiply::NormalMultiplyType};
 
 use super::{types::{Register, RegisterList}, BitState, opcode::ArmOpcode};
 
@@ -16,10 +16,9 @@ mod load_store_coprocessor;
 mod load_store_multiple;
 mod load_store_word_byte;
 mod misc_load_store;
-mod mla;
 mod mrs;
 mod msr;
-mod mul;
+mod normal_multiply;
 mod pld;
 mod saturating;
 
@@ -104,12 +103,12 @@ pub enum ArmOperand {
         h: BitState,
         offset: AddressingMode3,
     },
-    MLA {
+    NormalMultiply {
         s: BitState,
         rd: Register,
-        rn: Register,
         rs: Register,
         rm: Register,
+        mul_type: NormalMultiplyType,
     },
     MRS {
         r: BitState,
@@ -120,12 +119,6 @@ pub enum ArmOperand {
         // Note: Probably using something similar like RegisterList
         field_mask: u8,
         shifter_operand: ShifterOperand,
-    },
-    MUL {
-        s: BitState,
-        rd: Register,
-        rs: Register,
-        rm: Register,
     },
     PLD {
         u: BitState,
@@ -172,14 +165,14 @@ impl ArmOperand {
             MCR => load_store_coprocessor::get_mcr_mrc_operand(value),
             MCR2 => load_store_coprocessor::get_mcr_mrc_operand(value),
             MCRR => load_store_coprocessor::get_mcrr_mrrc_operand(value),
-            MLA => mla::get_operand(value),
+            MLA => normal_multiply::get_mla_operand(value),
             MOV => data_processing::get_operand(value),
             MRC => load_store_coprocessor::get_mcr_mrc_operand(value),
             MRC2 => load_store_coprocessor::get_mcr_mrc_operand(value),
             MRRC => load_store_coprocessor::get_mcrr_mrrc_operand(value),
             MRS => mrs::get_operand(value),
             MSR => msr::get_operand(value),
-            MUL => mul::get_operand(value),
+            MUL => normal_multiply::get_mul_operand(value),
             MVN => data_processing::get_operand(value),
             ORR => data_processing::get_operand(value),
             PLD => pld::get_operand(value),
