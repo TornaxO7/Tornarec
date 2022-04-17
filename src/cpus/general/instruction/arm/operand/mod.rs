@@ -22,6 +22,7 @@ mod saturating;
 mod halfword_multiply;
 mod long_multiply;
 mod word_halfword_multiply;
+mod semaphore;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ArmOperand {
@@ -151,7 +152,12 @@ pub enum ArmOperand {
         y: BitState,
         rm: Register,
         mul_type: WordHalfwordMultiplyType,
-    }
+    },
+    Semaphore {
+        rn: Register,
+        rd: Register,
+        rm: Register,
+    },
 }
 
 impl ArmOperand {
@@ -223,8 +229,8 @@ impl ArmOperand {
             STRT => load_store_word_byte::get_operand(value),
             SUB => data_processing::get_operand(value),
             SWI => swi::get_operand(value),
-            SWP => ,
-            SWPB => ,
+            SWP => semaphore::get_operand(value),
+            SWPB => semaphore::get_operand(value),
             TEQ => data_processing::get_operand(value),
             TST => data_processing::get_operand(value),
             UMLAL => ,
