@@ -1,28 +1,44 @@
 use crate::ram::Word;
 
-use self::{data_processing::ShifterOperand, load_store_coprocessor::LoadStoreCoprocessorMode, load_store_multiple::LoadStoreMultipleMode, load_store_word_byte::AddressingMode2, misc_load_store::AddressingMode3, normal_multiply::NormalMultiplyType, halfword_multiply::HalfwordMultiplyType, word_halfword_multiply::WordHalfwordMultiplyType};
+use self::{
+    data_processing::ShifterOperand,
+    halfword_multiply::HalfwordMultiplyType,
+    load_store_coprocessor::LoadStoreCoprocessorMode,
+    load_store_multiple::LoadStoreMultipleMode,
+    load_store_word_byte::AddressingMode2,
+    misc_load_store::AddressingMode3,
+    normal_multiply::NormalMultiplyType,
+    word_halfword_multiply::WordHalfwordMultiplyType,
+};
 
-use super::{types::{Register, RegisterList}, BitState, opcode::ArmOpcode};
+use super::{
+    opcode::ArmOpcode,
+    types::{
+        Register,
+        RegisterList,
+    },
+    BitState,
+};
 
 mod branch;
-mod data_processing;
 mod breakpoint;
-mod swi;
 mod cdp;
 mod clz;
+mod data_processing;
+mod halfword_multiply;
 mod load_store_coprocessor;
 mod load_store_multiple;
 mod load_store_word_byte;
+mod long_multiply;
 mod misc_load_store;
 mod mrs;
 mod msr;
 mod normal_multiply;
 mod pld;
 mod saturating;
-mod halfword_multiply;
-mod long_multiply;
-mod word_halfword_multiply;
 mod semaphore;
+mod swi;
+mod word_halfword_multiply;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ArmOperand {

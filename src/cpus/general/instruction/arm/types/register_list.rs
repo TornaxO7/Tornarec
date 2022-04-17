@@ -13,12 +13,13 @@ pub struct RegisterList(Vec<BitState>);
 impl RegisterList {
     pub fn new(value: Word, shift: u32, mask: u32) -> Self {
         let value = (value >> shift) & mask;
-        let amount_ones = mask.count_ones();
+        let amount_ones = usize::try_from(mask.count_ones()).unwrap();
 
-        let list = Vec::with_capacity(usize::try_from(amount_ones).unwrap());
+        let mut list = Vec::with_capacity(usize::try_from(amount_ones).unwrap());
 
-        for index in 0..14 {
-            list[index] = BitState::new(value, u32::try_from(index).unwrap());
+        for index in 0..amount_ones {
+            let bit = BitState::new(value, u32::try_from(index).unwrap());
+            list.push(bit);
         }
 
         Self(list)
@@ -51,7 +52,7 @@ mod tests {
 
     #[test]
     fn test_new() {
-        // for register set
+        // four register list
         let value = 0b1111;
 
         assert_eq!(
@@ -75,7 +76,7 @@ mod tests {
                 BitState::UNSET,
                 BitState::SET
             ]),
-            *RegisterList::new(value, 1, 0b1111)
+            *RegisterList::new(value, 0, 0b1111)
         );
     }
 }

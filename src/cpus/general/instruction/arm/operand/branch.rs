@@ -51,7 +51,7 @@ mod tests {
     fn test_normal() {
         let value = 0b0000_1011_1111_1111_1111_1111_1111_1111;
 
-        assert_eq!(ArmOperand::Branch((1 << 25) - 1), normal(value));
+        assert_eq!(ArmOperand::Branch((1 << 24) - 1), normal(value));
     }
 
     #[test]

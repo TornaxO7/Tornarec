@@ -24,7 +24,7 @@ mod tests {
 
         assert_eq!(
             ArmOperand::BKPT {
-                immed1: 0b111_1111_1111,
+                immed1: 0b1111_1111_1111,
                 immed2: 0b1111
             },
             get_operand(value)

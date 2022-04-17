@@ -20,12 +20,11 @@ pub fn get_operand(value: Word) -> ArmOperand {
 
 #[cfg(test)]
 mod tests {
-    use crate::cpus::general::instruction::arm::{
-        operand::{
-            breakpoint::get_operand,
-            ArmOperand,
-        },
-        types::Register,
+
+    use super::{
+        get_operand,
+        ArmOperand,
+        Register,
     };
 
     #[test]

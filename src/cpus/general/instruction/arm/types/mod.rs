@@ -56,7 +56,7 @@ mod tests {
     #[test]
     #[should_panic]
     fn test_sbo_third_not_set() {
-        sbo(0b0111, 1, 0b1);
+        sbo(0b0111, 3, 0b1);
     }
 
     #[test]
@@ -78,7 +78,6 @@ mod tests {
     }
 
     #[test]
-    #[should_panic]
     fn test_sbz_third_to_second_bit_set() {
         sbz(0b0011, 2, 0b11);
     }

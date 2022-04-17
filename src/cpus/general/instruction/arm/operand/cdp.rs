@@ -1,5 +1,6 @@
 use crate::{
-    ram::Word, cpus::general::instruction::arm::types::Register,
+    cpus::general::instruction::arm::types::Register,
+    ram::Word,
 };
 
 use super::ArmOperand;
@@ -23,27 +24,26 @@ pub fn get_operand(value: Word) -> ArmOperand {
 
 #[cfg(test)]
 mod tests {
-    use crate::cpus::general::instruction::arm::{
-        operand::{
-            breakpoint::get_operand,
-            ArmOperand,
-        }, types::Register,
+
+    use super::{
+        get_operand,
+        ArmOperand,
+        Register,
     };
 
     #[test]
     fn test_get_operand() {
         let value = 0b0000_1110_1111_1111_1111_1111_1110_1111;
 
-        assert_eq!(
-            ArmOperand::CDP {
-                opcode1: u8::from(0b1111),
-                crn: Register::from(0b1111),
-                crd: Register::from(0b1111),
-                num: 0b1111,
-                opcode2: 0b111,
-                crm: Register::from(01111),
-            },
-            get_operand(value)
-        );
+        let operand = get_operand(value);
+        let expected = ArmOperand::CDP {
+            opcode1: u8::from(0b1111),
+            crn: Register::from(0b1111),
+            crd: Register::from(0b1111),
+            num: 0b1111,
+            opcode2: 0b111,
+            crm: Register::from(0b1111),
+        };
+        assert_eq!(expected, operand, "{:#?}, {:#?}", expected, operand);
     }
 }

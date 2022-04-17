@@ -108,7 +108,7 @@ mod tests {
 
     #[test]
     fn shifter_operand_immediate_shift() {
-        let value = 0b0000_0001_1111_1111_1111_1111_1110_11111;
+        let value = 0b0000_0001_1111_1111_1111_1111_1110_1111;
 
         assert_eq!(
             ShifterOperand::ImmediateShift {

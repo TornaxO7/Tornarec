@@ -95,6 +95,7 @@ mod tests {
     }
 
     #[test]
+    #[should_panic]
     fn test_addressing_mode3_get_register_sbz() {
         let value = 0b0000_0001_1011_1111_1111_1111_1111_1111;
         AddressingMode3::get_register(value);

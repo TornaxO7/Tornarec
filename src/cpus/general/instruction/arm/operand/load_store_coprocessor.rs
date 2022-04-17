@@ -80,7 +80,8 @@ mod test {
             load_store_coprocessor::{
                 get_ldc_stc_operand,
                 get_mcr_mrc_operand,
-                LoadStoreCoprocessorMode, get_mcrr_mrrc_operand,
+                get_mcrr_mrrc_operand,
+                LoadStoreCoprocessorMode,
             },
             ArmOperand,
         },
@@ -156,15 +157,15 @@ mod test {
     fn test_get_mcrr_mrrc_operand() {
         let value = 0b0000_1100_0100_1111_1111_1111_1111_1111;
 
-        assert_eq!(
-            ArmOperand::MCRRandMRRC {
-                rn: Register::from(0b1111),
-                rd: Register::from(0b111),
-                cp_num: 0b1111,
-                opcode: 0b1111,
-                crm: Register::from(0b111),
-            },
-            get_mcrr_mrrc_operand(value)
-        );
+        let operand = get_mcrr_mrrc_operand(value);
+        let expected = ArmOperand::MCRRandMRRC {
+            rn: Register::from(0b1111),
+            rd: Register::from(0b1111),
+            cp_num: 0b1111,
+            opcode: 0b1111,
+            crm: Register::from(0b1111),
+        };
+
+        assert_eq!(expected, operand, "{:#?}, {:#?}", expected, operand);
     }
 }

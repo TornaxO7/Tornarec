@@ -101,7 +101,7 @@ mod tests {
     #[test]
     #[should_panic]
     fn test_get_operand_register_sbz() {
-        let value = 0b0000_0001_0110_1111_1111_0000_0000_1111;
+        let value = 0b0000_0001_0110_1111_1111_1111_0000_1111;
         get_operand(value);
     }
 }
