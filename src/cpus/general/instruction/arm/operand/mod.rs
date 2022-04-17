@@ -1,8 +1,6 @@
-use std::intrinsics::saturating_add;
-
 use crate::ram::Word;
 
-use self::{data_processing::ShifterOperand, load_store_coprocessor::LoadStoreCoprocessorMode, load_store_multiple::LoadStoreMultipleMode, load_store_word_byte::AddressingMode2, misc_load_store::AddressingMode3, normal_multiply::NormalMultiplyType};
+use self::{data_processing::ShifterOperand, load_store_coprocessor::LoadStoreCoprocessorMode, load_store_multiple::LoadStoreMultipleMode, load_store_word_byte::AddressingMode2, misc_load_store::AddressingMode3, normal_multiply::NormalMultiplyType, halfword_multiply::HalfwordMultiplyType};
 
 use super::{types::{Register, RegisterList}, BitState, opcode::ArmOpcode};
 
@@ -21,6 +19,7 @@ mod msr;
 mod normal_multiply;
 mod pld;
 mod saturating;
+mod halfword_multiply;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ArmOperand {
@@ -129,7 +128,14 @@ pub enum ArmOperand {
         rn: Register,
         rd: Register,
         rm: Register,
-    }
+    },
+    HalfwordMultiply {
+        rs: Register,
+        y: BitState,
+        x: BitState,
+        rm: Register,
+        mul_type: HalfwordMultiplyType,
+    },
 }
 
 impl ArmOperand {
@@ -183,11 +189,11 @@ impl ArmOperand {
             RSB => data_processing::get_operand(value),
             RSC => data_processing::get_operand(value),
             SBC => data_processing::get_operand(value),
-            SMLAXY => ,
+            SMLAXY => halfword_multiply::get_operand(value),
             SMLAL => ,
-            SMLALXY => ,
+            SMLALXY => halfword_multiply::get_operand(value),
             SMLAWY => ,
-            SMULXY => ,
+            SMULXY => halfword_multiply::get_operand(value),
             SMULL => ,
             SMULWY => ,
             STC => load_store_coprocessor::get_ldc_stc_operand(value),
