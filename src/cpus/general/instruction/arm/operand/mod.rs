@@ -18,6 +18,7 @@ mod mla;
 mod mrs;
 mod msr;
 mod mul;
+mod pld;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ArmOperand {
@@ -123,6 +124,11 @@ pub enum ArmOperand {
         rs: Register,
         rm: Register,
     },
+    PLD {
+        u: BitState,
+        rn: Register,
+        addr_mode: AddressingMode2,
+    }
 }
 
 impl ArmOperand {
@@ -168,7 +174,7 @@ impl ArmOperand {
             MUL => mul::get_operand(value),
             MVN => data_processing::get_operand(value),
             ORR => data_processing::get_operand(value),
-            PLD => ,
+            PLD => pld::get_operand(value),
             QADD => ,
             QDADD => ,
             QDSUB => ,
