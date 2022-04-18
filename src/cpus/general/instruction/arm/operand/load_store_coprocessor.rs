@@ -11,20 +11,14 @@ use super::ArmOperand;
 use std::convert::TryFrom;
 
 pub fn get_ldc_stc_operand(value: Word) -> ArmOperand {
-    let u = BitState::new(value, 23);
-    let n = BitState::new(value, 22);
-    let rn = Register::new(value, 16, 0b1111);
-    let crd = Register::new(value, 12, 0b1111);
-    let cp_num = u8::try_from((value >> 8) & 0b1111).unwrap();
-    let immed8 = u8::try_from(value & 0b1111_1111).unwrap();
-
     ArmOperand::LDCandSTC {
-        u,
-        n,
-        rn,
-        crd,
-        cp_num,
-        immed8,
+        u: BitState::new(value, 23),
+        n: BitState::new(value, 22),
+        rn: Register::new(value, 16, 0b1111),
+        crd: Register::new(value, 12, 0b1111),
+        cp_num: u8::try_from((value >> 8) & 0b1111).unwrap(),
+        immed8: u8::try_from(value & 0b1111_1111).unwrap(),
+        // `p` and `w` are used here
         mode: LoadStoreCoprocessorMode::from(value),
     }
 }
@@ -75,18 +69,14 @@ impl From<Word> for LoadStoreCoprocessorMode {
 
 #[cfg(test)]
 mod test {
-    use crate::cpus::general::instruction::arm::{
-        operand::{
-            load_store_coprocessor::{
-                get_ldc_stc_operand,
-                get_mcr_mrc_operand,
-                get_mcrr_mrrc_operand,
-                LoadStoreCoprocessorMode,
-            },
-            ArmOperand,
-        },
-        types::Register,
+    use super::{
+        get_ldc_stc_operand,
+        get_mcr_mrc_operand,
+        get_mcrr_mrrc_operand,
+        ArmOperand,
         BitState,
+        LoadStoreCoprocessorMode,
+        Register,
     };
 
     #[test]
@@ -121,36 +111,36 @@ mod test {
     fn test_get_ldc_stc_operand() {
         let value = 0b0000_1101_1110_1111_1111_1111_1111_1111;
 
-        assert_eq!(
-            ArmOperand::LDCandSTC {
-                u: BitState::SET,
-                n: BitState::SET,
-                rn: Register::from(0b1111),
-                crd: Register::from(0b1111),
-                cp_num: 0b1111,
-                immed8: 0b1111_1111,
-                // it has its own tests
-                mode: LoadStoreCoprocessorMode::from(value),
-            },
-            get_ldc_stc_operand(value)
-        );
+        let operand = get_ldc_stc_operand(value);
+        let expected = ArmOperand::LDCandSTC {
+            u: BitState::SET,
+            n: BitState::SET,
+            rn: Register::from(0b1111),
+            crd: Register::from(0b1111),
+            cp_num: 0b1111,
+            immed8: 0b1111_1111,
+            // it has its own tests
+            mode: LoadStoreCoprocessorMode::from(value),
+        };
+
+        assert_eq!(expected, operand, "{:#?}, {:#?}", expected, operand);
     }
 
     #[test]
     fn test_get_mcr_mrc_operand() {
         let value = 0b0000_1110_1110_1111_1111_1111_1111_1111;
 
-        assert_eq!(
-            ArmOperand::MCRandMRC {
-                opcode1: 0b111,
-                crn: Register::from(0b1111),
-                rd: Register::from(0b1111),
-                cp_num: 0b1111,
-                opcode2: 0b111,
-                crm: Register::from(0b1111)
-            },
-            get_mcr_mrc_operand(value)
-        );
+        let operand = get_mcr_mrc_operand(value);
+        let expected = ArmOperand::MCRandMRC {
+            opcode1: 0b111,
+            crn: Register::from(0b1111),
+            rd: Register::from(0b1111),
+            cp_num: 0b1111,
+            opcode2: 0b111,
+            crm: Register::from(0b1111),
+        };
+
+        assert_eq!(expected, operand, "{:#?} {:#?}", expected, operand);
     }
 
     #[test]

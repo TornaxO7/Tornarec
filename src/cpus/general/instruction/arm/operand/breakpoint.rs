@@ -13,8 +13,9 @@ pub fn get_operand(value: Word) -> ArmOperand {
 
 #[cfg(test)]
 mod tests {
-    use crate::cpus::general::instruction::arm::operand::{
-        breakpoint::get_operand,
+
+    use super::{
+        get_operand,
         ArmOperand,
     };
 
@@ -22,12 +23,11 @@ mod tests {
     fn test_bkpt() {
         let value = 0b1110_0001_0010_1111_1111_1111_0111_1111;
 
-        assert_eq!(
-            ArmOperand::BKPT {
+        let operand = get_operand(value);
+        let expected = ArmOperand::BKPT {
                 immed1: 0b1111_1111_1111,
                 immed2: 0b1111
-            },
-            get_operand(value)
-        );
+        };
+        assert_eq!(expected, operand, "{:#?}, {:#?}", expected, operand);
     }
 }

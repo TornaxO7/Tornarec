@@ -8,9 +8,6 @@ pub use register_list::RegisterList;
 
 use crate::ram::Word;
 
-pub type Shift = u8;
-pub type Mask = u32;
-
 pub fn sbo(encoding: Word, shift: u8, bit_mask: u32) {
     let field = (encoding >> shift) & bit_mask;
     assert!(field == bit_mask);

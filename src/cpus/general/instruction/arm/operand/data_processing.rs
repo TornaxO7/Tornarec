@@ -11,28 +11,11 @@ use crate::{
 use super::ArmOperand;
 
 pub fn get_operand(value: Word) -> ArmOperand {
-    let s = BitState::new(value, 20);
-    let rn = Register::new(value, 16, 0b1111);
-    let rd = Register::new(value, 12, 0b1111);
-
-    let bit25 = BitState::new(value, 25);
-    let bit7 = BitState::new(value, 7);
-    let bit4 = BitState::new(value, 4);
-    let shifter_operand = if *bit25 {
-        ShifterOperand::get_immediate(value)
-    } else if !bit4 {
-        ShifterOperand::get_immediate_shift(value)
-    } else if !bit7 && *bit4 {
-        ShifterOperand::get_register_shift(value)
-    } else {
-        unreachable!()
-    };
-
     ArmOperand::DataProcessing {
-        s,
-        rn,
-        rd,
-        shifter_operand,
+        s: BitState::new(value, 20),
+        rn: Register::new(value, 16, 0b1111),
+        rd: Register::new(value, 12, 0b1111),
+        shifter_operand: ShifterOperand::from(value),
     }
 }
 
@@ -79,18 +62,33 @@ impl ShifterOperand {
     }
 }
 
+impl From<Word> for ShifterOperand {
+    fn from(value: Word) -> Self {
+        let bit25 = BitState::new(value, 25);
+        let bit7 = BitState::new(value, 7);
+        let bit4 = BitState::new(value, 4);
+
+        if *bit25 {
+            ShifterOperand::get_immediate(value)
+        } else if !bit4 {
+            ShifterOperand::get_immediate_shift(value)
+        } else if !bit7 && *bit4 {
+            ShifterOperand::get_register_shift(value)
+        } else {
+            unreachable!()
+        }
+    }
+}
+
 #[cfg(test)]
 mod tests {
-    use crate::cpus::general::instruction::arm::{
-        operand::{
-            data_processing::{
-                get_operand,
-                ShifterOperand,
-            },
-            ArmOperand,
-        },
-        types::Register,
-        BitState,
+
+    use super::{
+        ShifterOperand,
+        ArmOperand,
+        Register,
+        get_operand,
+        BitState
     };
 
     #[test]

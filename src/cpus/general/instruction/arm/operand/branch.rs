@@ -11,12 +11,13 @@ use crate::{
 
 use super::ArmOperand;
 
-pub fn normal(value: Word) -> ArmOperand {
+pub fn get_immed24_operand(value: Word) -> ArmOperand {
     let immed24 = value & 0b1111_1111_1111_1111_1111_1111;
     ArmOperand::Branch(immed24)
 }
 
-pub fn register(value: Word) -> ArmOperand {
+// also operand for blx2
+pub fn get_register_operand(value: Word) -> ArmOperand {
     // example 170
     // Affected: BX, BLX(2)
     sbo(value, 8, 0b1111_1111_1111);
@@ -25,7 +26,7 @@ pub fn register(value: Word) -> ArmOperand {
     ArmOperand::BRegister(rm)
 }
 
-pub fn blx1(value: Word) -> ArmOperand {
+pub fn get_blx1_operand(value: Word) -> ArmOperand {
     let h = BitState::new(value, 24);
     let immed24 = value & 0b1111_1111_1111_1111_1111_1111;
 
@@ -34,24 +35,21 @@ pub fn blx1(value: Word) -> ArmOperand {
 
 #[cfg(test)]
 mod tests {
-    use crate::cpus::general::instruction::arm::{
-        operand::{
-            branch::{
-                blx1,
-                normal,
-                register,
-            },
-            ArmOperand,
-        },
-        types::Register,
+
+    use super::{
+        ArmOperand,
         BitState,
+        Register,
+        get_register_operand,
+        get_blx1_operand,
+        get_immed24_operand,
     };
 
     #[test]
     fn test_normal() {
         let value = 0b0000_1011_1111_1111_1111_1111_1111_1111;
 
-        assert_eq!(ArmOperand::Branch((1 << 24) - 1), normal(value));
+        assert_eq!(ArmOperand::Branch((1 << 24) - 1), get_immed24_operand(value));
     }
 
     #[test]
@@ -60,7 +58,7 @@ mod tests {
 
         assert_eq!(
             ArmOperand::BRegister(Register::from(0b1111)),
-            register(value)
+            get_register_operand(value)
         );
     }
 
@@ -68,7 +66,7 @@ mod tests {
     #[should_panic]
     fn test_register_sbo() {
         let value = 0b0000_0001_0010_0000_0000_0000_0011_1111;
-        register(value);
+        get_register_operand(value);
     }
 
     #[test]
@@ -80,7 +78,7 @@ mod tests {
                 h: BitState::SET,
                 immed24: 0b1111_1111_1111_1111_1111_1111
             },
-            blx1(value)
+            get_blx1_operand(value)
         );
     }
 }

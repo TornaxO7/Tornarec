@@ -1,6 +1,12 @@
-use crate::{ram::Word, cpus::general::instruction::arm::{BitState, types::Register}};
+use crate::{
+    cpus::general::instruction::arm::{
+        types::Register,
+        BitState,
+    },
+    ram::Word,
+};
 
-use super::{ArmOperand, load_store_word_byte::AddressingMode2};
+use super::{ArmOperand, load_store::AddressingMode2};
 
 pub fn get_operand(value: Word) -> ArmOperand {
     ArmOperand::PLD {
