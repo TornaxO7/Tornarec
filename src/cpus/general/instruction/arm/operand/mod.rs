@@ -9,7 +9,6 @@ use super::{
 };
 
 mod branch;
-mod breakpoint;
 mod cdp;
 mod data_processing;
 mod load_store;
@@ -17,10 +16,10 @@ mod load_store_coprocessor;
 mod pld;
 mod saturating;
 mod semaphore;
-mod swi;
 mod multiply;
 mod misc_arithmetic;
 mod cpsr_access;
+mod exception_generating;
 
 /// The operands are written as stated in the manual in page 109
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -118,7 +117,7 @@ impl ArmOperand {
             ArmOpcode::B => branch::get_immed24(value),
             ArmOpcode::BL => branch::get_immed24(value),
             ArmOpcode::BIC => data_processing::get_operand(value),
-            ArmOpcode::BKPT => breakpoint::get_operand(value),
+            ArmOpcode::BKPT => exception_generating::get_bkpt(value),
             ArmOpcode::BLX1 => branch::get_link_exchange_immed(value),
             ArmOpcode::BLX2 => branch::get_register(value),
             ArmOpcode::BX => branch::get_register(value),
@@ -177,7 +176,7 @@ impl ArmOperand {
             ArmOpcode::STRH => load_store::get_misc(value),
             ArmOpcode::STRT => load_store::get_word_or_unsigned_byte(value),
             ArmOpcode::SUB => data_processing::get_operand(value),
-            ArmOpcode::SWI => swi::get_operand(value),
+            ArmOpcode::SWI => exception_generating::get_swi(value),
             ArmOpcode::SWP => semaphore::get_operand(value),
             ArmOpcode::SWPB => semaphore::get_operand(value),
             ArmOpcode::TEQ => data_processing::get_operand(value),
