@@ -11,74 +11,97 @@ use crate::{
 
 use super::ArmOperand;
 
-pub fn get_immed24_operand(value: Word) -> ArmOperand {
-    let immed24 = value & 0b1111_1111_1111_1111_1111_1111;
-    ArmOperand::Branch(immed24)
+pub fn get_immed24(value: Word) -> ArmOperand {
+    ArmOperand::Branch(BranchOperand::get_immediate(value))
 }
 
-// also operand for blx2
-pub fn get_register_operand(value: Word) -> ArmOperand {
-    // example 170
-    // Affected: BX, BLX(2)
-    sbo(value, 8, 0b1111_1111_1111);
-
-    let rm = Register::new(value, 0, 0b1111);
-    ArmOperand::BRegister(rm)
+pub fn get_link_exchange_immed(value: Word) -> ArmOperand {
+    ArmOperand::Branch(BranchOperand::get_link_exchange_immediate(value))
 }
 
-pub fn get_blx1_operand(value: Word) -> ArmOperand {
-    let h = BitState::new(value, 24);
-    let immed24 = value & 0b1111_1111_1111_1111_1111_1111;
+pub fn get_register(value: Word) -> ArmOperand {
+    ArmOperand::Branch(BranchOperand::get_register(value))
+}
 
-    ArmOperand::BLX1 { h, immed24 }
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub enum BranchOperand {
+    Immediate { signed_immed_24: u32 },
+    LinkExchangeImmed { h: BitState, signed_immed_24: u32 },
+    Register { rm: Register },
+}
+
+impl BranchOperand {
+    pub fn get_immediate(value: Word) -> Self {
+        Self::Immediate {
+            signed_immed_24: value & 0b1111_1111_1111_1111_1111_1111,
+        }
+    }
+
+    pub fn get_link_exchange_immediate(value: Word) -> Self {
+        Self::LinkExchangeImmed {
+            h: BitState::new(value, 24),
+            signed_immed_24: value & 0b1111_1111_1111_1111_1111_1111,
+        }
+    }
+
+    pub fn get_register(value: Word) -> Self {
+        sbo(value, 8, 0b1111_1111_1111);
+        Self::Register {
+            rm: Register::new(value, 0, 0b1111),
+        }
+    }
 }
 
 #[cfg(test)]
 mod tests {
 
     use super::{
-        ArmOperand,
         BitState,
+        BranchOperand,
         Register,
-        get_register_operand,
-        get_blx1_operand,
-        get_immed24_operand,
     };
 
     #[test]
-    fn test_normal() {
+    fn test_get_immediate() {
         let value = 0b0000_1011_1111_1111_1111_1111_1111_1111;
 
-        assert_eq!(ArmOperand::Branch((1 << 24) - 1), get_immed24_operand(value));
+        assert_eq!(
+            BranchOperand::Immediate {
+                signed_immed_24: (1 << 24) - 1,
+            },
+            BranchOperand::get_immediate(value)
+        );
     }
 
     #[test]
-    fn test_register() {
+    fn test_get_link_exchange_immediate() {
+        let value = 0b1111_1011_1111_1111_1111_1111_1111_1111;
+
+        assert_eq!(
+            BranchOperand::LinkExchangeImmed {
+                h: BitState::SET,
+                signed_immed_24: (1 << 24) - 1,
+            },
+            BranchOperand::get_link_exchange_immediate(value)
+        );
+    }
+
+    #[test]
+    fn test_get_register() {
         let value = 0b0000_0001_0010_1111_1111_1111_0011_1111;
 
         assert_eq!(
-            ArmOperand::BRegister(Register::from(0b1111)),
-            get_register_operand(value)
+            BranchOperand::Register {
+                rm: Register::from(0b1111),
+            },
+            BranchOperand::get_register(value)
         );
     }
 
     #[test]
     #[should_panic]
-    fn test_register_sbo() {
+    fn test_get_link_exchange_register_sbo() {
         let value = 0b0000_0001_0010_0000_0000_0000_0011_1111;
-        get_register_operand(value);
-    }
-
-    #[test]
-    fn teste_blx1() {
-        let value = 0b1111_1011_1111_1111_1111_1111_1111_1111;
-
-        assert_eq!(
-            ArmOperand::BLX1 {
-                h: BitState::SET,
-                immed24: 0b1111_1111_1111_1111_1111_1111
-            },
-            get_blx1_operand(value)
-        );
+        BranchOperand::get_register(value);
     }
 }

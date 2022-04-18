@@ -1,5 +1,7 @@
 use crate::ram::Word;
 
+use self::branch::BranchOperand;
+
 use super::{
     opcode::ArmOpcode,
     types::Register,
@@ -21,14 +23,10 @@ mod semaphore;
 mod swi;
 mod multiply;
 
+/// The operands are written as stated in the manual in page 109
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ArmOperand {
-    Branch(u32),
-    BLX1 {
-        h: BitState,
-        immed24: u32,
-    },
-    BRegister(Register),
+    Branch(BranchOperand),
     DataProcessing {
         s: BitState,
         rn: Register,
@@ -118,13 +116,13 @@ impl ArmOperand {
             ArmOpcode::ADC => data_processing::get_operand(value),
             ArmOpcode::ADD => data_processing::get_operand(value),
             ArmOpcode::AND => data_processing::get_operand(value),
-            ArmOpcode::B => branch::get_immed24_operand(value),
-            ArmOpcode::BL => branch::get_immed24_operand(value),
+            ArmOpcode::B => branch::get_immed24(value),
+            ArmOpcode::BL => branch::get_immed24(value),
             ArmOpcode::BIC => data_processing::get_operand(value),
             ArmOpcode::BKPT => breakpoint::get_operand(value),
-            ArmOpcode::BLX1 => branch::get_blx1_operand(value),
-            ArmOpcode::BLX2 => branch::get_register_operand(value),
-            ArmOpcode::BX => branch::get_register_operand(value),
+            ArmOpcode::BLX1 => branch::get_link_exchange_immed(value),
+            ArmOpcode::BLX2 => branch::get_register(value),
+            ArmOpcode::BX => branch::get_register(value),
             ArmOpcode::CDP => cdp::get_operand(value),
             ArmOpcode::CDP2 => cdp::get_operand(value),
             ArmOpcode::CLZ => clz::get_operand(value),
