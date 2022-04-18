@@ -11,7 +11,6 @@ use super::{
 mod branch;
 mod breakpoint;
 mod cdp;
-mod clz;
 mod data_processing;
 mod load_store;
 mod load_store_coprocessor;
@@ -22,6 +21,7 @@ mod saturating;
 mod semaphore;
 mod swi;
 mod multiply;
+mod misc_arithmetic;
 
 /// The operands are written as stated in the manual in page 109
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -125,7 +125,7 @@ impl ArmOperand {
             ArmOpcode::BX => branch::get_register(value),
             ArmOpcode::CDP => cdp::get_operand(value),
             ArmOpcode::CDP2 => cdp::get_operand(value),
-            ArmOpcode::CLZ => clz::get_operand(value),
+            ArmOpcode::CLZ => misc_arithmetic::get_clz(value),
             ArmOpcode::CMN => data_processing::get_operand(value),
             ArmOpcode::CMP => data_processing::get_operand(value),
             ArmOpcode::EOR => data_processing::get_operand(value),
