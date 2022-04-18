@@ -11,18 +11,15 @@ mod breakpoint;
 mod cdp;
 mod clz;
 mod data_processing;
-mod halfword_multiply;
 mod load_store;
 mod load_store_coprocessor;
-mod long_multiply;
 mod mrs;
 mod msr;
-mod normal_multiply;
 mod pld;
 mod saturating;
 mod semaphore;
 mod swi;
-mod word_halfword_multiply;
+mod multiply;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum ArmOperand {
@@ -83,13 +80,6 @@ pub enum ArmOperand {
         rn: Register,
         load_store_type: load_store::LoadStoreType,
     },
-    NormalMultiply {
-        s: BitState,
-        rd: Register,
-        rs: Register,
-        rm: Register,
-        mul_type: normal_multiply::NormalMultiplyType,
-    },
     MRS {
         r: BitState,
         rd: Register,
@@ -110,26 +100,10 @@ pub enum ArmOperand {
         rd: Register,
         rm: Register,
     },
-    HalfwordMultiply {
-        rs: Register,
-        y: BitState,
-        x: BitState,
-        rm: Register,
-        mul_type: halfword_multiply::HalfwordMultiplyType,
-    },
-    LongMultiply {
-        s: BitState,
-        rdhi: u8,
-        rdlo: u8,
+    Multiply {
         rs: Register,
         rm: Register,
-    },
-    WordHalfwordMultiply {
-        rd: Register,
-        rs: Register,
-        y: BitState,
-        rm: Register,
-        mul_type: word_halfword_multiply::WordHalfwordMultiplyType,
+        mul_type: multiply::MultiplyType,
     },
     Semaphore {
         rn: Register,
@@ -171,14 +145,14 @@ impl ArmOperand {
             ArmOpcode::MCR => load_store_coprocessor::get_mcr_mrc_operand(value),
             ArmOpcode::MCR2 => load_store_coprocessor::get_mcr_mrc_operand(value),
             ArmOpcode::MCRR => load_store_coprocessor::get_mcrr_mrrc_operand(value),
-            ArmOpcode::MLA => normal_multiply::get_mla_operand(value),
+            ArmOpcode::MLA => multiply::get_normal_multiply(value),
             ArmOpcode::MOV => data_processing::get_operand(value),
             ArmOpcode::MRC => load_store_coprocessor::get_mcr_mrc_operand(value),
             ArmOpcode::MRC2 => load_store_coprocessor::get_mcr_mrc_operand(value),
             ArmOpcode::MRRC => load_store_coprocessor::get_mcrr_mrrc_operand(value),
             ArmOpcode::MRS => mrs::get_operand(value),
             ArmOpcode::MSR => msr::get_operand(value),
-            ArmOpcode::MUL => normal_multiply::get_mul_operand(value),
+            ArmOpcode::MUL => multiply::get_normal_multiply(value),
             ArmOpcode::MVN => data_processing::get_operand(value),
             ArmOpcode::ORR => data_processing::get_operand(value),
             ArmOpcode::PLD => pld::get_operand(value),
@@ -189,13 +163,13 @@ impl ArmOperand {
             ArmOpcode::RSB => data_processing::get_operand(value),
             ArmOpcode::RSC => data_processing::get_operand(value),
             ArmOpcode::SBC => data_processing::get_operand(value),
-            ArmOpcode::SMLAXY => halfword_multiply::get_operand(value),
-            ArmOpcode::SMLAL => long_multiply::get_operand(value),
-            ArmOpcode::SMLALXY => halfword_multiply::get_operand(value),
-            ArmOpcode::SMLAWY => word_halfword_multiply::get_operand(value),
-            ArmOpcode::SMULXY => halfword_multiply::get_operand(value),
-            ArmOpcode::SMULL => long_multiply::get_operand(value),
-            ArmOpcode::SMULWY => word_halfword_multiply::get_operand(value),
+            ArmOpcode::SMLAXY => multiply::get_halfword(value),
+            ArmOpcode::SMLAL => multiply::get_long(value),
+            ArmOpcode::SMLALXY => multiply::get_halfword(value),
+            ArmOpcode::SMLAWY => multiply::get_word_halfword(value),
+            ArmOpcode::SMULXY => multiply::get_halfword(value),
+            ArmOpcode::SMULL => multiply::get_long(value),
+            ArmOpcode::SMULWY => multiply::get_word_halfword(value),
             ArmOpcode::STC => load_store_coprocessor::get_ldc_stc_operand(value),
             ArmOpcode::STC2 => load_store_coprocessor::get_ldc_stc_operand(value),
             ArmOpcode::STM => load_store::get_multiple(value),
@@ -211,8 +185,8 @@ impl ArmOperand {
             ArmOpcode::SWPB => semaphore::get_operand(value),
             ArmOpcode::TEQ => data_processing::get_operand(value),
             ArmOpcode::TST => data_processing::get_operand(value),
-            ArmOpcode::UMLAL => long_multiply::get_operand(value),
-            ArmOpcode::UMULL => long_multiply::get_operand(value),
+            ArmOpcode::UMLAL => multiply::get_long(value),
+            ArmOpcode::UMULL => multiply::get_long(value),
             _ => unreachable!(),
         }
     }
