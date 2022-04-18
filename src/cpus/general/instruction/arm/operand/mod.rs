@@ -9,10 +9,8 @@ use super::{
 };
 
 mod branch;
-mod cdp;
 mod data_processing;
 mod load_store;
-mod load_store_coprocessor;
 mod pld;
 mod saturating;
 mod semaphore;
@@ -20,6 +18,7 @@ mod multiply;
 mod misc_arithmetic;
 mod cpsr_access;
 mod exception_generating;
+mod coprocessor;
 
 /// The operands are written as stated in the manual in page 109
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -55,7 +54,7 @@ pub enum ArmOperand {
         crd: Register,
         cp_num: u8,
         immed8: u8,
-        mode: load_store_coprocessor::LoadStoreCoprocessorMode,
+        mode: coprocessor::LoadStoreCoprocessorMode,
     },
     MCRandMRC {
         opcode1: u8,
@@ -121,14 +120,14 @@ impl ArmOperand {
             ArmOpcode::BLX1 => branch::get_link_exchange_immed(value),
             ArmOpcode::BLX2 => branch::get_register(value),
             ArmOpcode::BX => branch::get_register(value),
-            ArmOpcode::CDP => cdp::get_operand(value),
-            ArmOpcode::CDP2 => cdp::get_operand(value),
+            ArmOpcode::CDP => coprocessor::get_cdp(value),
+            ArmOpcode::CDP2 => coprocessor::get_cdp(value),
             ArmOpcode::CLZ => misc_arithmetic::get_clz(value),
             ArmOpcode::CMN => data_processing::get_operand(value),
             ArmOpcode::CMP => data_processing::get_operand(value),
             ArmOpcode::EOR => data_processing::get_operand(value),
-            ArmOpcode::LDC => load_store_coprocessor::get_ldc_stc_operand(value),
-            ArmOpcode::LDC2 => load_store_coprocessor::get_ldc_stc_operand(value),
+            ArmOpcode::LDC => coprocessor::get_ldc_stc(value),
+            ArmOpcode::LDC2 => coprocessor::get_ldc_stc(value),
             ArmOpcode::LDM => load_store::get_multiple(value),
             ArmOpcode::LDR => load_store::get_word_or_unsigned_byte(value),
             ArmOpcode::LDRB => load_store::get_word_or_unsigned_byte(value),
@@ -138,14 +137,14 @@ impl ArmOperand {
             ArmOpcode::LDRSB => load_store::get_misc(value),
             ArmOpcode::LDRSH => load_store::get_misc(value),
             ArmOpcode::LDRT => load_store::get_word_or_unsigned_byte(value),
-            ArmOpcode::MCR => load_store_coprocessor::get_mcr_mrc_operand(value),
-            ArmOpcode::MCR2 => load_store_coprocessor::get_mcr_mrc_operand(value),
-            ArmOpcode::MCRR => load_store_coprocessor::get_mcrr_mrrc_operand(value),
+            ArmOpcode::MCR => coprocessor::get_mcr_mrc(value),
+            ArmOpcode::MCR2 => coprocessor::get_mcr_mrc(value),
+            ArmOpcode::MCRR => coprocessor::get_mcrr_mrrc(value),
             ArmOpcode::MLA => multiply::get_normal_multiply(value),
             ArmOpcode::MOV => data_processing::get_operand(value),
-            ArmOpcode::MRC => load_store_coprocessor::get_mcr_mrc_operand(value),
-            ArmOpcode::MRC2 => load_store_coprocessor::get_mcr_mrc_operand(value),
-            ArmOpcode::MRRC => load_store_coprocessor::get_mcrr_mrrc_operand(value),
+            ArmOpcode::MRC => coprocessor::get_mcr_mrc(value),
+            ArmOpcode::MRC2 => coprocessor::get_mcr_mrc(value),
+            ArmOpcode::MRRC => coprocessor::get_mcrr_mrrc(value),
             ArmOpcode::MRS => cpsr_access::get_mrs(value),
             ArmOpcode::MSR => cpsr_access::get_msr(value),
             ArmOpcode::MUL => multiply::get_normal_multiply(value),
@@ -166,8 +165,8 @@ impl ArmOperand {
             ArmOpcode::SMULXY => multiply::get_halfword(value),
             ArmOpcode::SMULL => multiply::get_long(value),
             ArmOpcode::SMULWY => multiply::get_word_halfword(value),
-            ArmOpcode::STC => load_store_coprocessor::get_ldc_stc_operand(value),
-            ArmOpcode::STC2 => load_store_coprocessor::get_ldc_stc_operand(value),
+            ArmOpcode::STC => coprocessor::get_ldc_stc(value),
+            ArmOpcode::STC2 => coprocessor::get_ldc_stc(value),
             ArmOpcode::STM => load_store::get_multiple(value),
             ArmOpcode::STR => load_store::get_word_or_unsigned_byte(value),
             ArmOpcode::STRB => load_store::get_word_or_unsigned_byte(value),
