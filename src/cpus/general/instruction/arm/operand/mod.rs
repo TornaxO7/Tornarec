@@ -14,14 +14,13 @@ mod cdp;
 mod data_processing;
 mod load_store;
 mod load_store_coprocessor;
-mod mrs;
-mod msr;
 mod pld;
 mod saturating;
 mod semaphore;
 mod swi;
 mod multiply;
 mod misc_arithmetic;
+mod cpsr_access;
 
 /// The operands are written as stated in the manual in page 109
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -148,8 +147,8 @@ impl ArmOperand {
             ArmOpcode::MRC => load_store_coprocessor::get_mcr_mrc_operand(value),
             ArmOpcode::MRC2 => load_store_coprocessor::get_mcr_mrc_operand(value),
             ArmOpcode::MRRC => load_store_coprocessor::get_mcrr_mrrc_operand(value),
-            ArmOpcode::MRS => mrs::get_operand(value),
-            ArmOpcode::MSR => msr::get_operand(value),
+            ArmOpcode::MRS => cpsr_access::get_mrs(value),
+            ArmOpcode::MSR => cpsr_access::get_msr(value),
             ArmOpcode::MUL => multiply::get_normal_multiply(value),
             ArmOpcode::MVN => data_processing::get_operand(value),
             ArmOpcode::ORR => data_processing::get_operand(value),

@@ -3,20 +3,31 @@ use crate::{
         types::{
             sbo,
             sbz,
+            Register,
         },
         BitState,
     },
     ram::Word,
 };
 
-use std::convert::TryFrom;
-
 use super::{
     data_processing::ShifterOperand,
     ArmOperand,
 };
 
-pub fn get_operand(value: Word) -> ArmOperand {
+use std::convert::TryFrom;
+
+pub fn get_mrs(value: Word) -> ArmOperand {
+    sbo(value, 16, 0b1111);
+    sbz(value, 0, 0b1111_1111_1111);
+
+    ArmOperand::MRS {
+        r: BitState::new(value, 22),
+        rd: Register::new(value, 12, 0b1111),
+    }
+}
+
+pub fn get_msr(value: Word) -> ArmOperand {
     let shifter_operand = {
         let bit25 = BitState::new(value, 25);
         match bit25 {
@@ -40,17 +51,44 @@ pub fn get_operand(value: Word) -> ArmOperand {
 #[cfg(test)]
 mod tests {
 
-    use crate::cpus::general::instruction::arm::types::Register;
-
     use super::{
-        get_operand,
+        get_mrs,
+        get_msr,
         ArmOperand,
         BitState,
+        Register,
         ShifterOperand,
     };
 
     #[test]
-    fn test_get_operand_immediate() {
+    fn test_get_mrs() {
+        let value = 0b0000_0001_0100_1111_1111_0000_0000_0000;
+
+        assert_eq!(
+            ArmOperand::MRS {
+                r: BitState::SET,
+                rd: Register::from(0b1111),
+            },
+            get_mrs(value),
+        );
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_get_mrs_sbo() {
+        let value = 0b0000_0001_0100_0000_1111_0000_0000_0000;
+        get_mrs(value);
+    }
+
+    #[test]
+    #[should_panic]
+    fn test_get_mrs_sbz() {
+        let value = 0b0000_0001_0100_1111_1111_1111_1111_1111;
+        get_mrs(value);
+    }
+
+    #[test]
+    fn test_get_msr_immediate() {
         let value = 0b0000_0011_0110_1111_1111_1111_1111_1111;
 
         assert_eq!(
@@ -62,12 +100,12 @@ mod tests {
                     immed8: 0b1111_1111,
                 }
             },
-            get_operand(value)
+            get_msr(value)
         );
     }
 
     #[test]
-    fn test_get_operand_register() {
+    fn test_get_msr_register() {
         let value = 0b0000_0001_0110_1111_1111_0000_0000_1111;
 
         assert_eq!(
@@ -80,28 +118,28 @@ mod tests {
                     rm: Register::from(0b1111),
                 }
             },
-            get_operand(value)
+            get_msr(value)
         );
     }
 
     #[test]
     #[should_panic]
-    fn test_get_operand_immediate_sbo() {
+    fn test_get_msr_immediate_sbo() {
         let value = 0b0000_0011_0110_1111_0000_1111_1111_1111;
-        get_operand(value);
+        get_msr(value);
     }
 
     #[test]
     #[should_panic]
-    fn test_get_operand_register_sbo() {
+    fn test_get_msr_register_sbo() {
         let value = 0b0000_0001_0110_1111_0000_0000_0000_1111;
-        get_operand(value);
+        get_msr(value);
     }
 
     #[test]
     #[should_panic]
-    fn test_get_operand_register_sbz() {
+    fn test_get_msr_register_sbz() {
         let value = 0b0000_0001_0110_1111_1111_1111_0000_1111;
-        get_operand(value);
+        get_msr(value);
     }
 }
