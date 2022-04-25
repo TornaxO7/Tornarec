@@ -1,5 +1,5 @@
 use crate::{
-    cpus::general::instruction::arm::BitState,
+    cpus::general::instruction::types::BitState,
     ram::Word,
 };
 

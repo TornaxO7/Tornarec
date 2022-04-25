@@ -1,9 +1,9 @@
 use std::convert::TryFrom;
 
 use crate::{
-    cpus::general::instruction::arm::{
-        types::Register,
-        BitState,
+    cpus::general::instruction::{
+        arm::types::Register,
+        types::BitState,
     },
     ram::Word,
 };
@@ -84,11 +84,11 @@ impl From<Word> for ShifterOperand {
 mod tests {
 
     use super::{
-        ShifterOperand,
-        ArmOperand,
-        Register,
         get_operand,
-        BitState
+        ArmOperand,
+        BitState,
+        Register,
+        ShifterOperand,
     };
 
     #[test]

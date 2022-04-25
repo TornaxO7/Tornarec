@@ -1,5 +1,5 @@
 use crate::{
-    cpus::general::instruction::arm::BitState,
+    cpus::general::instruction::types::BitState,
     ram::Word,
 };
 
@@ -34,7 +34,7 @@ fn handle_load_store(value: Word) -> ArmOpcode {
         (_, 1, _, 1) => ArmOpcode::LDRB,
         (_, 0, _, 0) => ArmOpcode::STR,
         (_, 1, _, 0) => ArmOpcode::STRB,
-        _ => unreachable!()
+        _ => unreachable!(),
     }
 }
 

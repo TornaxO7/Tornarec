@@ -1,4 +1,10 @@
-use crate::{ram::Word, cpus::general::instruction::arm::{types::Register, BitState}};
+use crate::{
+    cpus::general::instruction::{
+        arm::types::Register,
+        types::BitState,
+    },
+    ram::Word,
+};
 
 use super::ArmOperand;
 
@@ -81,12 +87,12 @@ mod tests {
 
     use super::{
         get_cdp,
-        get_mcr_mrc,
         get_ldc_stc,
+        get_mcr_mrc,
         get_mcrr_mrrc,
         ArmOperand,
-        LoadStoreCoprocessorMode,
         BitState,
+        LoadStoreCoprocessorMode,
         Register,
     };
 

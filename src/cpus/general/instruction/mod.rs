@@ -1,5 +1,6 @@
 pub mod arm;
 pub mod thumb;
+pub mod types;
 
 use crate::ram::Address;
 

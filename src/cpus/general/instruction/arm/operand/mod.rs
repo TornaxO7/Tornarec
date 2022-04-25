@@ -1,24 +1,26 @@
-use crate::ram::Word;
+use crate::{
+    cpus::general::instruction::types::BitState,
+    ram::Word,
+};
 
 use self::branch::BranchOperand;
 
 use super::{
     opcode::ArmOpcode,
     types::Register,
-    BitState,
 };
 
 mod branch;
+mod coprocessor;
+mod cpsr_access;
 mod data_processing;
+mod exception_generating;
 mod load_store;
+mod misc_arithmetic;
+mod multiply;
 mod pld;
 mod saturating;
 mod semaphore;
-mod multiply;
-mod misc_arithmetic;
-mod cpsr_access;
-mod exception_generating;
-mod coprocessor;
 
 /// The operands are written as stated in the manual in page 109
 #[derive(Debug, Clone, PartialEq, Eq)]

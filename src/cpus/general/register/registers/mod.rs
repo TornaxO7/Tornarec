@@ -37,6 +37,9 @@ pub struct Registers {
 }
 
 impl Registers {
+    pub const ARM_PC_OFFSET: u8 = 8;
+    pub const THUMB_PC_OFFSET: u8 = 4;
+
     pub fn new() -> Self {
         Self::default()
     }

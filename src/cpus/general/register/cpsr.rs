@@ -1,6 +1,6 @@
 use crate::cpus::general::{
     condition_code_flag::ConditionCodeFlag,
-    instruction::arm::BitState,
+    instruction::types::BitState,
     interruption::Interruption,
     operating_mode::OperatingMode,
     operating_state::OperatingState,

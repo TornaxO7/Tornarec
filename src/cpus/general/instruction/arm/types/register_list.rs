@@ -3,9 +3,10 @@ use std::{
     ops::Deref,
 };
 
-use crate::ram::Word;
-
-use super::BitState;
+use crate::{
+    cpus::general::instruction::types::BitState,
+    ram::Word,
+};
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct RegisterList(Vec<BitState>);

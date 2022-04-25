@@ -1,6 +1,6 @@
 use core::convert::From;
 
-use crate::cpus::general::instruction::arm::BitState;
+use crate::cpus::general::instruction::types::BitState;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct ConditionBits {

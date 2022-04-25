@@ -1,10 +1,10 @@
 use crate::{
-    cpus::general::instruction::arm::{
-        types::{
+    cpus::general::instruction::{
+        arm::types::{
             sbz,
             Register,
         },
-        BitState,
+        types::BitState,
     },
     ram::Word,
 };
@@ -189,5 +189,4 @@ impl From<Word> for WordHalfwordMultiplyType {
 }
 
 #[cfg(test)]
-mod tests {
-}
+mod tests {}

@@ -1,10 +1,10 @@
 use crate::{
-    cpus::general::instruction::arm::{
-        types::{
+    cpus::general::instruction::{
+        arm::types::{
             sbo,
             Register,
         },
-        BitState,
+        types::BitState,
     },
     ram::Word,
 };

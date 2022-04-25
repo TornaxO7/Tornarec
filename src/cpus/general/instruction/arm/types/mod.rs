@@ -1,8 +1,6 @@
-mod bit_state;
 mod register;
 mod register_list;
 
-pub use bit_state::BitState;
 pub use register::Register;
 pub use register_list::RegisterList;
 

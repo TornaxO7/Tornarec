@@ -1,6 +1,6 @@
 use std::convert::From;
 
-use super::instruction::arm::BitState;
+use super::instruction::types::BitState;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub enum OperatingState {

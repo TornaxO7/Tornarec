@@ -1,6 +1,7 @@
-use crate::ram::Word;
-
-use super::BitState;
+use crate::{
+    cpus::general::instruction::types::BitState,
+    ram::Word,
+};
 
 mod opcode000;
 mod opcode001;

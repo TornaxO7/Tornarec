@@ -1,4 +1,7 @@
 mod map;
+mod opcode;
+mod operand;
+mod types;
 
 pub use map::get_thumb_instruction;
 

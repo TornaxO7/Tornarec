@@ -2,8 +2,6 @@ pub mod opcode;
 pub mod operand;
 mod types;
 
-pub use types::BitState;
-
 use opcode::ArmOpcode;
 use operand::ArmOperand;
 

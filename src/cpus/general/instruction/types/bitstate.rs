@@ -16,6 +16,10 @@ impl BitState {
         let bit_value = ((value >> index) & 0b1) != 0;
         Self(bit_value)
     }
+
+    pub fn is_set(&self) -> bool {
+        self.0
+    }
 }
 
 impl Deref for BitState {

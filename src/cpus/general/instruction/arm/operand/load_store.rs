@@ -1,11 +1,11 @@
 use crate::{
-    cpus::general::instruction::arm::{
-        types::{
+    cpus::general::instruction::{
+        arm::types::{
             sbz,
             Register,
             RegisterList,
         },
-        BitState,
+        types::BitState,
     },
     ram::Word,
 };
@@ -22,7 +22,8 @@ pub fn get_word_or_unsigned_byte(value: Word) -> ArmOperand {
     }
 }
 
-/// A3.11.3 (page 131) Load and store halfword or doubleword, and load signed byte
+/// A3.11.3 (page 131) Load and store halfword or doubleword, and load signed
+/// byte
 pub fn get_misc(value: Word) -> ArmOperand {
     ArmOperand::LoadStore {
         rn: Register::new(value, 16, 0b1111),
