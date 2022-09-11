@@ -13,8 +13,8 @@ pub enum Regs {
     R10,     R10Fiq,
     R11,     R11Fiq,
     R12,     R12Fiq,
-    R13,     R13Fiq,  R13Svc,  R13Abt,  R13Irq,  R13Und,
-    R14,     R14Fiq,  R14Svc,  R14Abt,  R14Irq,  R14Und,
+    R13,     R13Fiq,  R13Svc,  R13Abt,  R13Irq,  R13Und, // SP
+    R14,     R14Fiq,  R14Svc,  R14Abt,  R14Irq,  R14Und, // LR
     R15,     PC,
     CPSR,
              SPSRFiq, SPSRSvc, SPSRAbt, SPSRIrq, SPSRUnd,

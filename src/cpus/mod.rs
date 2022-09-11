@@ -1,5 +1,5 @@
 pub mod arm7tdmi;
-pub mod arm946_se;
+pub mod arm946es;
 
 pub type Register = u64;
 
