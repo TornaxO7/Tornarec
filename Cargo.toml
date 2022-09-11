@@ -8,3 +8,4 @@ edition = "2018"
 [dependencies]
 thiserror = "1.0.34"
 iced-x86 = "1.17.0"
+fnv = "1.0.7"

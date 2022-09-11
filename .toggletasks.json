@@ -1,0 +1,12 @@
+{
+    "tasks": [
+        {
+            "name": "build",
+            "cmd": "cargo build"
+        },
+        {
+            "name": "check",
+            "cmd": "cargo clippy"
+        }
+    ]
+}
