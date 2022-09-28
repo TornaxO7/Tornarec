@@ -1,4 +1,3 @@
-
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Regs {
     R0,
