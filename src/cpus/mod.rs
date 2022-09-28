@@ -12,6 +12,13 @@ pub enum Endianes {
     Big,
 }
 
+#[repr(C)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash)]
+pub enum OperatingState {
+    Arm,
+    Thumb,
+}
+
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum OperatingMode {
     /// User mode

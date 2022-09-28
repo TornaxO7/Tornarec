@@ -1,7 +1,7 @@
 
 use std::time::Instant;
 
-use super::{Register, Endianes};
+use super::{Register, Endianes, OperatingState, OperatingMode};
 
 pub const AMOUNT_REGS: usize = 16;
 pub const AMOUNT_BANKED_REGS: usize = 5;
@@ -17,6 +17,8 @@ pub struct Architecture {
     spsr: [Register; AMOUNT_BANKED_REGS - 1],
     tick: Instant,
     endianes: Endianes,
+    op_state: OperatingState,
+    op_mode: OperatingMode,
 }
 
 impl Default for Architecture {
@@ -30,6 +32,8 @@ impl Default for Architecture {
             spsr: [Register::default(); AMOUNT_BANKED_REGS - 1],
             tick: Instant::now(),
             endianes: Endianes::Little,
+            op_state: OperatingState::Arm,
+            op_mode: OperatingMode::Sys,
         }
     }
 }
