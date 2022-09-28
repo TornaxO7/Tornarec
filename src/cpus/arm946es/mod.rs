@@ -1,7 +1,6 @@
-use super::Endianes;
+use super::architecture::Architecture;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Arm949Es {
-    endianes: Endianes,
-    // regs: [Register; ]
+    arch: Architecture,
 }

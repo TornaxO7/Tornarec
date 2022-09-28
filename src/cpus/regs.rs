@@ -1,4 +1,3 @@
-pub mod spsr;
 
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Regs {

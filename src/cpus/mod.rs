@@ -1,8 +1,10 @@
 pub mod arm7tdmi;
 pub mod arm946es;
+pub mod architecture;
 
 pub type Register = u64;
 
+#[repr(C)]
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub enum Endianes {
     Little,
