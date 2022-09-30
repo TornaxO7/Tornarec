@@ -1,7 +1,12 @@
+use memmap2::Mmap;
+
 use crate::Addr;
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct Block {
-    content: Vec<u8>,
-    start_addr: Addr,
+#[derive(Debug)]
+pub struct CodeBlock {
+    pub content: Mmap,
+    pub start_addr: Addr,
+}
+
+impl CodeBlock {
 }
