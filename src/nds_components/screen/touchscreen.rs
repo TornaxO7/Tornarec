@@ -19,6 +19,7 @@ impl Screen for Touchscreen {
             screen: BaseScreen::new(name),
         }
     }
+
     fn refresh(&mut self) {
         self.screen.refresh();
     }
