@@ -1,6 +1,8 @@
-use nds_components::screen::NDSScreens;
+use nds_components::{
+    cpus::{arm7tdmi::Arm7TDMI, arm946es::Arm949Es},
+    screen::NDSScreens,
+};
 
-pub mod cpus;
 pub mod jit;
 pub mod nds_components;
 
@@ -10,6 +12,7 @@ pub const WORKRAM_SIZE: usize = 32_000;
 
 #[derive(Debug)]
 pub struct NDS {
-    mem: Vec<u8>,
     screens: NDSScreens,
+    arm7_tdmi: Arm7TDMI,
+    arm946_es: Arm949Es,
 }

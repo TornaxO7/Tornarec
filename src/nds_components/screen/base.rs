@@ -25,7 +25,7 @@ impl Screen for BaseScreen {
     }
     fn refresh(&mut self) {
         self.window
-            .update_with_buffer(&self.buffer.as_slice(), WIDTH, HEIGHT)
+            .update_with_buffer(self.buffer.as_slice(), WIDTH, HEIGHT)
             .unwrap();
     }
 }
