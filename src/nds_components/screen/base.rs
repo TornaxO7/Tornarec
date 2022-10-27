@@ -1,5 +1,7 @@
 use minifb::{Window, WindowOptions};
 
+use crate::Hertz;
+
 use super::Screen;
 
 pub type Pixel = u32;
@@ -7,6 +9,7 @@ pub type Pixel = u32;
 pub const WIDTH: usize = 256;
 pub const HEIGHT: usize = 192;
 pub const SIZE: usize = WIDTH * HEIGHT;
+pub const REFRESH_RATE: Hertz = 60;
 
 #[derive(Debug)]
 pub struct BaseScreen {
