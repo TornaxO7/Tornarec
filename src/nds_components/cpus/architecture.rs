@@ -8,16 +8,16 @@ pub const AMOUNT_BANKED_REGS: usize = 5;
 #[repr(C)]
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct Architecture {
-    regs: [Register; AMOUNT_REGS],
-    r13bank: [Register; AMOUNT_BANKED_REGS],
-    r14bank: [Register; AMOUNT_BANKED_REGS],
-    pc: Register,
-    cpsr: Register,
-    spsr: [Register; AMOUNT_BANKED_REGS - 1],
-    tick: Instant,
-    endianes: Endianes,
-    op_state: OperatingState,
-    op_mode: OperatingMode,
+    pub regs: [Register; AMOUNT_REGS],
+    pub r13bank: [Register; AMOUNT_BANKED_REGS],
+    pub r14bank: [Register; AMOUNT_BANKED_REGS],
+    pub pc: Register,
+    pub cpsr: Register,
+    pub spsr: [Register; AMOUNT_BANKED_REGS - 1],
+    pub tick: Instant,
+    pub endianes: Endianes,
+    pub op_state: OperatingState,
+    pub op_mode: OperatingMode,
 }
 
 impl Default for Architecture {
