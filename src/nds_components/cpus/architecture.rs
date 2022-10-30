@@ -1,4 +1,3 @@
-
 use std::time::Instant;
 
 use super::{Register, Endianes, OperatingState, OperatingMode};
@@ -35,5 +34,11 @@ impl Default for Architecture {
             op_state: OperatingState::Arm,
             op_mode: OperatingMode::Sys,
         }
+    }
+}
+
+impl Architecture {
+    pub fn new() -> Self {
+        Self::default()
     }
 }

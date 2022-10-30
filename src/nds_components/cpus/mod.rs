@@ -1,5 +1,3 @@
-pub mod arm7tdmi;
-pub mod arm946es;
 pub mod architecture;
 pub mod regs;
 
